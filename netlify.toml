@@ -5,3 +5,6 @@
   from = "/callback"
   to = "/callback.html"
   status = 200
+
+[build.environment]
+  SECRETS_SCAN_OMIT_PATHS = "callback.html"
