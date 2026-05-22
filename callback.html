@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Withings — Piano Allenamento</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #e8ff47;
+    --accent2: #47b4ff;
+    --text: #f0f0f0;
+    --muted: #888;
+    --good: #4ade80;
+    --warn: #facc15;
+    --bad: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', 'Courier New', monospace;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    display: flex; gap: 0; border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem;
+  }
+  nav a {
+    color: var(--muted); text-decoration: none;
+    padding: .75rem 1rem; font-size: .75rem; letter-spacing: .1em;
+    text-transform: uppercase; border-bottom: 2px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  nav a:hover { color: var(--text); }
+  nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .nav-brand { color: var(--accent) !important; font-weight: 700; margin-right: auto; }
+
+  /* MAIN */
+  main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .25rem; }
+  .subtitle { color: var(--muted); font-size: .8rem; margin-bottom: 2rem; }
+
+  /* STATO */
+  #status-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2rem; text-align: center;
+    margin-bottom: 2rem;
+  }
+  #status-box .icon { font-size: 2.5rem; margin-bottom: .75rem; }
+  #status-box p { color: var(--muted); font-size: .85rem; }
+  #status-box strong { color: var(--text); }
+
+  /* CONNECT BUTTON */
+  .btn-connect {
+    display: inline-block; background: var(--accent); color: #000;
+    padding: .65rem 1.5rem; border-radius: 6px; font-family: inherit;
+    font-size: .8rem; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; cursor: pointer; border: none;
+    text-decoration: none; transition: opacity .2s;
+  }
+  .btn-connect:hover { opacity: .85; }
+  .btn-secondary {
+    display: inline-block; background: transparent; color: var(--muted);
+    padding: .65rem 1.5rem; border-radius: 6px; font-family: inherit;
+    font-size: .8rem; cursor: pointer; border: 1px solid var(--border);
+    text-decoration: none; transition: all .2s; margin-left: .5rem;
+  }
+  .btn-secondary:hover { color: var(--text); border-color: var(--text); }
+
+  /* GRID DATI */
+  .data-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem;
+  }
+  .card-label {
+    font-size: .65rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: .5rem;
+  }
+  .card-value { font-size: 2rem; font-weight: 700; line-height: 1; }
+  .card-sub { font-size: .75rem; color: var(--muted); margin-top: .3rem; }
+  .card-accent { border-left: 3px solid var(--accent); }
+  .card-blue { border-left: 3px solid var(--accent2); }
+  .card-green { border-left: 3px solid var(--good); }
+
+  /* SLEEP STAGES */
+  .sleep-bar { margin-top: 1rem; }
+  .sleep-bar-track {
+    height: 8px; border-radius: 4px; background: var(--border);
+    display: flex; overflow: hidden; margin: .5rem 0;
+  }
+  .seg-deep { background: #6366f1; }
+  .seg-light { background: #818cf8; }
+  .seg-rem { background: var(--accent2); }
+  .seg-awake { background: var(--border); }
+  .sleep-legend {
+    display: flex; gap: 1rem; flex-wrap: wrap; font-size: .7rem; color: var(--muted);
+  }
+  .leg-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    display: inline-block; margin-right: 4px; vertical-align: middle;
+  }
+
+  /* SCORE RING */
+  .score-wrap { display: flex; align-items: center; gap: 1.5rem; }
+  .score-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-num {
+    position: absolute; inset: 0; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 1.3rem; font-weight: 700;
+  }
+  .score-details { flex: 1; }
+  .score-row { display: flex; justify-content: space-between; font-size: .78rem; padding: .2rem 0; border-bottom: 1px solid var(--border); }
+  .score-row:last-child { border: none; }
+  .score-row span:last-child { color: var(--accent); font-weight: 600; }
+
+  /* HRV */
+  .hrv-bar { margin-top: .75rem; }
+  .hrv-track {
+    height: 6px; background: var(--border); border-radius: 3px;
+    position: relative; margin: .4rem 0 .2rem;
+  }
+  .hrv-fill { height: 100%; border-radius: 3px; background: var(--good); }
+  .hrv-pointer {
+    position: absolute; top: -3px; width: 2px; height: 12px;
+    background: var(--accent); border-radius: 1px;
+  }
+
+  /* TABLE */
+  .history-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  .history-table th {
+    text-align: left; font-size: .65rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+    padding: .5rem .75rem; border-bottom: 1px solid var(--border);
+  }
+  .history-table td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); }
+  .history-table tr:last-child td { border: none; }
+  .badge {
+    display: inline-block; padding: .15rem .5rem; border-radius: 3px;
+    font-size: .65rem; font-weight: 600; letter-spacing: .05em;
+  }
+  .badge-good { background: rgba(74,222,128,.15); color: var(--good); }
+  .badge-ok { background: rgba(250,204,21,.15); color: var(--warn); }
+  .badge-bad { background: rgba(248,113,113,.15); color: var(--bad); }
+
+  /* SPINNER */
+  .spinner {
+    width: 32px; height: 32px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin .8s linear infinite; margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* APNEA ALERT */
+  .alert {
+    border: 1px solid var(--warn); background: rgba(250,204,21,.05);
+    border-radius: 6px; padding: .75rem 1rem; font-size: .8rem;
+    color: var(--warn); margin-top: 1rem;
+  }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">⚡ Piano</span>
+  <div class="nav-links">
+    <a href="index.html"><span class="dot" style="background:#c8f55a"></span>Programma</a>
+    <a href="nuoto.html"><span class="dot" style="background:#7ab8f5"></span>Nuoto</a>
+    <a href="palestra.html"><span class="dot" style="background:#c85af5"></span>Palestra</a>
+    <a href="corsa.html"><span class="dot" style="background:#f55a5a"></span>Corsa</a>
+    <a href="callback.html" class="active"><span class="dot" style="background:#5af5c8"></span>Sonno 😴</a>
+  </div>
+</nav>
+
+<main>
+  <h1>😴 Dati Withings</h1>
+  <p class="subtitle">Sonno · Peso · FC notturna — da Withings Health Mate</p>
+
+  <!-- STATO: non connesso -->
+  <div id="view-connect" class="hidden">
+    <div id="status-box">
+      <div class="icon">🔗</div>
+      <strong>Connetti il tuo account Withings</strong>
+      <p style="margin:.5rem 0 1.25rem">Autorizza l'accesso ai dati di sonno e peso.</p>
+      <button class="btn-connect" onclick="startOAuth()">Connetti Withings</button>
+    </div>
+  </div>
+
+  <!-- STATO: caricamento -->
+  <div id="view-loading" class="hidden">
+    <div id="status-box">
+      <div class="spinner"></div>
+      <strong>Caricamento dati...</strong>
+      <p>Recupero dati da Withings Health Mate</p>
+    </div>
+  </div>
+
+  <!-- STATO: errore -->
+  <div id="view-error" class="hidden">
+    <div id="status-box">
+      <div class="icon">⚠️</div>
+      <strong id="error-msg">Errore di connessione</strong>
+      <p style="margin:.5rem 0 1.25rem">Prova a riconnetterti.</p>
+      <button class="btn-connect" onclick="startOAuth()">Riprova</button>
+      <a href="/" class="btn-secondary">← Torna al piano</a>
+    </div>
+  </div>
+
+  <!-- STATO: dati caricati -->
+  <div id="view-data" class="hidden">
+
+    <!-- ULTIMA NOTTE -->
+    <div class="data-grid">
+
+      <!-- Score sonno -->
+      <div class="card card-accent">
+        <div class="card-label">Score sonno — stanotte</div>
+        <div class="score-wrap">
+          <div class="score-ring">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="#2a2a2a" stroke-width="8"/>
+              <circle id="score-arc" cx="40" cy="40" r="34" fill="none"
+                stroke="#e8ff47" stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+            </svg>
+            <div class="score-num" id="score-num">—</div>
+          </div>
+          <div class="score-details">
+            <div class="score-row"><span>Durata</span><span id="s-duration">—</span></div>
+            <div class="score-row"><span>Profondo</span><span id="s-deep">—</span></div>
+            <div class="score-row"><span>REM</span><span id="s-rem">—</span></div>
+            <div class="score-row"><span>Risvegli</span><span id="s-wakeup">—</span></div>
+          </div>
+        </div>
+        <!-- Barra fasi -->
+        <div class="sleep-bar">
+          <div class="sleep-bar-track" id="stage-bar"></div>
+          <div class="sleep-legend">
+            <span><span class="leg-dot" style="background:#6366f1"></span>Profondo</span>
+            <span><span class="leg-dot" style="background:#818cf8"></span>Leggero</span>
+            <span><span class="leg-dot" style="background:#47b4ff"></span>REM</span>
+            <span><span class="leg-dot" style="background:#2a2a2a"></span>Sveglio</span>
+          </div>
+        </div>
+        <div id="apnea-alert" class="alert hidden">⚠️ Rilevate possibili apnee — valuta consulto medico.</div>
+      </div>
+
+      <!-- FC notturna + HRV -->
+      <div class="card card-blue">
+        <div class="card-label">Frequenza cardiaca notturna</div>
+        <div class="card-value" id="hr-min">—</div>
+        <div class="card-sub">bpm minimo · media <span id="hr-avg">—</span> bpm</div>
+        <div class="hrv-bar">
+          <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:.75rem">
+            <span>Respirazione media</span>
+            <span id="rr-val">— resp/min</span>
+          </div>
+        </div>
+        <div style="margin-top:1rem">
+          <div class="card-label">Snoring</div>
+          <div style="font-size:1.1rem;font-weight:600" id="snoring-val">—</div>
+        </div>
+      </div>
+
+      <!-- Peso -->
+      <div class="card card-green">
+        <div class="card-label">Ultimo peso rilevato</div>
+        <div class="card-value" id="weight-val">—</div>
+        <div class="card-sub" id="weight-date">—</div>
+        <div style="margin-top:1rem;font-size:.78rem">
+          <div style="display:flex;justify-content:space-between;padding:.2rem 0">
+            <span style="color:var(--muted)">Target piano</span>
+            <span style="color:var(--accent)">73,0 kg</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:.2rem 0">
+            <span style="color:var(--muted)">Differenza</span>
+            <span id="weight-diff">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:.2rem 0">
+            <span style="color:var(--muted)">Grasso corporeo</span>
+            <span id="fat-val">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- STORICO SONNO -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="card-label" style="margin-bottom:1rem">Storico ultime notti</div>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Notte</th>
+            <th>Durata</th>
+            <th>Profondo</th>
+            <th>REM</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="history-body">
+          <tr><td colspan="5" style="color:var(--muted);text-align:center">Caricamento...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="text-align:right">
+      <button class="btn-secondary" onclick="logout()" style="font-size:.75rem">Disconnetti</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const CLIENT_ID = '3fbf541859fb9995d2e1ea7e89754aafc8375d2e6af6cc20846de2db87a91445';
+const REDIRECT_URI = 'https://miopianoallenamento.netlify.app/callback';
+const SCOPE = 'user.metrics,user.sleepevents';
+const TOKEN_KEY = 'withings_token';
+const PROXY = 'https://api.withings.com';
+
+// ── UTILS ────────────────────────────────────────────────────────────────────
+
+function show(id) {
+  ['view-connect','view-loading','view-error','view-data'].forEach(v => {
+    document.getElementById(v).classList.toggle('hidden', v !== id);
+  });
+}
+
+function fmtMin(min) {
+  if (!min) return '—';
+  return `${Math.floor(min/60)}h ${min%60}m`;
+}
+
+function scoreColor(s) {
+  if (s >= 75) return 'var(--good)';
+  if (s >= 55) return 'var(--warn)';
+  return 'var(--bad)';
+}
+
+function scoreBadge(s) {
+  if (!s) return '<span class="badge badge-ok">—</span>';
+  if (s >= 75) return `<span class="badge badge-good">${s}</span>`;
+  if (s >= 55) return `<span class="badge badge-ok">${s}</span>`;
+  return `<span class="badge badge-bad">${s}</span>`;
+}
+
+function saveToken(data) {
+  localStorage.setItem(TOKEN_KEY, JSON.stringify({
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    expires_at: Date.now() + data.expires_in * 1000
+  }));
+}
+
+function getToken() {
+  try { return JSON.parse(localStorage.getItem(TOKEN_KEY)); } catch { return null; }
+}
+
+function logout() {
+  localStorage.removeItem(TOKEN_KEY);
+  show('view-connect');
+}
+
+// ── OAUTH ────────────────────────────────────────────────────────────────────
+
+function startOAuth() {
+  const state = Math.random().toString(36).slice(2);
+  sessionStorage.setItem('oauth_state', state);
+  const url = `https://account.withings.com/oauth2_user/authorize2?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPE)}&state=${state}`;
+  window.location.href = url;
+}
+
+async function exchangeCode(code) {
+  const res = await fetch('/.netlify/functions/withings-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ grant_type: 'authorization_code', code })
+  });
+  const data = await res.json();
+  if (data.status !== 0) throw new Error(`OAuth error: ${data.error || data.status}`);
+  return data.body;
+}
+
+async function refreshToken(rt) {
+  const res = await fetch('/.netlify/functions/withings-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: rt })
+  });
+  const data = await res.json();
+  if (data.status !== 0) throw new Error('Refresh failed');
+  return data.body;
+}
+
+async function getValidToken() {
+  let t = getToken();
+  if (!t) return null;
+  if (Date.now() > t.expires_at - 60000) {
+    const fresh = await refreshToken(t.refresh_token);
+    saveToken(fresh);
+    t = getToken();
+  }
+  return t.access_token;
+}
+
+// ── API CALLS ────────────────────────────────────────────────────────────────
+
+async function apiCall(endpoint, params, token) {
+  const body = new URLSearchParams({ ...params, access_token: token });
+  const res = await fetch(`https://wbsapi.withings.net${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body
+  });
+  const data = await res.json();
+  if (data.status !== 0) throw new Error(`API ${endpoint}: ${data.error || data.status}`);
+  return data.body;
+}
+
+async function loadData() {
+  show('view-loading');
+  try {
+    const token = await getValidToken();
+    if (!token) { show('view-connect'); return; }
+
+    const now = Math.floor(Date.now() / 1000);
+    const days14 = now - 14 * 86400;
+
+    // Sonno ultimi 14 giorni
+    const sleepData = await apiCall('/v2/sleep', {
+      action: 'getsummary',
+      startdateymd: new Date(days14*1000).toISOString().slice(0,10),
+      enddateymd: new Date(now*1000).toISOString().slice(0,10),
+      data_fields: 'nb_rem_episodes,sleep_score,total_sleep_time,total_timeinbed,wakeupcount,deepsleepduration,lightsleepduration,remsleepduration,sleep_efficiency,breathing_disturbances_intensity,snoring,hr_average,hr_min,rr_average'
+    }, token);
+
+    // Peso ultimi 30 giorni
+    const weightData = await apiCall('/measure', {
+      action: 'getmeas',
+      startdate: now - 30*86400,
+      enddate: now,
+      meastypes: '1,6,8'  // peso, grasso, acqua
+    }, token);
+
+    renderData(sleepData, weightData);
+    show('view-data');
+
+  } catch (e) {
+    console.error(e);
+    document.getElementById('error-msg').textContent = e.message;
+    show('view-error');
+  }
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+
+function renderData(sleepData, weightData) {
+  const series = (sleepData.series || []).sort((a,b) => b.startdate - a.startdate);
+
+  // ── ULTIMA NOTTE ──
+  if (series.length > 0) {
+    const s = series[0];
+    const d = s.data || {};
+
+    // Score
+    const score = d.sleep_score || null;
+    document.getElementById('score-num').textContent = score || '—';
+    if (score) {
+      const arc = document.getElementById('score-arc');
+      const circ = 213.6;
+      arc.style.strokeDashoffset = circ - (score/100)*circ;
+      arc.style.stroke = scoreColor(score);
+    }
+
+    // Dettagli
+    document.getElementById('s-duration').textContent = fmtMin(Math.round((d.total_sleep_time||0)/60));
+    document.getElementById('s-deep').textContent = fmtMin(Math.round((d.deepsleepduration||0)/60));
+    document.getElementById('s-rem').textContent = fmtMin(Math.round((d.remsleepduration||0)/60));
+    document.getElementById('s-wakeup').textContent = d.wakeupcount != null ? `${d.wakeupcount}×` : '—';
+
+    // Barra fasi
+    const total = (d.deepsleepduration||0) + (d.lightsleepduration||0) + (d.remsleepduration||0) + ((d.total_timeinbed||0)-(d.total_sleep_time||0));
+    if (total > 0) {
+      const bar = document.getElementById('stage-bar');
+      bar.innerHTML = `
+        <div class="seg-deep" style="flex:${d.deepsleepduration||0}"></div>
+        <div class="seg-light" style="flex:${d.lightsleepduration||0}"></div>
+        <div class="seg-rem" style="flex:${d.remsleepduration||0}"></div>
+        <div class="seg-awake" style="flex:${Math.max(0,(d.total_timeinbed||0)-(d.total_sleep_time||0))}"></div>
+      `;
+    }
+
+    // Apnea alert
+    if ((d.breathing_disturbances_intensity||0) > 40) {
+      document.getElementById('apnea-alert').classList.remove('hidden');
+    }
+
+    // FC notturna
+    document.getElementById('hr-min').textContent = d.hr_min ? `${d.hr_min} bpm` : '—';
+    document.getElementById('hr-avg').textContent = d.hr_average || '—';
+    document.getElementById('rr-val').textContent = d.rr_average ? `${d.rr_average} resp/min` : '—';
+
+    // Snoring
+    const snor = d.snoring || 0;
+    document.getElementById('snoring-val').textContent = snor ? `${Math.round(snor/60)} min` : '0 min';
+  }
+
+  // ── STORICO ──
+  const tbody = document.getElementById('history-body');
+  if (series.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center">Nessun dato disponibile</td></tr>';
+  } else {
+    tbody.innerHTML = series.slice(0, 7).map(s => {
+      const d = s.data || {};
+      const date = new Date(s.startdate * 1000);
+      const label = date.toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short' });
+      return `<tr>
+        <td>${label}</td>
+        <td>${fmtMin(Math.round((d.total_sleep_time||0)/60))}</td>
+        <td>${fmtMin(Math.round((d.deepsleepduration||0)/60))}</td>
+        <td>${fmtMin(Math.round((d.remsleepduration||0)/60))}</td>
+        <td>${scoreBadge(d.sleep_score)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── PESO ──
+  const groups = weightData.measuregrps || [];
+  if (groups.length > 0) {
+    const latest = groups.sort((a,b) => b.date - a.date)[0];
+    const measures = {};
+    (latest.measures || []).forEach(m => { measures[m.type] = m.value * Math.pow(10, m.unit); });
+
+    const w = measures[1];
+    if (w) {
+      document.getElementById('weight-val').textContent = `${w.toFixed(1)} kg`;
+      document.getElementById('weight-date').textContent = new Date(latest.date*1000).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'});
+      const diff = w - 73.0;
+      const diffEl = document.getElementById('weight-diff');
+      diffEl.textContent = `${diff > 0 ? '+' : ''}${diff.toFixed(1)} kg`;
+      diffEl.style.color = diff <= 0 ? 'var(--good)' : diff < 2 ? 'var(--warn)' : 'var(--bad)';
+    }
+    const fat = measures[6];
+    document.getElementById('fat-val').textContent = fat ? `${fat.toFixed(1)}%` : '—';
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const state = params.get('state');
+  const error = params.get('error');
+
+  if (error) {
+    document.getElementById('error-msg').textContent = `Autorizzazione negata: ${error}`;
+    show('view-error');
+    return;
+  }
+
+  if (code) {
+    // Torna da OAuth — pulisci URL
+    window.history.replaceState({}, '', window.location.pathname);
+    show('view-loading');
+    try {
+      const savedState = sessionStorage.getItem('oauth_state');
+      if (state && savedState && state !== savedState) throw new Error('State mismatch — riprova.');
+      const tokenData = await exchangeCode(code);
+      saveToken(tokenData);
+      await loadData();
+    } catch (e) {
+      document.getElementById('error-msg').textContent = e.message;
+      show('view-error');
+    }
+    return;
+  }
+
+  // Controlla token esistente
+  const t = getToken();
+  if (t) {
+    await loadData();
+  } else {
+    show('view-connect');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

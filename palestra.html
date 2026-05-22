@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palestra — Piano 15 giorni</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">⚡ Piano 15gg</span>
+  <div class="nav-links">
+    <a href="index.html"><span class="dot" style="background:#c8f55a"></span>Programma</a>
+    <a href="nuoto.html"><span class="dot" style="background:#7ab8f5"></span>Nuoto</a>
+    <a href="palestra.html" class="active"><span class="dot" style="background:#c85af5"></span>Palestra</a>
+    <a href="corsa.html"><span class="dot" style="background:#f55a5a"></span>Corsa</a>
+    <a href="callback.html"><span class="dot" style="background:#5af5c8"></span>Sonno 😴</a>
+  </div>
+</nav>
+
+<main>
+
+<div class="page-hero">
+  <h1 style="color:var(--purple)">💪 Palestra</h1>
+  <p>Sempre prima del nuoto &nbsp;·&nbsp; Sequenza fissa: Mobilità → Core → Trazione → Spalla → Spinta → Gambe</p>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:28px">
+  <div class="hstat"><strong style="color:var(--purple);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px">⏱️ Sequenza fissa</strong><span style="font-size:12px;color:var(--muted)">Mobilità → Core → Trazione → Spalla → Spinta → Gambe</span></div>
+  <div class="hstat"><strong style="color:var(--purple);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px">🔢 Ratio 2:1</strong><span style="font-size:12px;color:var(--muted)">2 trazioni per ogni spinta — protegge la cuffia</span></div>
+  <div class="hstat"><strong style="color:var(--purple);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px">📈 Progressione</strong><span style="font-size:12px;color:var(--muted)">Non aumentare carico e volume nuoto nella stessa settimana</span></div>
+  <div class="hstat" style="border-color:rgba(245,90,90,.2)"><strong style="color:var(--red);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px">⚠️ Dolore spalla</strong><span style="font-size:12px;color:var(--muted)">Sospendi trazione e spinta → fisioterapista</span></div>
+</div>
+
+<div class="filter-bar" id="pillbar">
+  <button class="pill on" data-f="all" onclick="filt(this)">Tutti</button>
+  <button class="pill" data-sess="A" onclick="filtSess(this)">Sessione A</button>
+  <button class="pill" data-sess="B" onclick="filtSess(this)" id="sessB-btn">Sessione B</button>
+  <button class="pill" data-f="Mobilità" onclick="filt(this)">Mobilità</button>
+  <button class="pill" data-f="Core" onclick="filt(this)">Core</button>
+  <button class="pill" data-f="Trazione" onclick="filt(this)">Trazione</button>
+  <button class="pill" data-f="Spalla" onclick="filt(this)">Spalla</button>
+  <button class="pill" data-f="Spinta" onclick="filt(this)">Spinta</button>
+  <button class="pill" data-f="Gambe" onclick="filt(this)">Gambe</button>
+</div>
+
+<!-- ══ SESSIONE A ══ -->
+<div id="sessA-block">
+<div class="sess-hdr" style="border-left-color:var(--purple)">
+  <h2 style="color:var(--purple)">Sessione A — prima settimana</h2>
+  <div class="sess-meta">Mar 12 · Gio 14 · Sab 16 · Dom 17 mag &nbsp;·&nbsp; ~35 min &nbsp;·&nbsp; Carichi leggeri</div>
+</div>
+
+<div class="sec">Mobilità</div>
+<div class="xcard" data-cat="Mobilità" data-sess="A">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bm">Mobilità</span><span class="cname">Rotazioni spalle + caviglie con elastico</span>
+    <span class="csets">1 × 2 min</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 160" role="img"><title>Rotazioni spalle</title>
+      <line x1="20" y1="148" x2="160" y2="148" stroke="var(--border)" stroke-width="1"/>
+      <circle cx="90" cy="32" r="12" fill="none" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="90" y1="44" x2="90" y2="105" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="90" y1="115" x2="72" y2="148" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="90" y1="115" x2="108" y2="148" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="90" y1="70" x2="130" y2="58" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="130" cy="58" r="4" fill="var(--accent)"/>
+      <path d="M118 42 A32 32 0 0 1 140 80" fill="none" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 3" opacity=".6"/>
+      <text x="144" y="84" font-size="11" fill="var(--accent)" font-family="sans-serif">↻</text>
+      <line x1="90" y1="70" x2="50" y2="80" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <rect x="64" y="140" width="52" height="6" rx="3" fill="var(--teal)" opacity=".5"/>
+      <text x="90" y="158" text-anchor="middle" font-size="9" fill="var(--teal)" font-family="sans-serif">elastico caviglia</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">1</span><span class="l">serie</span></div><div class="stat"><span class="v">2 min</span><span class="l">durata</span></div><div class="stat"><span class="v">—</span><span class="l">recupero</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>8 cerchi ampi avanti e 8 indietro per ogni braccio, lentamente.</li><li>Elastico sotto il piede: 10 flessioni/estensioni caviglia per lato, poi cerchi.</li><li>Chiudi portando i gomiti indietro, stringi le scapole 2 sec, rilascia.</li></ol>
+      <div class="tip"><strong>Perché:</strong> Apre la capsula articolare prima di ogni trazione. Salta questo e rischi di entrare in vasca con le spalle fredde.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="sec">Core</div>
+<div class="xcard" data-cat="Core" data-sess="A">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bc">Core</span><span class="cname">Dead Bug — braccio/gamba opposti</span>
+    <span class="csets">3 × 10/lato · 45"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 140" role="img"><title>Dead Bug</title>
+      <line x1="10" y1="118" x2="170" y2="118" stroke="var(--border)" stroke-width="1"/>
+      <circle cx="24" cy="98" r="10" fill="none" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="34" y1="98" x2="130" y2="98" stroke="var(--muted)" stroke-width="2"/>
+      <g style="animation:dead-bug-arm 2s ease-in-out infinite;transform-origin:80px 98px">
+        <line x1="80" y1="98" x2="80" y2="54" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="80" cy="54" r="4" fill="var(--accent)"/>
+      </g>
+      <line x1="80" y1="98" x2="80" y2="118" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" opacity=".4"/>
+      <line x1="110" y1="98" x2="110" y2="74" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="110" y1="74" x2="130" y2="74" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <g style="animation:dead-bug-leg 2s ease-in-out infinite 1s;transform-origin:130px 98px">
+        <line x1="130" y1="98" x2="158" y2="70" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="158" cy="70" r="4" fill="var(--accent)"/>
+      </g>
+      <text x="50" y="112" font-size="8" fill="var(--teal)" font-family="sans-serif">↓ lombare a terra</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">3</span><span class="l">serie</span></div><div class="stat"><span class="v">10/lato</span><span class="l">ripetizioni</span></div><div class="stat"><span class="v">45"</span><span class="l">recupero</span></div><div class="stat"><span class="v">4+2s</span><span class="l">tempo</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Supino, braccia verso il soffitto, cosce verticali, ginocchia a 90°.</li><li>Premi la zona lombare a terra — tienila incollata per tutta la serie.</li><li>Abbassa lentamente braccio dx + gamba sx verso il pavimento (4 sec), senza toccare.</li><li>Ritorna (2 sec), ripeti dall'altro lato. Espira durante la discesa.</li></ol>
+      <div class="tip"><strong>Nuoto:</strong> Il core deve resistere alla rotazione durante la bracciata in crawl.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="xcard" data-cat="Core" data-sess="A">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bc">Core</span><span class="cname">Hollow Body Hold</span>
+    <span class="csets">3 × 20 sec · 30"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 140" role="img"><title>Hollow Body Hold</title>
+      <line x1="10" y1="118" x2="170" y2="118" stroke="var(--border)" stroke-width="1"/>
+      <g style="animation:hollow-hold 3s ease-in-out infinite">
+        <circle cx="26" cy="96" r="10" fill="none" stroke="var(--muted)" stroke-width="2"/>
+        <path d="M36 96 Q90 80 148 96" fill="none" stroke="var(--muted)" stroke-width="2.5"/>
+        <line x1="26" y1="88" x2="10" y2="68" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="10" cy="68" r="4" fill="var(--accent)"/>
+        <line x1="148" y1="96" x2="168" y2="78" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="168" cy="78" r="4" fill="var(--accent)"/>
+      </g>
+      <line x1="168" y1="80" x2="168" y2="118" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3 2"/>
+      <text x="148" y="100" font-size="8" fill="var(--teal)" font-family="sans-serif">~15cm</text>
+      <text x="90" y="72" text-anchor="middle" font-size="8" fill="var(--accent)" font-family="sans-serif">posizione «banana»</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">3</span><span class="l">serie</span></div><div class="stat"><span class="v">20 sec</span><span class="l">durata</span></div><div class="stat"><span class="v">30"</span><span class="l">recupero</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Supino, braccia sopra la testa, gambe distese e sollevate ~15 cm dal suolo.</li><li>Contrai gli addominali, appiattisci la lombare, solleva leggermente le spalle.</li><li>Corpo a «banana concava» — tieni respirando normalmente.</li><li>Settimana B: gambe più basse o 25 sec.</li></ol>
+      <div class="tip"><strong>Nuoto:</strong> Replica la posizione idrodinamica in vasca — assetto piatto, meno resistenza.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="sec">Trazione</div>
+<div class="xcard" data-cat="Trazione" data-sess="A">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bt">Trazione</span><span class="cname">Lat Pulldown — presa larga</span>
+    <span class="csets">3 × 10 rip · 60"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 180" role="img"><title>Lat Pulldown</title>
+      <rect x="20" y="12" width="140" height="6" rx="3" fill="var(--border)"/>
+      <line x1="90" y1="18" x2="90" y2="30" stroke="var(--border)" stroke-width="3"/>
+      <rect x="34" y="30" width="112" height="7" rx="3" fill="var(--blue)" opacity=".8"/>
+      <g style="animation:pull-down 2.2s ease-in-out infinite;transform-origin:90px 90px">
+        <line x1="44" y1="37" x2="58" y2="80" stroke="var(--border)" stroke-width="1.5"/>
+        <line x1="136" y1="37" x2="122" y2="80" stroke="var(--border)" stroke-width="1.5"/>
+        <line x1="58" y1="80" x2="90" y2="96" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="122" y1="80" x2="90" y2="96" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <circle cx="90" cy="84" r="11" fill="none" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="90" y1="95" x2="90" y2="148" stroke="var(--muted)" stroke-width="2"/>
+      <rect x="68" y="148" width="44" height="6" rx="3" fill="var(--border)" opacity=".7"/>
+      <line x1="80" y1="154" x2="72" y2="172" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="100" y1="154" x2="108" y2="172" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <text x="26" y="122" font-size="8" fill="var(--accent)" font-family="sans-serif">gomiti giù</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">3</span><span class="l">serie</span></div><div class="stat"><span class="v">10 rip</span><span class="l">ripetizioni</span></div><div class="stat"><span class="v">60"</span><span class="l">recupero</span></div><div class="stat"><span class="v">2+3s</span><span class="l">tempo</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Siediti, coscia bloccata sotto il cuscinetto, presa più larga delle spalle.</li><li>Abbassa la barra verso il mento portando i gomiti giù e indietro (2 sec).</li><li>Tieni 1 sec in basso stringendo i dorsali, risali lentamente (3 sec).</li><li>Non inarcare la schiena, non usare slancio.</li></ol>
+      <div class="tip"><strong>Nuoto:</strong> Simula la fase di trazione del crawl. Pensa a "portare i gomiti alle tasche".</div>
+      <div class="wbox"><strong>Settimana B:</strong> +2–3 kg solo se la tecnica è solida.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="xcard" data-cat="Trazione" data-sess="A">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bt">Trazione</span><span class="cname">Remata con manubrio — unilaterale</span>
+    <span class="csets">3 × 10/lato · 45"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 160" role="img"><title>Remata unilaterale</title>
+      <rect x="16" y="98" width="90" height="10" rx="4" fill="var(--border)"/>
+      <rect x="18" y="108" width="8" height="28" rx="3" fill="var(--border)"/>
+      <rect x="96" y="108" width="8" height="28" rx="3" fill="var(--border)"/>
+      <line x1="10" y1="136" x2="170" y2="136" stroke="var(--border)" stroke-width="1"/>
+      <circle cx="28" cy="86" r="10" fill="none" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="38" y1="88" x2="120" y2="94" stroke="var(--muted)" stroke-width="2.5"/>
+      <circle cx="62" cy="98" r="6" fill="var(--border)"/>
+      <line x1="38" y1="92" x2="50" y2="98" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <g style="animation:row-pull 2s ease-in-out infinite;transform-origin:120px 94px">
+        <line x1="120" y1="94" x2="148" y2="108" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <rect x="148" y="104" width="16" height="6" rx="2" fill="var(--blue)"/>
+        <rect x="146" y="102" width="4" height="10" rx="1" fill="var(--blue)" opacity=".7"/>
+        <rect x="162" y="102" width="4" height="10" rx="1" fill="var(--blue)" opacity=".7"/>
+      </g>
+      <line x1="108" y1="98" x2="120" y2="136" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <text x="140" y="88" font-size="8" fill="var(--accent)" font-family="sans-serif">gomito ↑</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">3</span><span class="l">serie</span></div><div class="stat"><span class="v">10/lato</span><span class="l">ripetizioni</span></div><div class="stat"><span class="v">45"</span><span class="l">recupero</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Ginocchio e mano dello stesso lato sulla panca, schiena parallela al suolo.</li><li>Manubrio in mano libera, braccio disteso verso il basso.</li><li>Tira il gomito verso il soffitto (non verso l'esterno), all'altezza del busto.</li><li>Tieni 1 sec in alto, abbassa controllando (3 sec). Non ruotare il busto.</li></ol>
+      <div class="tip"><strong>Nuoto:</strong> Forza dorsale unilaterale — mantiene l'assetto durante la rotazione nel crawl.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="sec">Spalla</div>
+<div class="xcard" data-cat="Spalla" data-sess="A">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bs">Spalla</span><span class="cname">Face Pull — cavi o elastico</span>
+    <span class="csets">3 × 15 rip · 45"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 160" role="img"><title>Face Pull</title>
+      <rect x="154" y="72" width="14" height="10" rx="2" fill="var(--border)"/>
+      <circle cx="52" cy="52" r="11" fill="none" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="52" y1="63" x2="52" y2="116" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="52" y1="126" x2="36" y2="152" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="52" y1="126" x2="68" y2="152" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <g style="animation:face-pull 2s ease-in-out infinite;transform-origin:52px 80px">
+        <line x1="52" y1="80" x2="30" y2="68" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="52" y1="80" x2="74" y2="68" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="30" y1="68" x2="22" y2="82" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="74" y1="68" x2="82" y2="82" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="22" cy="82" r="3" fill="var(--accent)"/>
+        <circle cx="82" cy="82" r="3" fill="var(--accent)"/>
+        <line x1="22" y1="82" x2="154" y2="76" stroke="var(--border)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="82" y1="82" x2="154" y2="76" stroke="var(--border)" stroke-width="1" stroke-dasharray="4 3"/>
+      </g>
+      <text x="52" y="44" text-anchor="middle" font-size="8" fill="var(--yellow)" font-family="sans-serif">«W» con i gomiti</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">3</span><span class="l">serie</span></div><div class="stat"><span class="v">15 rip</span><span class="l">ripetizioni</span></div><div class="stat"><span class="v">45"</span><span class="l">recupero</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Cavo/elastico all'altezza della testa, pollici verso l'alto.</li><li>Tira verso il viso portando i gomiti indietro e verso l'esterno (posizione a «W»).</li><li>In fondo: mani ai lati delle orecchie, gomiti più alti delle spalle. Tieni 1 sec.</li><li>Carico leggero — non è un esercizio di forza massima.</li></ol>
+      <div class="tip"><strong>Non saltarlo mai:</strong> protegge i rotatori esterni — l'assicurazione sulla vita per chi nuota.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="sec">Spinta</div>
+<div class="xcard" data-cat="Spinta" data-sess="A">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bp">Spinta</span><span class="cname">Push-up — standard o su ginocchia</span>
+    <span class="csets">2 × 12 rip · 45"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 130" role="img"><title>Push-up</title>
+      <line x1="10" y1="110" x2="170" y2="110" stroke="var(--border)" stroke-width="1"/>
+      <g style="animation:pushup-down 2s ease-in-out infinite;transform-origin:90px 88px">
+        <circle cx="26" cy="78" r="10" fill="none" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="36" y1="81" x2="160" y2="94" stroke="var(--muted)" stroke-width="2.5"/>
+        <line x1="58" y1="85" x2="52" y2="100" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="84" y1="89" x2="88" y2="103" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="52" cy="100" r="3" fill="var(--accent)"/>
+        <circle cx="88" cy="103" r="3" fill="var(--muted)"/>
+        <line x1="160" y1="94" x2="164" y2="110" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="40" y="70" font-size="8" fill="var(--orange)" font-family="sans-serif">gomiti 45°</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">2</span><span class="l">serie</span></div><div class="stat"><span class="v">12 rip</span><span class="l">ripetizioni</span></div><div class="stat"><span class="v">45"</span><span class="l">recupero</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Mani leggermente più larghe delle spalle, corpo in linea retta testa-talloni.</li><li>Abbassa il petto (2 sec), gomiti a ~45° dal busto — non perpendicolari.</li><li>Spingi su espirando, senza bloccare i gomiti in cima.</li><li>Variante su ginocchia accettabile nelle prime sessioni.</li></ol>
+      <div class="tip"><strong>Ratio 2:1:</strong> 2 trazioni per ogni spinta nel piano — protegge la cuffia dei rotatori.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="sec">Gambe</div>
+<div class="xcard" data-cat="Gambe" data-sess="A">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bg">Gambe</span><span class="cname">Squat Goblet con manubrio</span>
+    <span class="csets">3 × 10 rip · 60"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 170" role="img"><title>Goblet Squat</title>
+      <line x1="10" y1="152" x2="170" y2="152" stroke="var(--border)" stroke-width="1"/>
+      <g style="animation:squat-down 2.2s ease-in-out infinite;transform-origin:90px 100px">
+        <circle cx="90" cy="38" r="11" fill="none" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="90" y1="49" x2="88" y2="100" stroke="var(--muted)" stroke-width="2.5"/>
+        <rect x="76" y="66" width="28" height="10" rx="3" fill="var(--blue)"/>
+        <rect x="74" y="64" width="6" height="14" rx="2" fill="var(--blue)" opacity=".7"/>
+        <rect x="100" y="64" width="6" height="14" rx="2" fill="var(--blue)" opacity=".7"/>
+        <line x1="90" y1="66" x2="76" y2="72" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="90" y1="66" x2="104" y2="72" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="88" y1="100" x2="62" y2="114" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="88" y1="100" x2="114" y2="112" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="62" y1="114" x2="56" y2="152" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="114" y1="112" x2="120" y2="152" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <text x="90" y="162" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="sans-serif">punte aperte</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">3</span><span class="l">serie</span></div><div class="stat"><span class="v">10 rip</span><span class="l">ripetizioni</span></div><div class="stat"><span class="v">60"</span><span class="l">recupero</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Manubrio verticale contro il petto, piedi larghezza fianchi, punte aperte.</li><li>Scendi lentamente fino a cosce parallele (o sotto), petto alto, ginocchia verso l'esterno.</li><li>Risali espirando senza bloccare le ginocchia.</li><li>Il manubrio davanti aiuta a tenere il busto eretto.</li></ol>
+      <div class="tip"><strong>Nuoto:</strong> Forza per virate e partenze. Glutei e quadricipiti forti migliorano l'assetto del bacino in vasca.</div>
+    </div>
+  </div></div>
+</div>
+</div><!-- /sessA-block -->
+
+<!-- ══ SESSIONE B ══ -->
+<div id="sessB-block">
+<div class="sess-hdr" id="sessB" style="border-left-color:var(--teal);margin-top:32px">
+  <h2 style="color:var(--teal)">Sessione B — seconda settimana</h2>
+  <div class="sess-meta">Mer 20 · Sab 23 · Dom 24 mag &nbsp;·&nbsp; ~42 min &nbsp;·&nbsp; Carico aumentato</div>
+</div>
+
+<p class="note-b">La Sessione B mantiene tutti gli esercizi della A con <strong>ripetizioni e/o carico aumentati</strong>. Di seguito solo gli esercizi nuovi o le varianti.</p>
+
+<table class="dtbl">
+  <thead><tr><th>Esercizio</th><th>Sessione A</th><th>Sessione B</th></tr></thead>
+  <tbody>
+    <tr><td>Dead Bug</td><td>3 × 10/lato</td><td>3 × 12/lato</td></tr>
+    <tr><td>Hollow Body Hold</td><td>3 × 20 sec</td><td>3 × 25 sec</td></tr>
+    <tr><td>Lat Pulldown</td><td>3 × 10 (base)</td><td>3 × 10 (+2–3 kg)</td></tr>
+    <tr><td>Remata unilaterale</td><td>3 × 10/lato</td><td>3 × 10/lato (+carico)</td></tr>
+    <tr><td>Face Pull</td><td>3 × 15</td><td>3 × 15 (invariato)</td></tr>
+    <tr><td>Squat Goblet</td><td>3 × 10</td><td>3 × 10 (+carico)</td></tr>
+  </tbody>
+</table>
+
+<div class="sec">Core — aggiunto in B</div>
+<div class="xcard" data-cat="Core" data-sess="B">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bc">Core</span><span class="cname">Plank laterale</span>
+    <span class="csets">3 × 25 sec/lato · 30"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 140" role="img"><title>Plank Laterale</title>
+      <line x1="10" y1="120" x2="170" y2="120" stroke="var(--border)" stroke-width="1"/>
+      <g style="animation:side-plank-hold 3s ease-in-out infinite;transform-origin:90px 90px">
+        <circle cx="26" cy="82" r="10" fill="none" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="36" y1="86" x2="162" y2="94" stroke="var(--muted)" stroke-width="2.5"/>
+        <line x1="58" y1="88" x2="58" y2="120" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="58" cy="120" r="4" fill="var(--accent)"/>
+        <line x1="80" y1="90" x2="80" y2="62" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="80" cy="62" r="3" fill="var(--accent)"/>
+        <line x1="162" y1="94" x2="168" y2="120" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <path d="M26 82 L162 94" stroke="var(--teal)" stroke-width="0.5" stroke-dasharray="3 3" opacity=".6"/>
+      <text x="90" y="74" text-anchor="middle" font-size="8" fill="var(--teal)" font-family="sans-serif">corpo in linea retta</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">3</span><span class="l">serie</span></div><div class="stat"><span class="v">25 sec</span><span class="l">per lato</span></div><div class="stat"><span class="v">30"</span><span class="l">recupero</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Sdraiato su un fianco, appoggiato sull'avambraccio (gomito sotto la spalla).</li><li>Solleva il bacino fino ad avere corpo in linea retta dalla testa ai piedi.</li><li>Contrai il fianco e il core. Respira normalmente.</li><li>Non lasciare che il bacino cada.</li></ol>
+      <div class="tip"><strong>Nuoto:</strong> Stabilità anti-lateroflessione — ti tiene dritto in vasca durante la rotazione nel crawl.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="sec">Spalla — aggiunto in B</div>
+<div class="xcard" data-cat="Spalla" data-sess="B">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bs">Spalla</span><span class="cname">Rotazione esterna con elastico</span>
+    <span class="csets">2 × 12/lato · 30"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 160" role="img"><title>Rotazione esterna elastico</title>
+      <rect x="158" y="82" width="12" height="10" rx="2" fill="var(--border)"/>
+      <circle cx="56" cy="50" r="11" fill="none" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="56" y1="61" x2="56" y2="116" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="56" y1="126" x2="40" y2="152" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="56" y1="126" x2="72" y2="152" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="56" y1="78" x2="36" y2="88" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="56" y1="78" x2="76" y2="78" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
+      <g style="animation:ext-rot 2.5s ease-in-out infinite;transform-origin:76px 78px">
+        <line x1="76" y1="78" x2="110" y2="78" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="110" cy="78" r="4" fill="var(--accent)"/>
+        <line x1="110" y1="78" x2="158" y2="86" stroke="var(--yellow)" stroke-width="1.5" stroke-dasharray="4 2"/>
+      </g>
+      <path d="M76 96 A18 18 0 0 1 94 78" fill="none" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2" opacity=".5"/>
+      <text x="56" y="40" text-anchor="middle" font-size="8" fill="var(--accent)" font-family="sans-serif">gomito incollato al fianco</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">2</span><span class="l">serie</span></div><div class="stat"><span class="v">12/lato</span><span class="l">ripetizioni</span></div><div class="stat"><span class="v">30"</span><span class="l">recupero</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Elastico fissato di lato, braccio al fianco, gomito piegato a 90°, avambraccio in avanti.</li><li>Ruota il braccio verso l'esterno portando la mano lontano dal corpo. Gomito incollato al fianco.</li><li>Tieni 1 sec in fondo, ritorna lentamente. Non compensare con la spalla.</li><li>Elastico leggero — è lavoro neuromotorio di qualità.</li></ol>
+      <div class="tip"><strong>Perché:</strong> Rinforza i rotatori esterni — previene la sindrome da conflitto della spalla tipica dei nuotatori.</div>
+      <div class="wbox"><strong>Dolore (non bruciore):</strong> fermati e consulta un fisioterapista.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="sec">Spinta — variante B</div>
+<div class="xcard" data-cat="Spinta" data-sess="B">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bp">Spinta</span><span class="cname">Push-up Decline — piedi su panca</span>
+    <span class="csets">2 × 10 rip · 45"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 150" role="img"><title>Push-up Decline</title>
+      <rect x="118" y="90" width="50" height="10" rx="3" fill="var(--border)"/>
+      <rect x="120" y="100" width="8" height="38" rx="2" fill="var(--border)"/>
+      <rect x="154" y="100" width="8" height="38" rx="2" fill="var(--border)"/>
+      <line x1="10" y1="130" x2="120" y2="130" stroke="var(--border)" stroke-width="1"/>
+      <g style="animation:pushup-down 2.2s ease-in-out infinite;transform-origin:90px 105px">
+        <circle cx="28" cy="108" r="10" fill="none" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="38" y1="110" x2="128" y2="95" stroke="var(--muted)" stroke-width="2.5"/>
+        <line x1="58" y1="107" x2="52" y2="122" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="80" y1="104" x2="82" y2="120" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="52" cy="122" r="3" fill="var(--accent)"/>
+        <circle cx="82" cy="120" r="3" fill="var(--muted)"/>
+        <line x1="128" y1="95" x2="134" y2="90" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="30" y="96" font-size="8" fill="var(--orange)" font-family="sans-serif">carico petto alto</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">2</span><span class="l">serie</span></div><div class="stat"><span class="v">10 rip</span><span class="l">ripetizioni</span></div><div class="stat"><span class="v">45"</span><span class="l">recupero</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Piedi sulla panca, mani a terra leggermente più larghe delle spalle.</li><li>Corpo in linea retta — non alzare il sedere.</li><li>Scendi lentamente (2 sec), quasi a toccare il petto, spingi su espirando.</li><li>L'inclinazione carica la parte alta del petto e i deltoidi anteriori.</li></ol>
+      <div class="tip"><strong>Sostituisce</strong> il push-up standard della Sessione A — specifico per la fase di uscita dall'acqua.</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="sec">Gambe — aggiunto in B</div>
+<div class="xcard" data-cat="Gambe" data-sess="B">
+  <div class="ctop" onclick="tog(this.parentElement)">
+    <span class="bdg bg">Gambe</span><span class="cname">Hip Thrust con manubrio</span>
+    <span class="csets">3 × 12 rip · 60"</span><span class="chev">▾</span>
+  </div>
+  <div class="cbody"><div class="bgrid">
+    <div class="illus"><svg width="100%" viewBox="0 0 180 160" role="img"><title>Hip Thrust</title>
+      <rect x="8" y="88" width="60" height="10" rx="3" fill="var(--border)"/>
+      <rect x="10" y="98" width="8" height="36" rx="2" fill="var(--border)"/>
+      <rect x="52" y="98" width="8" height="36" rx="2" fill="var(--border)"/>
+      <line x1="8" y1="134" x2="172" y2="134" stroke="var(--border)" stroke-width="1"/>
+      <g style="animation:hip-thrust-up 2.2s ease-in-out infinite;transform-origin:90px 100px">
+        <circle cx="28" cy="82" r="10" fill="none" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="38" y1="88" x2="68" y2="88" stroke="var(--muted)" stroke-width="3"/>
+        <line x1="68" y1="88" x2="108" y2="72" stroke="var(--muted)" stroke-width="2.5"/>
+        <rect x="92" y="66" width="30" height="10" rx="3" fill="var(--blue)"/>
+        <rect x="90" y="64" width="6" height="14" rx="2" fill="var(--blue)" opacity=".7"/>
+        <rect x="120" y="64" width="6" height="14" rx="2" fill="var(--blue)" opacity=".7"/>
+        <line x1="68" y1="88" x2="92" y2="72" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="108" y1="72" x2="124" y2="72" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="108" y1="72" x2="100" y2="134" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="104" y1="76" x2="128" y2="134" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <text x="100" y="58" font-size="8" fill="var(--purple)" font-family="sans-serif">glutei stretti</text>
+    </svg></div>
+    <div class="det">
+      <div class="srow"><div class="stat"><span class="v">3</span><span class="l">serie</span></div><div class="stat"><span class="v">12 rip</span><span class="l">ripetizioni</span></div><div class="stat"><span class="v">60"</span><span class="l">recupero</span></div><div class="stat"><span class="v">3s exc.</span><span class="l">tempo</span></div></div>
+      <h4>Esecuzione</h4>
+      <ol class="steps"><li>Schiena appoggiata alla panca (scapole), piedi a terra larghezza fianchi, manubrio sul bacino.</li><li>Abbassa il bacino (partenza), poi spingi i fianchi in alto contraendo i glutei.</li><li>In cima: spalle–ginocchia in linea. Tieni 1 sec stringendo i glutei al massimo.</li><li>Scendi lentamente (3 sec) senza toccare il suolo tra le ripetizioni.</li></ol>
+      <div class="tip"><strong>Nuoto:</strong> Glutei forti = bacino alto in vasca = meno resistenza. Uno degli esercizi più sottovalutati per i nuotatori.</div>
+    </div>
+  </div></div>
+</div>
+</div><!-- /sessB-block -->
+
+</main>
+
+<script>
+function tog(card){card.classList.toggle('open')}
+function filt(btn){
+  document.querySelectorAll('#pillbar .pill').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  const f=btn.dataset.f;
+  document.getElementById('sessA-block').style.display='';
+  document.getElementById('sessB-block').style.display='';
+  document.querySelectorAll('.xcard').forEach(c=>{
+    c.classList.toggle('hide', f!=='all' && c.dataset.cat!==f);
+  });
+  if(f!=='all'){
+    ['A','B'].forEach(s=>{
+      const block=document.getElementById('sess'+s+'-block');
+      const any=[...block.querySelectorAll('.xcard')].some(c=>!c.classList.contains('hide'));
+      block.style.display=any?'':'none';
+    });
+  }
+}
+function filtSess(btn){
+  document.querySelectorAll('#pillbar .pill').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.xcard').forEach(c=>c.classList.remove('hide'));
+  const s=btn.dataset.sess;
+  document.getElementById('sessA-block').style.display=s==='A'?'':'none';
+  document.getElementById('sessB-block').style.display=s==='B'?'':'none';
+}
+// Check if arrived via #sessB anchor
+if(location.hash==='#sessB'){
+  document.getElementById('sessB').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
