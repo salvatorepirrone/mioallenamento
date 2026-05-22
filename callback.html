@@ -228,6 +228,7 @@
       <!-- Score sonno -->
       <div class="card card-accent">
         <div class="card-label">Score sonno — stanotte</div>
+        <div id="sleep-unavailable" class="hidden" style="font-size:.75rem;color:var(--warn);margin-bottom:.75rem">⚠️ Dati sonno non ancora disponibili — scope in attesa di approvazione Withings.</div>
         <div class="score-wrap">
           <div class="score-ring">
             <svg width="80" height="80" viewBox="0 0 80 80">
@@ -325,7 +326,7 @@
 </main>
 
 <script>
-const CLIENT_ID = '__WITHINGS_CLIENT_ID__'; // injected at runtime via /api/config
+const CLIENT_ID = '3fbf541859fb9995d2e1ea7e89754aafc8375d2e6af6cc20846de2db87a91445';
 const REDIRECT_URI = 'https://miopianoallenamento.netlify.app/callback';
 const SCOPE = 'user.metrics,user.sleepevents';
 const TOKEN_KEY = 'withings_token';
@@ -376,12 +377,10 @@ function logout() {
 
 // ── OAUTH ────────────────────────────────────────────────────────────────────
 
-async function startOAuth() {
-  const cfg = await fetch('/.netlify/functions/withings-config').then(r => r.json());
-  const clientId = cfg.clientId;
+function startOAuth() {
   const state = Math.random().toString(36).slice(2);
   sessionStorage.setItem('oauth_state', state);
-  const url = `https://account.withings.com/oauth2_user/authorize2?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPE)}&state=${state}`;
+  const url = `https://account.withings.com/oauth2_user/authorize2?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPE)}&state=${state}`;
   window.location.href = url;
 }
 
@@ -441,21 +440,27 @@ async function loadData() {
     const now = Math.floor(Date.now() / 1000);
     const days14 = now - 14 * 86400;
 
-    // Sonno ultimi 14 giorni
-    const sleepData = await apiCall('/v2/sleep', {
-      action: 'getsummary',
-      startdateymd: new Date(days14*1000).toISOString().slice(0,10),
-      enddateymd: new Date(now*1000).toISOString().slice(0,10),
-      data_fields: 'nb_rem_episodes,sleep_score,total_sleep_time,total_timeinbed,wakeupcount,deepsleepduration,lightsleepduration,remsleepduration,sleep_efficiency,breathing_disturbances_intensity,snoring,hr_average,hr_min,rr_average'
-    }, token);
-
-    // Peso ultimi 30 giorni
+    // Peso ultimi 30 giorni (sempre disponibile)
     const weightData = await apiCall('/measure', {
       action: 'getmeas',
       startdate: now - 30*86400,
       enddate: now,
-      meastypes: '1,6,8'  // peso, grasso, acqua
+      meastypes: '1,6,8'
     }, token);
+
+    // Sonno ultimi 14 giorni (opzionale — richiede scope aggiuntivo)
+    let sleepData = { series: [] };
+    try {
+      sleepData = await apiCall('/v2/sleep', {
+        action: 'getsummary',
+        startdateymd: new Date(days14*1000).toISOString().slice(0,10),
+        enddateymd: new Date(now*1000).toISOString().slice(0,10),
+        data_fields: 'nb_rem_episodes,sleep_score,total_sleep_time,total_timeinbed,wakeupcount,deepsleepduration,lightsleepduration,remsleepduration,sleep_efficiency,breathing_disturbances_intensity,snoring,hr_average,hr_min,rr_average'
+      }, token);
+    } catch(sleepErr) {
+      console.warn('Dati sonno non disponibili:', sleepErr.message);
+      document.getElementById('sleep-unavailable').classList.remove('hidden');
+    }
 
     renderData(sleepData, weightData);
     show('view-data');
