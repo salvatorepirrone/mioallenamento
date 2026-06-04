@@ -3,13 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nuoto — Piano 15 giorni</title>
+<title>Nuoto — Piano allenamento</title>
 <link rel="stylesheet" href="style.css">
+<style>
+.drill-focus {
+  background: rgba(122,184,245,.06);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  margin: 12px 0 4px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.drill-focus strong { color: var(--blue); }
+.drill-focus .drill-why {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: .8;
+  margin-top: 4px;
+  font-style: italic;
+}
+.speed-badge {
+  display: inline-block;
+  background: rgba(245,150,90,.15);
+  color: var(--orange);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+</style>
 </head>
 <body>
 
 <nav>
-  <span class="nav-logo">⚡ Piano 15gg</span>
+  <span class="nav-logo">⚡ Piano</span>
   <div class="nav-links">
     <a href="index.html"><span class="dot" style="background:#c8f55a"></span>Programma</a>
     <a href="nuoto.html" class="active"><span class="dot" style="background:#7ab8f5"></span>Nuoto</a>
@@ -23,10 +54,68 @@
 
 <div class="page-hero">
   <h1 style="color:var(--blue)">🏊 Nuoto</h1>
-  <p>Vasca corta 25 m &nbsp;·&nbsp; Passo aerobico: ~1:50/100 m &nbsp;·&nbsp; Veloce: ~1:30/100 m &nbsp;·&nbsp; Sprint: ~1:20/100 m</p>
+  <p>Vasca corta 25 m &nbsp;·&nbsp; Aerobico: ~1:50/100 m &nbsp;·&nbsp; Veloce: ~1:35/100 m &nbsp;·&nbsp; Sprint: ~1:20/100 m &nbsp;·&nbsp; Focus: presa + velocità</p>
 </div>
 
-<!-- Legenda ritmi -->
+<!-- DIAGNOSI TECNICA -->
+<div class="sec">Diagnosi tecnica — problema da correggere</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-bottom:28px">
+  <div class="hstat" style="border-color:rgba(245,90,90,.3)">
+    <strong style="color:var(--red);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">⚠️ Il sintomo</strong>
+    <span style="font-size:12px;color:var(--muted)">Durante la respirazione, il braccio opposto inizia la bracciata prima del tempo (catch-up prematuro). Succede di meno con il pullbuoy.</span>
+  </div>
+  <div class="hstat" style="border-color:rgba(245,200,90,.3)">
+    <strong style="color:var(--yellow);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">🔍 La causa</strong>
+    <span style="font-size:12px;color:var(--muted)">Le gambe scendono durante la rotazione per il respiro → il corpo cerca equilibrio anticipando la bracciata. Il pullbuoy elimina il sintomo perché sostiene il bacino.</span>
+  </div>
+  <div class="hstat" style="border-color:rgba(90,245,200,.3)">
+    <strong style="color:var(--teal);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">✅ La soluzione</strong>
+    <span style="font-size:12px;color:var(--muted)">Tre fronti: (1) calciata di mantenimento più attiva, (2) drill catch-up con respiro forzato, (3) nuoto a un braccio per isolare la fase di presa indipendente dalla respirazione.</span>
+  </div>
+</div>
+
+<!-- DRILL LIBRARY -->
+<div class="sec">Drill specifici — libreria tecnica</div>
+
+<div class="note-b" style="border-left-color:var(--blue);margin-bottom:16px">
+  <strong style="color:var(--blue)">Come usare i drill:</strong> ogni sessione contiene un blocco drill pre-scelto. Puoi anche aggiungere 2×25m di un drill a tua scelta come warm-up extra se senti una debolezza specifica. Non fare più di 200–300m totali di drill per sessione — la qualità supera il volume.
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:28px">
+
+  <div class="hstat" style="border-color:rgba(122,184,245,.3);padding:14px 16px">
+    <strong style="color:var(--blue);font-size:12px;display:block;margin-bottom:6px">1. Catch-Up con respiro forzato 🎯</strong>
+    <span style="font-size:12px;color:var(--muted);line-height:1.6;display:block">Un braccio in avanti tocca l'altro prima di tirare. <strong style="color:var(--text)">Respira ogni 2 bracciate</strong> — non ogni 3 — così forzi il momento di massima difficoltà più spesso. Il braccio in estensione deve restare fermo finché quello che tira non arriva al fianco.<br><br><em style="color:var(--muted);font-size:11px">Corregge: anticipo del braccio opposto durante il respiro</em></span>
+  </div>
+
+  <div class="hstat" style="border-color:rgba(122,184,245,.3);padding:14px 16px">
+    <strong style="color:var(--blue);font-size:12px;display:block;margin-bottom:6px">2. Nuoto a un braccio con respiro laterale 🎯</strong>
+    <span style="font-size:12px;color:var(--muted);line-height:1.6;display:block">Braccio attivo tira, braccio opposto lungo il fianco (non in avanti). Respira verso il lato del braccio fermo. Nessun appoggio: devi mantenere l'assetto solo con la calciata.<br>25m braccio dx, 25m braccio sx, switch ogni vasca.<br><br><em style="color:var(--muted);font-size:11px">Corregge: gambe che scendono + dipendenza dal pullbuoy</em></span>
+  </div>
+
+  <div class="hstat" style="border-color:rgba(122,184,245,.3);padding:14px 16px">
+    <strong style="color:var(--blue);font-size:12px;display:block;margin-bottom:6px">3. 6-3-6 (6 calci, 3 bracciate, 6 calci)</strong>
+    <span style="font-size:12px;color:var(--muted);line-height:1.6;display:block">Nuota 6 calci in posizione laterale (orecchio sull'acqua), poi 3 bracciate normali, poi di nuovo 6 calci sull'altro lato. I 6 calci ti insegnano a mantenere il bacino alto senza avanzare — senti esattamente dove scende.<br><br><em style="color:var(--muted);font-size:11px">Corregge: bacino basso + calciata inconsistente</em></span>
+  </div>
+
+  <div class="hstat" style="border-color:rgba(122,184,245,.3);padding:14px 16px">
+    <strong style="color:var(--blue);font-size:12px;display:block;margin-bottom:6px">4. Nuoto con boa tra le ginocchia (no pullbuoy)</strong>
+    <span style="font-size:12px;color:var(--muted);line-height:1.6;display:block">Metti qualcosa di morbido tra le ginocchia (non le caviglie come il pullbuoy). Le gambe devono lavorare appena per non cadere ma non puoi kiccare forte. Obbliga la calciata ad essere efficiente anziché potente.<br><br><em style="color:var(--muted);font-size:11px">Alternativa controllata al pullbuoy — non elimina la dipendenza</em></span>
+  </div>
+
+  <div class="hstat" style="border-color:rgba(122,184,245,.3);padding:14px 16px">
+    <strong style="color:var(--blue);font-size:12px;display:block;margin-bottom:6px">5. Pugno chiuso</strong>
+    <span style="font-size:12px;color:var(--muted);line-height:1.6;display:block">Nuota crawl normale con i pugni chiusi. Senza la palma non puoi cavartela con la forza bruta — sei costretto ad usare l'avambraccio come superficie di presa. Quando riapri la mano, la bracciata sembra enorme.<br><br><em style="color:var(--muted);font-size:11px">Sviluppa: sensazione dell'acqua + early vertical forearm</em></span>
+  </div>
+
+  <div class="hstat" style="border-color:rgba(200,90,245,.3);padding:14px 16px">
+    <strong style="color:var(--orange);font-size:12px;display:block;margin-bottom:6px">6. Sprint 10m partenza da metà vasca <span class="speed-badge">Velocità</span></strong>
+    <span style="font-size:12px;color:var(--muted);line-height:1.6;display:block">Partenza a 15m, sprint massimale fino a 25m (solo 10m di lavoro). Recupero 60". Questo è lo stimolo che insegna alla bracciata a essere esplosiva senza perdere la presa. Max 6 ripetizioni.<br><br><em style="color:var(--muted);font-size:11px">Sviluppa: potenza di presa in condizioni di massima velocità</em></span>
+  </div>
+
+</div>
+
+<!-- LEGENDA RITMI -->
 <div class="sec">Ritmi di riferimento</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:28px">
   <div class="hstat"><span class="v" style="font-size:15px;color:var(--muted)">~2:00</span><span class="l">Facile /100m</span></div>
@@ -36,37 +125,43 @@
   <div class="hstat"><span class="v" style="font-size:15px;color:var(--red)">~1:20</span><span class="l">Sprint /100m</span></div>
 </div>
 
-<!-- Legenda attrezzi -->
+<!-- ATTREZZI -->
 <div class="sec">Attrezzi</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:28px">
   <div class="hstat" style="border-color:rgba(245,200,90,.3)">
     <span class="v" style="font-size:15px;color:var(--yellow)">🟡 Pullbuoy</span>
-    <span class="l">Isola trazione · gambe ferme · passo +5"</span>
+    <span class="l">Isola trazione · gambe ferme · passo +5" · usalo come strumento, non come stampella</span>
   </div>
   <div class="hstat" style="border-color:rgba(122,184,245,.3)">
     <span class="v" style="font-size:15px;color:var(--blue)">🔵 Palette</span>
-    <span class="l">+20–30% carico bracciata · solo con buona tecnica</span>
+    <span class="l">+20–30% carico bracciata · solo dopo aver consolidato la presa libera</span>
   </div>
   <div class="hstat" style="border-color:rgba(200,90,245,.3)">
     <span class="v" style="font-size:15px;color:var(--purple)">🔵+🟡 Combo</span>
-    <span class="l">Massimo overload trazione · recupero lungo</span>
+    <span class="l">Overload massimo trazione · recupero lungo · max 200m per sessione</span>
   </div>
 </div>
 
-<!-- SESSIONE A -->
-<div class="sec">Sessione A — reintroduzione</div>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SESSIONE A — REINTRODUZIONE (già svolta, riferimento)      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="sec">Sessione A — reintroduzione (riferimento)</div>
 <div id="sessA" class="pool-card">
   <div class="pool-hdr">
-    <h3>Sessione A &nbsp;·&nbsp; Martedì 12 / Giovedì 14 mag</h3>
-    <div class="pool-sub">Reintroduzione &nbsp;·&nbsp; ~1.900 m &nbsp;·&nbsp; Focus: trazione pullbuoy, tecnica crawl</div>
+    <h3>Sessione A &nbsp;·&nbsp; già svolta (12 mag, 26 mag)</h3>
+    <div class="pool-sub">Reintroduzione &nbsp;·&nbsp; ~1.900 m &nbsp;·&nbsp; Drill: catch-up con respiro forzato + pugno chiuso</div>
+  </div>
+  <div class="drill-focus">
+    <strong>Drill focus:</strong> Catch-up con respiro ogni 2 (drill n.1) &amp; Pugno chiuso (drill n.5) — identificano dove il braccio anticipa e ricostruiscono la sensazione dell'acqua.
+    <div class="drill-why">Sessione di riferimento — i drill sono già stati sperimentati. Se la riesegui, allunga il blocco drill a 4×50m alternando i due.</div>
   </div>
   <table class="pool-table">
     <thead><tr><th>Fase</th><th>Descrizione</th><th>Ritmo</th><th>Rec.</th><th>Vol.</th><th>Note</th></tr></thead>
     <tbody>
       <tr><td class="fase">Riscaldamento</td><td>400m crawl facile</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td>Rotazione ampia, respiro ogni 3</td></tr>
-      <tr><td class="fase">Drill</td><td>4×50m catch-up drill</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">200m</td><td>Un braccio fermo mentre l'altro tira</td></tr>
-      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>4×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>25"</td><td class="vol">400m</td><td>Gambe ferme. Focus: gomito alto in entrata</td></tr>
-      <tr><td class="fase">Principale</td><td>5×100m crawl</td><td class="ritmo">Aerobico</td><td>30"</td><td class="vol">500m</td><td>Passo 1:50 costante, non partire forte</td></tr>
+      <tr><td class="fase">Drill 🎯</td><td>4×50m: 2 catch-up respiro ogni 2 + 2 pugno chiuso</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">200m</td><td>Braccio fermo finché l'altro non arriva al fianco</td></tr>
+      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>4×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>25"</td><td class="vol">400m</td><td>Gambe ferme. Gomito alto in entrata — senti la differenza vs nuoto libero</td></tr>
+      <tr><td class="fase">Principale</td><td>5×100m crawl libero</td><td class="ritmo">Aerobico</td><td>30"</td><td class="vol">500m</td><td>1:50 costante — confronta la presa con e senza pullbuoy</td></tr>
       <tr><td class="fase">Stile alt.</td><td>4×50m dorso</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">200m</td><td>Recupero attivo, rotazione spalle</td></tr>
       <tr><td class="fase">Defaticante</td><td>200m misto libero</td><td class="ritmo">Facile</td><td>—</td><td class="vol">200m</td><td>Chiudi senza fretta</td></tr>
     </tbody>
@@ -74,118 +169,149 @@
   <div class="pool-total"><span>Totale</span><strong>~1.900 m</strong></div>
 </div>
 
-<!-- SESSIONE B-SAB -->
-<div class="sec">Sessione B-Sabato — consolidamento intenso</div>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SESSIONE B-SAB — VELOCITÀ + PRESA                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="sec">Sessione B-Sab — velocità + consolidamento presa</div>
 <div id="sessBsab" class="pool-card">
   <div class="pool-hdr">
-    <h3>Sessione B-Sab &nbsp;·&nbsp; Sabato 16 mag</h3>
-    <div class="pool-sub">Consolidamento &nbsp;·&nbsp; ~2.500 m &nbsp;·&nbsp; Focus: palette + pullbuoy, velocità</div>
+    <h3>Sessione B-Sab &nbsp;·&nbsp; Sabato (prossima sessione in vasca)</h3>
+    <div class="pool-sub">Velocità + presa &nbsp;·&nbsp; ~2.400 m &nbsp;·&nbsp; Drill: 1 braccio con respiro laterale + sprint 10m</div>
+  </div>
+  <div class="drill-focus">
+    <strong>Drill focus:</strong> Nuoto a un braccio con respiro laterale (drill n.2) — isola esattamente il momento critico: braccio fermo in avanti mentre l'altro respira. Se il bacino scende, lo senti subito senza il pullbuoy a mascherarlo.
+    <div class="drill-why">Poi sprint 10m da metà vasca (drill n.6): la presa deve reggere anche ad alta velocità, non solo in condizioni comode.</div>
   </div>
   <table class="pool-table">
     <thead><tr><th>Fase</th><th>Descrizione</th><th>Ritmo</th><th>Rec.</th><th>Vol.</th><th>Note</th></tr></thead>
     <tbody>
-      <tr><td class="fase">Riscaldamento</td><td>300m crawl + 100m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td>Dorso per mobilizzare le spalle</td></tr>
-      <tr><td class="fase">Drill</td><td>4×25m pugno chiuso</td><td class="ritmo">Facile</td><td>15"</td><td class="vol">100m</td><td>Senti avambraccio e polso prendere l'acqua</td></tr>
-      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>8×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>25"</td><td class="vol">800m</td><td>Passo 1:48, gambe a riposo</td></tr>
-      <tr class="palette-pb"><td class="fase">Palette+PB</td><td>4×50m crawl<br><span class="attrezzo att-pp">🔵+🟡 Combo</span></td><td class="ritmo">Aer/Soglia</td><td>30"</td><td class="vol">200m</td><td>Overload trazione. Gomito alto, presa ampia</td></tr>
-      <tr><td class="fase">Stili</td><td>4×50m rana tecnica</td><td class="ritmo">Facile</td><td>30"</td><td class="vol">200m</td><td>Focus scivolata</td></tr>
-      <tr><td class="fase">Drill</td><td>4×50m crawl 1 braccio</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">200m</td><td>25m dx, 25m sx — gomito alto</td></tr>
-      <tr><td class="fase">Velocità</td><td>4×50m crawl veloce</td><td class="ritmo">Veloce</td><td>45"</td><td class="vol">200m</td><td>~1:35–1:40, sprint controllato</td></tr>
-      <tr class="palette"><td class="fase">Palette</td><td>4×25m sprint<br><span class="attrezzo att-pa">🔵 Palette</span></td><td class="ritmo">Sprint</td><td>45"</td><td class="vol">100m</td><td>Sprint tecnico, senti la resistenza</td></tr>
-      <tr><td class="fase">Defaticante</td><td>300m crawl lento</td><td class="ritmo">Facile</td><td>—</td><td class="vol">300m</td><td>Sciogliti bene dopo le palette</td></tr>
+      <tr><td class="fase">Riscaldamento</td><td>300m crawl + 100m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td>Dorso mobilizza le spalle</td></tr>
+      <tr><td class="fase">Drill 🎯</td><td>4×50m un braccio (25m dx / 25m sx)<br>braccio fermo lungo il fianco, NON in avanti</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">200m</td><td>Respira verso il lato del braccio fermo. Calciata costante per non affondare</td></tr>
+      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>4×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>25"</td><td class="vol">400m</td><td>Usa il feeling appena acquisito dal drill — gomito alto, presa lunga</td></tr>
+      <tr><td class="fase">Principale</td><td>4×100m crawl libero</td><td class="ritmo">Aerobico</td><td>30"</td><td class="vol">400m</td><td>1:48–1:50 — riproduci la presa del pullbuoy senza il galleggiante</td></tr>
+      <tr class="palette-pb"><td class="fase">Palette+PB</td><td>4×50m crawl<br><span class="attrezzo att-pp">🔵+🟡 Combo</span></td><td class="ritmo">Soglia</td><td>35"</td><td class="vol">200m</td><td>Overload presa — senti la resistenza, non tirare con la forza bruta</td></tr>
+      <tr><td class="fase">Sprint brevi <span class="speed-badge">Velocità</span></td><td>6×25m sprint crawl partenza dal bordo</td><td class="ritmo">Sprint</td><td>60"</td><td class="vol">150m</td><td>Massimale — concentrati sulla presa nei primi 5m, poi spingila. Recupero completo tra le rip.</td></tr>
+      <tr><td class="fase">Drill velocità 🎯</td><td>4×(15m easy + 10m sprint) da metà vasca</td><td class="ritmo">Sprint</td><td>60"</td><td class="vol">100m</td><td>Rallenti, poi acceleri negli ultimi 10m — la presa deve reggere all'aumento di velocità</td></tr>
+      <tr><td class="fase">Defaticante</td><td>300m crawl + 150m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">450m</td><td>Dorso finale scioglie le spalle dopo i lavori ad alta intensità</td></tr>
     </tbody>
   </table>
-  <div class="pool-total"><span>Totale</span><strong>~2.500 m</strong></div>
+  <div class="pool-total"><span>Totale</span><strong>~2.300 m</strong></div>
 </div>
 
-<!-- SESSIONE B-DOM -->
-<div class="sec">Sessione B-Domenica — recupero attivo</div>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SESSIONE B-DOM — RECUPERO ATTIVO + PRESA LIBERA            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="sec">Sessione B-Dom — recupero attivo + presa senza attrezzi</div>
 <div id="sessBdom" class="pool-card">
   <div class="pool-hdr">
-    <h3>Sessione B-Dom &nbsp;·&nbsp; Domenica 17 mag</h3>
-    <div class="pool-sub">Recupero attivo &nbsp;·&nbsp; ~1.900 m &nbsp;·&nbsp; Focus: pullbuoy leggero, scioglimento</div>
+    <h3>Sessione B-Dom &nbsp;·&nbsp; Domenica (dopo B-Sab)</h3>
+    <div class="pool-sub">Recupero qualità &nbsp;·&nbsp; ~1.900 m &nbsp;·&nbsp; Drill: 6-3-6 + catch-up respiro forzato</div>
+  </div>
+  <div class="drill-focus">
+    <strong>Drill focus:</strong> 6-3-6 (drill n.3) — dopo lo sforzo di ieri, il tuo obiettivo è consolidare il controllo del bacino in posizione laterale. Non si tratta di velocità, ma di imparare a sentire dove il bacino scende e correggere durante la calciata laterale.
+    <div class="drill-why">Il 6-3-6 è faticoso mentalmente ma è il drill più diretto per il tuo problema specifico.</div>
   </div>
   <table class="pool-table">
     <thead><tr><th>Fase</th><th>Descrizione</th><th>Ritmo</th><th>Rec.</th><th>Vol.</th><th>Note</th></tr></thead>
     <tbody>
-      <tr><td class="fase">Riscaldamento</td><td>300m crawl + 100m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td>Dorso scioglie le spalle da ieri</td></tr>
-      <tr><td class="fase">Drill</td><td>4×25m pugno chiuso</td><td class="ritmo">Facile</td><td>15"</td><td class="vol">100m</td><td>Consolida il drill di ieri</td></tr>
+      <tr><td class="fase">Riscaldamento</td><td>200m crawl + 100m dorso + 100m rana</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td>Dorso e rana sciolgono da ieri</td></tr>
+      <tr><td class="fase">Drill 🎯</td><td>4×25m 6-3-6<br>(6 calci lato, 3 bracciate, 6 calci lato)</td><td class="ritmo">Facile</td><td>25"</td><td class="vol">100m</td><td>Orecchio sull'acqua nei 6 calci. Senti il bacino — deve restare in superficie. Respira nel cambio lato</td></tr>
+      <tr><td class="fase">Drill 🎯</td><td>4×25m catch-up con respiro ogni 2</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">100m</td><td>Rafforza il pattern del giorno prima — braccio in attesa, nessun anticipo</td></tr>
       <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>3×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>30"</td><td class="vol">300m</td><td>Volume ridotto, gambe scariche da ieri</td></tr>
-      <tr><td class="fase">Principale</td><td>5×100m crawl</td><td class="ritmo">Aerobico</td><td>30"</td><td class="vol">500m</td><td>Passo 1:50–1:55, meno pressione</td></tr>
-      <tr><td class="fase">Stili</td><td>4×50m dorso + 2×50m rana</td><td class="ritmo">Facile</td><td>25"</td><td class="vol">300m</td><td>Recupero, tecnica leggera</td></tr>
-      <tr><td class="fase">Velocità</td><td>4×25m crawl veloce</td><td class="ritmo">Veloce</td><td>45"</td><td class="vol">100m</td><td>Breve stimolo velocità</td></tr>
-      <tr><td class="fase">Defaticante</td><td>200m misto libero</td><td class="ritmo">Facile</td><td>—</td><td class="vol">200m</td><td>Chiudi bene, settimana davanti</td></tr>
+      <tr><td class="fase">Principale</td><td>5×100m crawl libero</td><td class="ritmo">Aerobico</td><td>30"</td><td class="vol">500m</td><td>1:50–1:55 — niente pressione, focus sulla continuità della calciata durante il respiro</td></tr>
+      <tr><td class="fase">Stili</td><td>4×50m dorso + 2×50m rana</td><td class="ritmo">Facile</td><td>25"</td><td class="vol">300m</td><td>Recupero leggero</td></tr>
+      <tr><td class="fase">Velocità 🎯</td><td>4×25m sprint crawl</td><td class="ritmo">Veloce</td><td>45"</td><td class="vol">100m</td><td>Breve stimolo velocità — mantieni la presa anche quando stai correndo</td></tr>
+      <tr><td class="fase">Defaticante</td><td>100m misto libero</td><td class="ritmo">Facile</td><td>—</td><td class="vol">100m</td><td>Chiudi bene</td></tr>
     </tbody>
   </table>
   <div class="pool-total"><span>Totale</span><strong>~1.900 m</strong></div>
 </div>
 
-<!-- SESSIONE B-MER -->
-<div class="sec">Sessione B-Mercoledì — consolidamento</div>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SESSIONE B-MER — PROGRESSIONE + RIPETUTE VELOCITÀ         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="sec">Sessione B-Mer — ripetute velocità + presa palette</div>
 <div id="sessBmer" class="pool-card">
   <div class="pool-hdr">
-    <h3>Sessione B-Mer &nbsp;·&nbsp; Mercoledì 20 mag</h3>
-    <div class="pool-sub">Consolidamento &nbsp;·&nbsp; ~2.500 m &nbsp;·&nbsp; Progressione rispetto a sabato 16</div>
+    <h3>Sessione B-Mer &nbsp;·&nbsp; Mercoledì (sessione infrasettimanale)</h3>
+    <div class="pool-sub">Velocità strutturata &nbsp;·&nbsp; ~2.500 m &nbsp;·&nbsp; Drill: pugno chiuso + un braccio · Blocco ripetute 50m veloci</div>
+  </div>
+  <div class="drill-focus">
+    <strong>Drill focus:</strong> Pugno chiuso (drill n.5) poi subito palette — il contrasto è il punto. Chiudi i pugni 25m → apri la mano → metti le palette: la sensazione dell'avambraccio si porta dietro e la palette amplifica una presa già corretta, non sostituisce quella sbagliata.
+    <div class="drill-why">Questo è il pattern che costruisce vera velocità: presa qualitativa → overload → velocità applicata.</div>
   </div>
   <table class="pool-table">
     <thead><tr><th>Fase</th><th>Descrizione</th><th>Ritmo</th><th>Rec.</th><th>Vol.</th><th>Note</th></tr></thead>
     <tbody>
       <tr><td class="fase">Riscaldamento</td><td>300m crawl + 100m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td></td></tr>
-      <tr><td class="fase">Drill</td><td>4×25m pugno chiuso</td><td class="ritmo">Facile</td><td>15"</td><td class="vol">100m</td><td></td></tr>
-      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>8×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>25"</td><td class="vol">800m</td><td>Target 1:47 — più regolare di sab 16</td></tr>
-      <tr class="palette-pb"><td class="fase">Palette+PB</td><td>4×50m crawl<br><span class="attrezzo att-pp">🔵+🟡 Combo</span></td><td class="ritmo">Aer/Soglia</td><td>30"</td><td class="vol">200m</td><td>Consolida il lavoro di sabato</td></tr>
-      <tr><td class="fase">Stili</td><td>4×50m rana + 2×50m dorso</td><td class="ritmo">Facile</td><td>25"</td><td class="vol">300m</td><td></td></tr>
-      <tr><td class="fase">Drill</td><td>4×50m crawl 1 braccio</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">200m</td><td></td></tr>
-      <tr><td class="fase">Velocità</td><td>4×50m crawl veloce</td><td class="ritmo">Veloce</td><td>45"</td><td class="vol">200m</td><td></td></tr>
-      <tr><td class="fase">Defaticante</td><td>300m crawl lento</td><td class="ritmo">Facile</td><td>—</td><td class="vol">300m</td><td></td></tr>
+      <tr><td class="fase">Drill 🎯</td><td>4×25m pugno chiuso</td><td class="ritmo">Facile</td><td>15"</td><td class="vol">100m</td><td>Senti avambraccio e polso prendere l'acqua — è quello che la palette amplificherà dopo</td></tr>
+      <tr><td class="fase">Drill 🎯</td><td>2×50m un braccio (25m dx / 25m sx)</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">100m</td><td>Braccio lungo il fianco, respiro verso il lato del braccio fermo. Calciata attiva</td></tr>
+      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>4×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>25"</td><td class="vol">400m</td><td>Target 1:47 — presa lunga, gomito alto</td></tr>
+      <tr class="palette-pb"><td class="fase">Palette+PB</td><td>4×50m crawl<br><span class="attrezzo att-pp">🔵+🟡 Combo</span></td><td class="ritmo">Soglia</td><td>35"</td><td class="vol">200m</td><td>Consolida il contrasto pugno → palette. Forza bruta fuori, presa avambraccio dentro</td></tr>
+      <tr><td class="fase">Ripetute veloci <span class="speed-badge">Velocità</span></td><td>6×50m crawl</td><td class="ritmo">Veloce</td><td>50"</td><td class="vol">300m</td><td>Target ~0:42–0:45 (≈1:24–1:30/100m). Recupero completo — non sacrificare la presa per il passo</td></tr>
+      <tr><td class="fase">Sprint brevi <span class="speed-badge">Velocità</span></td><td>4×25m sprint massimale</td><td class="ritmo">Sprint</td><td>60"</td><td class="vol">100m</td><td>Massimale da bordo — calciata piena nei primi 5m, poi mantieni</td></tr>
+      <tr><td class="fase">Stili rec.</td><td>4×50m rana + 2×50m dorso</td><td class="ritmo">Facile</td><td>25"</td><td class="vol">300m</td><td>Recupero attivo</td></tr>
+      <tr><td class="fase">Defaticante</td><td>300m crawl lento</td><td class="ritmo">Facile</td><td>—</td><td class="vol">300m</td><td>Chiudi sciogliendo bene</td></tr>
     </tbody>
   </table>
-  <div class="pool-total"><span>Totale</span><strong>~2.500 m</strong></div>
+  <div class="pool-total"><span>Totale</span><strong>~2.200 m</strong></div>
 </div>
 
-<!-- SESSIONE C-SAB -->
-<div class="sec">Sessione C-Sabato — picco volume</div>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SESSIONE C-SAB — PICCO VOLUME + VELOCITÀ ESTESA            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="sec">Sessione C-Sab — picco volume + velocità estesa</div>
 <div id="sessCsab" class="pool-card">
   <div class="pool-hdr">
-    <h3>Sessione C-Sab &nbsp;·&nbsp; Sabato 23 mag</h3>
-    <div class="pool-sub">Picco piano &nbsp;·&nbsp; ~3.000 m &nbsp;·&nbsp; Focus: palette soglia + pullbuoy volume</div>
+    <h3>Sessione C-Sab &nbsp;·&nbsp; Sabato (sessione lunga settimanale)</h3>
+    <div class="pool-sub">Picco piano &nbsp;·&nbsp; ~2.900 m &nbsp;·&nbsp; Drill: 6-3-6 + un braccio · Ripetute 50m veloci + sprint</div>
+  </div>
+  <div class="drill-focus">
+    <strong>Drill focus:</strong> 6-3-6 in apertura (quando sei fresco) poi un braccio a metà sessione (quando inizia la stanchezza). La stanchezza è lo specchio fedele della tecnica — se il bacino scende solo nelle ultime vasche, stai migliorando.
+    <div class="drill-why">Questa sessione ha due picchi: il blocco palette soglia e le ripetute veloci. Non sono intercambiabili — fai prima il blocco tecnico, poi spingi.</div>
   </div>
   <table class="pool-table">
     <thead><tr><th>Fase</th><th>Descrizione</th><th>Ritmo</th><th>Rec.</th><th>Vol.</th><th>Note</th></tr></thead>
     <tbody>
       <tr><td class="fase">Riscaldamento</td><td>400m crawl + 100m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">500m</td><td></td></tr>
-      <tr><td class="fase">Drill</td><td>4×25m farfalla onda corpo</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">100m</td><td>Solo ondulazione, braccia lungo il corpo</td></tr>
-      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>6×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>25"</td><td class="vol">600m</td><td>Passo 1:47, volume trazione</td></tr>
-      <tr><td class="fase">Principale</td><td>4×200m crawl</td><td class="ritmo">Aer/Soglia</td><td>40"</td><td class="vol">800m</td><td>Passo 1:48–1:50 uniforme — blocco più duro</td></tr>
-      <tr class="palette"><td class="fase">Palette</td><td>4×100m crawl<br><span class="attrezzo att-pa">🔵 Palette</span></td><td class="ritmo">Soglia</td><td>40"</td><td class="vol">400m</td><td>Passo 1:43–1:45. Forma prima di tutto</td></tr>
-      <tr><td class="fase">Stili</td><td>4×50m rana + 2×50m dorso</td><td class="ritmo">Facile</td><td>25"</td><td class="vol">300m</td><td>Recupero attivo tra i blocchi duri</td></tr>
-      <tr><td class="fase">Velocità</td><td>4×25m sprint crawl</td><td class="ritmo">Sprint</td><td>60"</td><td class="vol">100m</td><td>Massimale da bordo vasca</td></tr>
-      <tr><td class="fase">Defaticante</td><td>200m dorso lento</td><td class="ritmo">Facile</td><td>—</td><td class="vol">200m</td><td>Chiudi con il dorso</td></tr>
+      <tr><td class="fase">Drill 🎯</td><td>4×25m 6-3-6</td><td class="ritmo">Facile</td><td>25"</td><td class="vol">100m</td><td>Orecchio sull'acqua, bacino alto, calciata costante nei 6 calci laterali</td></tr>
+      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>6×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>25"</td><td class="vol">600m</td><td>Passo 1:47 — volume trazione, risparmia le gambe per dopo</td></tr>
+      <tr><td class="fase">Principale</td><td>4×200m crawl libero</td><td class="ritmo">Aer/Soglia</td><td>40"</td><td class="vol">800m</td><td>Passo 1:48–1:50 uniforme — ogni 200m controlla che la presa regga senza pullbuoy</td></tr>
+      <tr><td class="fase">Drill 🎯</td><td>4×25m un braccio (quando sei già affaticato)</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">100m</td><td>Esegui a metà sessione, con le gambe che iniziano a sentirsi — è il test reale</td></tr>
+      <tr class="palette"><td class="fase">Palette <span class="speed-badge">Velocità</span></td><td>4×100m crawl<br><span class="attrezzo att-pa">🔵 Palette</span></td><td class="ritmo">Soglia</td><td>40"</td><td class="vol">400m</td><td>Passo 1:43–1:45. La presa deve essere già lì — la palette amplifica, non compensa</td></tr>
+      <tr><td class="fase">Sprint brevi <span class="speed-badge">Velocità</span></td><td>4×25m sprint massimale</td><td class="ritmo">Sprint</td><td>60"</td><td class="vol">100m</td><td>Massimale da bordo vasca — ultimi sprint della sessione</td></tr>
+      <tr><td class="fase">Stili rec.</td><td>4×50m rana + 2×50m dorso</td><td class="ritmo">Facile</td><td>25"</td><td class="vol">300m</td><td>Recupero attivo tra i blocchi duri</td></tr>
+      <tr><td class="fase">Defaticante</td><td>200m dorso lento</td><td class="ritmo">Facile</td><td>—</td><td class="vol">200m</td><td>Chiudi con il dorso — spalle ringraziano</td></tr>
     </tbody>
   </table>
-  <div class="pool-total"><span>Totale</span><strong>~3.000 m</strong></div>
+  <div class="pool-total"><span>Totale</span><strong>~3.100 m</strong></div>
 </div>
 
-<!-- SESSIONE C-DOM -->
-<div class="sec">Sessione C-Domenica — chiusura piano</div>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SESSIONE C-DOM — CHIUSURA FINE PIANO                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="sec">Sessione C-Dom — chiusura piano</div>
 <div id="sessCdom" class="pool-card">
   <div class="pool-hdr">
-    <h3>Sessione C-Dom &nbsp;·&nbsp; Domenica 24 mag 🎯</h3>
-    <div class="pool-sub">Chiusura piano &nbsp;·&nbsp; ~2.200 m &nbsp;·&nbsp; Niente stress — pesata domani mattina</div>
+    <h3>Sessione C-Dom &nbsp;·&nbsp; Domenica (fine piano) 🎯</h3>
+    <div class="pool-sub">Chiusura piano &nbsp;·&nbsp; ~2.100 m &nbsp;·&nbsp; Niente stress — pesata lunedì mattina · Drill a scelta</div>
+  </div>
+  <div class="drill-focus">
+    <strong>Drill libero:</strong> scegli il drill che ti ha dato più beneficio nelle sessioni precedenti. Se non sei sicuro, fai catch-up con respiro ogni 2 — è quello che colpisce direttamente il problema originale ed è il modo migliore per misurare quanto hai migliorato.
   </div>
   <table class="pool-table">
     <thead><tr><th>Fase</th><th>Descrizione</th><th>Ritmo</th><th>Rec.</th><th>Vol.</th><th>Note</th></tr></thead>
     <tbody>
-      <tr><td class="fase">Riscaldamento</td><td>300m crawl + 100m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td>Ultimo allenamento — goditi la vasca</td></tr>
-      <tr><td class="fase">Drill</td><td>4×25m a scelta</td><td class="ritmo">Facile</td><td>15"</td><td class="vol">100m</td><td>Scegli il drill preferito del piano</td></tr>
-      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>3×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>30"</td><td class="vol">300m</td><td>Leggero, gambe a riposo dopo ieri</td></tr>
-      <tr><td class="fase">Principale</td><td>4×200m crawl</td><td class="ritmo">Aerobico</td><td>45"</td><td class="vol">800m</td><td>Passo 1:50 — niente soglia, conserva</td></tr>
+      <tr><td class="fase">Riscaldamento</td><td>300m crawl + 100m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td>Ultimo allenamento del piano — goditi la vasca</td></tr>
+      <tr><td class="fase">Drill 🎯</td><td>4×25m drill a scelta tra n.1, n.2 o n.3</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">100m</td><td>Il migliore tra: catch-up respiro ogni 2 / un braccio / 6-3-6</td></tr>
+      <tr class="pullbuoy"><td class="fase">Pullbuoy</td><td>3×100m crawl<br><span class="attrezzo att-pb">🟡 Pullbuoy</span></td><td class="ritmo">Aerobico</td><td>30"</td><td class="vol">300m</td><td>Leggero — gambe a riposo dopo ieri</td></tr>
+      <tr><td class="fase">Principale</td><td>4×200m crawl libero</td><td class="ritmo">Aerobico</td><td>45"</td><td class="vol">800m</td><td>Passo 1:50 — niente soglia. Pensa solo alla qualità della presa senza il pullbuoy</td></tr>
       <tr><td class="fase">Stili</td><td>4×50m dorso + 2×50m rana</td><td class="ritmo">Facile</td><td>25"</td><td class="vol">300m</td><td>Tecnica pulita</td></tr>
-      <tr><td class="fase">Velocità</td><td>4×25m sprint crawl</td><td class="ritmo">Sprint</td><td>60"</td><td class="vol">100m</td><td>Ultimi sprint del piano</td></tr>
-      <tr><td class="fase">Defaticante</td><td>200m misto libero</td><td class="ritmo">Facile</td><td>—</td><td class="vol">200m</td><td>🎯 Fine piano!</td></tr>
+      <tr><td class="fase">Sprint finali <span class="speed-badge">Velocità</span></td><td>4×25m sprint crawl</td><td class="ritmo">Sprint</td><td>60"</td><td class="vol">100m</td><td>Ultimi sprint del piano — vai</td></tr>
+      <tr><td class="fase">Defaticante</td><td>100m misto libero</td><td class="ritmo">Facile</td><td>—</td><td class="vol">100m</td><td>🎯 Fine piano!</td></tr>
     </tbody>
   </table>
-  <div class="pool-total"><span>Totale</span><strong>~2.200 m</strong></div>
+  <div class="pool-total"><span>Totale</span><strong>~2.100 m</strong></div>
 </div>
 
 </main>
