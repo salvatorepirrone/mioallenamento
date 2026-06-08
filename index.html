@@ -6,51 +6,122 @@
 <title>Piano Allenamento</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.week-block { margin-bottom: 36px; }
-.week-title {
-  font-size: 13px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--muted); margin-bottom: 10px;
-  display: flex; align-items: center; gap: 10px;
+/* WEEK GRID */
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 32px;
 }
-.week-title::after { content:''; flex:1; height:1px; background:var(--border); }
-.week-title span { color: var(--accent); }
+.wday {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 10px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color .2s;
+}
+.wday.today { border-color: var(--accent); }
+.wday.rest { opacity: .55; }
+.wday-label {
+  font-size: 10px;
+  font-family: monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.wday-date {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: monospace;
+  color: var(--text);
+  line-height: 1;
+}
+.wday.today .wday-date { color: var(--accent); }
+.wday-acts { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.act-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pill-run   { background: rgba(245,90,90,.15);  color: var(--red);    }
+.pill-swim  { background: rgba(122,184,245,.15); color: var(--blue);   }
+.pill-gym   { background: rgba(200,90,245,.12);  color: var(--purple); }
+.pill-rest  { background: rgba(122,122,122,.1);  color: var(--muted);  }
 
-.weight-bar {
-  background: var(--s2); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px 16px; margin-bottom: 24px;
+/* SESSIONI CARDS */
+.sess-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
 }
-.weight-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.w-item { text-align: center; }
-.w-item .v { font-size: 20px; font-weight: 700; font-family: monospace; display: block; }
-.w-item .l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-.w-arrow { font-size: 22px; color: var(--muted); }
-.progress-wrap { margin: 16px 0 0; }
-.progress-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:5px; }
-.progress-bar { height:5px; background:var(--s3); border-radius:3px; overflow:hidden; }
-.progress-fill { height:100%; background:var(--accent); border-radius:3px; transition:width .6s; }
+.sess-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  transition: border-color .2s;
+}
+.sess-card:hover { border-color: #3a3a3a; }
+.sess-card-top {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.sess-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.si-run  { background: rgba(245,90,90,.15); }
+.si-swim { background: rgba(122,184,245,.15); }
+.si-gym  { background: rgba(200,90,245,.12); }
+.sess-card-title { font-size: 14px; font-weight: 600; }
+.sess-card-day   { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.sess-card-body  { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.sess-card-body strong { color: var(--text); }
+.sess-link {
+  display: inline-block; margin-top: 10px;
+  font-size: 11px; color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 6px;
+  padding: 4px 10px; transition: all .2s;
+}
+.sess-link:hover { background: var(--accent); color: var(--bg); }
 
-.phase-tag {
-  font-size: 9px; font-family: monospace; text-transform: uppercase;
-  letter-spacing: .08em; padding: 2px 7px; border-radius: 4px; white-space: nowrap;
+/* PESO CARD */
+.peso-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  margin-bottom: 32px;
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
 }
-.ph-chiusura { background: rgba(200,245,90,.12); color: var(--accent); }
-.ph-consolid { background: rgba(90,245,200,.12); color: var(--teal); }
-.ph-progress  { background: rgba(122,184,245,.12); color: var(--blue); }
-.ph-qualita   { background: rgba(200,90,245,.12); color: var(--purple); }
+.peso-val { font-size: 32px; font-weight: 700; font-family: monospace; color: var(--accent); }
+.peso-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.peso-trend {
+  display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 160px;
+}
+.trend-row {
+  display: flex; justify-content: space-between;
+  font-size: 12px; padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+.trend-row:last-child { border: none; }
+.trend-row span:first-child { color: var(--muted); }
 
-/* Past days: dimmed */
-.day-row.past { opacity: .45; }
-/* Today: accent border + subtle glow */
-.day-row.today {
-  border-color: var(--accent) !important;
-  background: rgba(200,245,90,.04) !important;
-  box-shadow: 0 0 0 1px var(--accent);
-}
-/* Today badge injected by JS */
-.today-badge {
-  font-size: 9px; font-weight: 700; letter-spacing: .07em;
-  text-transform: uppercase; background: var(--accent); color: #111;
-  padding: 2px 7px; border-radius: 4px; white-space: nowrap; margin-left: 6px;
+/* NOTE CARD */
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-bottom: 24px;
 }
 </style>
 </head>
@@ -71,468 +142,213 @@
 
 <div class="hero">
   <h1>Piano allenamento</h1>
-  <p>18 Maggio – 14 Giugno 2026 &nbsp;·&nbsp; Obiettivo finale: 73,0 kg</p>
+  <p>4 sessioni · Martedì · Giovedì · Sabato · Domenica &nbsp;·&nbsp; Focus: benessere + velocità</p>
 </div>
 
 <!-- PESO -->
-<div class="weight-bar">
-  <div class="weight-row">
-    <div class="w-item"><span class="v" style="color:var(--muted)">76,6</span><span class="l">10 mag</span></div>
-    <div class="w-arrow">→</div>
-    <div class="w-item"><span class="v" style="color:var(--accent)">77,0</span><span class="l">oggi (4 giu)</span></div>
-    <div class="w-arrow">→</div>
-    <div class="w-item"><span class="v" style="color:var(--orange)">74,5</span><span class="l">🎯 7 giu</span></div>
-    <div class="w-arrow">→</div>
-    <div class="w-item"><span class="v" style="color:var(--red)">73,0</span><span class="l">🎯 14 giu</span></div>
+<div class="sec">Peso</div>
+<div class="peso-card">
+  <div>
+    <div class="peso-val" id="peso-oggi">76,9 kg</div>
+    <div class="peso-sub" id="peso-data">7 giu 2026</div>
   </div>
-  <div class="progress-wrap">
-    <div class="progress-label"><span>Progresso verso 73,0 kg</span><span id="prog-pct">0%</span></div>
-    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="peso-trend">
+    <div class="trend-row"><span>Grasso corporeo</span><span id="peso-fat" style="color:var(--text)">24,5%</span></div>
+    <div class="trend-row"><span>Massa muscolare</span><span id="peso-muscle" style="color:var(--text)">30,1 kg</span></div>
+    <div class="trend-row"><span>Acqua corporea</span><span style="color:var(--text)">55,1%</span></div>
   </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════ -->
-<!-- SETTIMANA 1 · 18–24 mag                                        -->
-<!-- ════════════════════════════════════════════════════════════════ -->
-<div class="week-block">
-  <div class="week-title"><span class="phase-tag ph-chiusura">Chiusura piano</span> Settimana 1 &nbsp;<span>18–24 mag</span></div>
-  <div class="day-grid">
-
-    <div class="day-row rest" data-date="2026-05-18">
-      <div class="day-date">Lun 18 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div>
-        <div><div class="act-name">Riposo</div><div class="act-detail">Gambe stanche da 2 giorni di corsa</div></div>
-      </div>
-      <span class="act-kcal">—</span>
-    </div>
-
-    <div class="day-row rest" data-date="2026-05-19">
-      <div class="day-date">Mar 19 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div>
-        <div><div class="act-name">Riposo</div><div class="act-detail">Impegni serali</div></div>
-      </div>
-      <span class="act-kcal">—</span>
-    </div>
-
-    <div class="day-row" data-date="2026-05-20">
-      <div class="day-date">Mer 20 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 40 min → Sess. B ~2.500 m</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~710 kcal</span>
-        <a class="act-link" href="palestra.html#sessB">P</a>
-        <a class="act-link" href="nuoto.html#sessBmer">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-05-21">
-      <div class="day-date">Gio 21 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name">Corsa</div><div class="act-detail">7 km, Z2 + inserti Z3 — Uscita 2</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~530 kcal</span>
-        <a class="act-link" href="corsa.html#uscita2">→</a>
-      </div>
-    </div>
-
-    <div class="day-row rest" data-date="2026-05-22">
-      <div class="day-date">Ven 22 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div>
-        <div><div class="act-name">Riposo</div><div class="act-detail">Scarico pre-weekend finale</div></div>
-      </div>
-      <span class="act-kcal">—</span>
-    </div>
-
-    <div class="day-row" data-date="2026-05-23">
-      <div class="day-date">Sab 23 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 45 min → Sess. C-Sab ~3.000 m</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~870 kcal</span>
-        <a class="act-link" href="palestra.html#sessB">P</a>
-        <a class="act-link" href="nuoto.html#sessCsab">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-05-24">
-      <div class="day-date">Dom 24 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 35 min → Sess. C-Dom ~2.200 m</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~690 kcal</span>
-        <a class="act-link" href="palestra.html#sessB">P</a>
-        <a class="act-link" href="nuoto.html#sessCdom">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-05-25" style="border-color:var(--yellow);background:rgba(245,200,90,.04)">
-      <div class="day-date">Lun 25 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--yellow)"></div>
-        <div><div class="act-name" style="color:var(--yellow)">⚖️ Pesata — Target 74,6 kg</div><div class="act-detail">Pesata mattutina a digiuno</div></div>
-      </div>
-      <span class="act-kcal" style="color:var(--yellow)">🎯</span>
-    </div>
-
+  <div style="font-size:12px;color:var(--muted);max-width:200px;line-height:1.6">
+    La composizione conta più del numero. Massa magra stabile = progresso reale.
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════════ -->
-<!-- SETTIMANA 2 · 25–31 mag                                        -->
-<!-- ════════════════════════════════════════════════════════════════ -->
-<div class="week-block">
-  <div class="week-title"><span class="phase-tag ph-consolid">Consolidamento</span> Settimana 2 &nbsp;<span>25–31 mag</span></div>
-  <div class="day-grid">
+<!-- SETTIMANA CORRENTE -->
+<div class="sec">Settimana corrente</div>
+<div class="week-grid" id="week-grid"></div>
 
-    <div class="day-row rest" data-date="2026-05-25">
-      <div class="day-date">Lun 25 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div>
-        <div><div class="act-name">Riposo post-pesata</div><div class="act-detail">Valuta il risultato, reset mentale</div></div>
-      </div>
-      <span class="act-kcal">—</span>
-    </div>
+<!-- SESSIONI DEL PIANO -->
+<div class="sec">Le 4 sessioni</div>
+<div class="sess-grid">
 
-    <div class="day-row" data-date="2026-05-26">
-      <div class="day-date">Mar 26 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 40 min → Sess. A ~1.900 m (scarico)</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~580 kcal</span>
-        <a class="act-link" href="palestra.html">P</a>
-        <a class="act-link" href="nuoto.html#sessA">N</a>
+  <div class="sess-card">
+    <div class="sess-card-top">
+      <div class="sess-icon si-run">🏃</div>
+      <div>
+        <div class="sess-card-title">Corsa — Velocità</div>
+        <div class="sess-card-day">Martedì · settimane dispari</div>
       </div>
     </div>
-
-    <div class="day-row rest" data-date="2026-05-27">
-      <div class="day-date">Mer 27 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div>
-        <div><div class="act-name">Riposo attivo</div><div class="act-detail">Camminata 30 min</div></div>
-      </div>
-      <span class="act-kcal">~120 kcal</span>
+    <div class="sess-card-body">
+      <strong>6–8 × 200m</strong> quasi massimali<br>
+      Recupero: camminata 90"<br>
+      Totale ~6 km · ~40 min
     </div>
-
-    <div class="day-row" data-date="2026-05-28">
-      <div class="day-date">Gio 28 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 40 min → B-Dom ~1.900 m</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~640 kcal</span>
-        <a class="act-link" href="palestra.html">P</a>
-        <a class="act-link" href="nuoto.html#sessBdom">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-05-29">
-      <div class="day-date">Ven 29 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name">Corsa</div><div class="act-detail">7–8 km, Z2 puro — guida FC non passo</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~510 kcal</span>
-        <a class="act-link" href="corsa.html#uscita3">→</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-05-30">
-      <div class="day-date">Sab 30 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 45 min → B-Sab ~2.400 m</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~760 kcal</span>
-        <a class="act-link" href="palestra.html#sessB">P</a>
-        <a class="act-link" href="nuoto.html#sessBsab">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-05-31">
-      <div class="day-date">Dom 31 Mag</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--blue)"></div>
-        <div><div class="act-name">Nuoto</div><div class="act-detail">B-Dom ~1.900 m, no palestra — scarico attivo</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~420 kcal</span>
-        <a class="act-link" href="nuoto.html#sessBdom">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-06-01" style="border-color:var(--teal);background:rgba(90,245,200,.04)">
-      <div class="day-date">Lun 1 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div>
-        <div><div class="act-name" style="color:var(--teal)">⚖️ Pesata — Target 74,0 kg</div></div>
-      </div>
-      <span class="act-kcal" style="color:var(--teal)">🎯</span>
-    </div>
-
+    <a class="sess-link" href="corsa.html#velocita">Scheda →</a>
   </div>
-</div>
 
-<!-- ════════════════════════════════════════════════════════════════ -->
-<!-- SETTIMANA 3 · 1–7 giu                                          -->
-<!-- ════════════════════════════════════════════════════════════════ -->
-<div class="week-block">
-  <div class="week-title"><span class="phase-tag ph-progress">Progressione</span> Settimana 3 &nbsp;<span>1–7 giu</span></div>
-  <div class="day-grid">
-
-    <div class="day-row rest" data-date="2026-06-01">
-      <div class="day-date">Lun 1 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div>
-        <div><div class="act-name">Riposo</div></div>
-      </div>
-      <span class="act-kcal">—</span>
-    </div>
-
-    <div class="day-row" data-date="2026-06-02">
-      <div class="day-date">Mar 2 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 40 min → B-Dom ~1.900 m</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~640 kcal</span>
-        <a class="act-link" href="palestra.html">P</a>
-        <a class="act-link" href="nuoto.html#sessBdom">N</a>
+  <div class="sess-card">
+    <div class="sess-card-top">
+      <div class="sess-icon si-run">🏃</div>
+      <div>
+        <div class="sess-card-title">Corsa — Soglia</div>
+        <div class="sess-card-day">Martedì · settimane pari</div>
       </div>
     </div>
-
-    <div class="day-row rest" data-date="2026-06-03">
-      <div class="day-date">Mer 3 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div>
-        <div><div class="act-name">Riposo</div><div class="act-detail">Corsa spostata a giovedì</div></div>
-      </div>
-      <span class="act-kcal">—</span>
+    <div class="sess-card-body">
+      <strong>3–4 km continui</strong> a Z3 sostenuto<br>
+      Passo 5:20–5:30/km<br>
+      Totale ~7 km · ~45 min
     </div>
-
-    <div class="day-row" data-date="2026-06-04">
-      <div class="day-date">Gio 4 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name">Corsa</div><div class="act-detail">7–8 km, Z2 puro — FC &lt; 150 bpm · caldo Roma, rallenta senza esitare</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~510 kcal</span>
-        <a class="act-link" href="corsa.html#uscita3">→</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-06-05">
-      <div class="day-date">Ven 5 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 40 min → B-Mer ~2.200 m · drill presa + ripetute veloci</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~680 kcal</span>
-        <a class="act-link" href="palestra.html#sessB">P</a>
-        <a class="act-link" href="nuoto.html#sessBmer">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-06-06">
-      <div class="day-date">Sab 6 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 45 min → C-Sab ~3.100 m · drill 6-3-6 + palette velocità</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~870 kcal</span>
-        <a class="act-link" href="palestra.html#sessB">P</a>
-        <a class="act-link" href="nuoto.html#sessCsab">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-06-07">
-      <div class="day-date">Dom 7 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--blue)"></div>
-        <div><div class="act-name">Nuoto</div><div class="act-detail">B-Dom ~1.900 m · drill 6-3-6 + catch-up · scarico attivo</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~420 kcal</span>
-        <a class="act-link" href="nuoto.html#sessBdom">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-06-08" style="border-color:var(--orange);background:rgba(245,150,90,.04)">
-      <div class="day-date">Lun 8 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--orange)"></div>
-        <div><div class="act-name" style="color:var(--orange)">⚖️ Pesata — Target 74,0 kg</div></div>
-      </div>
-      <span class="act-kcal" style="color:var(--orange)">🎯</span>
-    </div>
-
+    <a class="sess-link" href="corsa.html#soglia">Scheda →</a>
   </div>
-</div>
 
-<!-- ════════════════════════════════════════════════════════════════ -->
-<!-- SETTIMANA 4 · 8–14 giu                                         -->
-<!-- ════════════════════════════════════════════════════════════════ -->
-<div class="week-block">
-  <div class="week-title"><span class="phase-tag ph-qualita">Qualità</span> Settimana 4 &nbsp;<span>8–14 giu</span></div>
-  <div class="day-grid">
-
-    <div class="day-row rest" data-date="2026-06-08">
-      <div class="day-date">Lun 8 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div>
-        <div><div class="act-name">Riposo</div></div>
-      </div>
-      <span class="act-kcal">—</span>
-    </div>
-
-    <div class="day-row" data-date="2026-06-09">
-      <div class="day-date">Mar 9 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 40 min → B-Mer ~2.200 m</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~710 kcal</span>
-        <a class="act-link" href="palestra.html#sessB">P</a>
-        <a class="act-link" href="nuoto.html#sessBmer">N</a>
+  <div class="sess-card">
+    <div class="sess-card-top">
+      <div class="sess-icon si-swim">🏊</div>
+      <div>
+        <div class="sess-card-title">Nuoto — Tecnica + Soglia</div>
+        <div class="sess-card-day">Giovedì · + palestra facoltativa</div>
       </div>
     </div>
-
-    <div class="day-row" data-date="2026-06-10">
-      <div class="day-date">Mer 10 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name">Corsa — Fartlek</div><div class="act-detail">8 km con 5×(1' Z4 + 2' Z2)</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~570 kcal</span>
-        <a class="act-link" href="corsa.html#uscita4">→</a>
-      </div>
+    <div class="sess-card-body">
+      Drill rotazione · blocco soglia<br>
+      <strong>1:45–1:47/100m</strong><br>
+      ~2.000 m totali
     </div>
-
-    <div class="day-row" data-date="2026-06-11">
-      <div class="day-date">Gio 11 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 40 min → B-Mer ~2.200 m</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~710 kcal</span>
-        <a class="act-link" href="palestra.html#sessB">P</a>
-        <a class="act-link" href="nuoto.html#sessBmer">N</a>
-      </div>
-    </div>
-
-    <div class="day-row rest" data-date="2026-06-12">
-      <div class="day-date">Ven 12 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div>
-        <div><div class="act-name">Riposo</div></div>
-      </div>
-      <span class="act-kcal">—</span>
-    </div>
-
-    <div class="day-row" data-date="2026-06-13">
-      <div class="day-date">Sab 13 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza 45 min → C-Sab ~3.100 m</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~870 kcal</span>
-        <a class="act-link" href="palestra.html#sessB">P</a>
-        <a class="act-link" href="nuoto.html#sessCsab">N</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-06-14">
-      <div class="day-date">Dom 14 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name">Corsa lunga</div><div class="act-detail">10–11 km, Z2 puro — prima uscita lunga 🏁</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="act-kcal">~680 kcal</span>
-        <a class="act-link" href="corsa.html#uscita5">→</a>
-      </div>
-    </div>
-
-    <div class="day-row" data-date="2026-06-15" style="border-color:var(--red);background:rgba(245,90,90,.04)">
-      <div class="day-date">Lun 15 Giu</div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name" style="color:var(--red)">⚖️ Pesata finale — Target 73,0 kg 🎯</div></div>
-      </div>
-      <span class="act-kcal" style="color:var(--red)">🎯</span>
-    </div>
-
+    <a class="sess-link" href="nuoto.html#tecnica">Scheda →</a>
   </div>
+
+  <div class="sess-card">
+    <div class="sess-card-top">
+      <div class="sess-icon si-run">🏃</div>
+      <div>
+        <div class="sess-card-title">Corsa — Z2 Lunga</div>
+        <div class="sess-card-day">Sabato · mattina</div>
+      </div>
+    </div>
+    <div class="sess-card-body">
+      <strong>8–10 km</strong> FC sotto 150<br>
+      Passo libero · no cronometro<br>
+      ~55–65 min
+    </div>
+    <a class="sess-link" href="corsa.html#z2lungo">Scheda →</a>
+  </div>
+
+  <div class="sess-card">
+    <div class="sess-card-top">
+      <div class="sess-icon si-swim">🏊</div>
+      <div>
+        <div class="sess-card-title">Nuoto — Velocità Pura</div>
+        <div class="sess-card-day">Domenica · + palestra facoltativa</div>
+      </div>
+    </div>
+    <div class="sess-card-body">
+      <strong>8–10 × 50m</strong> sprint 1:25–1:30<br>
+      Recupero 45–60" · poi blocco aerobico<br>
+      ~2.500 m totali
+    </div>
+    <a class="sess-link" href="nuoto.html#velocita">Scheda →</a>
+  </div>
+
+  <div class="sess-card" style="border-color:rgba(200,90,245,.25)">
+    <div class="sess-card-top">
+      <div class="sess-icon si-gym">💪</div>
+      <div>
+        <div class="sess-card-title">Palestra</div>
+        <div class="sess-card-day">Giovedì + Domenica · facoltativa</div>
+      </div>
+    </div>
+    <div class="sess-card-body">
+      Prima del nuoto · ~35–45 min<br>
+      Mobilità → Core → Trazione → Spinta<br>
+      Ratio 2:1 trazione/spinta
+    </div>
+    <a class="sess-link" href="palestra.html" style="border-color:var(--purple);color:var(--purple)">Scheda →</a>
+  </div>
+
 </div>
 
-<!-- LEGENDA -->
-<div class="sec">Legenda</div>
-<div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:16px">
-  <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--purple);margin-right:6px"></span>Palestra + Nuoto</span>
-  <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:6px"></span>Solo nuoto</span>
-  <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px"></span>Corsa</span>
-  <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);margin-right:6px"></span>Riposo</span>
-</div>
-
-<!-- NOTE PREPARATORE -->
-<div class="sec">Note del preparatore</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:24px">
+<!-- NOTE -->
+<div class="sec">Principi</div>
+<div class="note-grid">
   <div class="hstat" style="border-color:rgba(245,90,90,.2)">
-    <span style="font-size:11px;font-weight:600;color:var(--red);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">⚠️ Corsa lenta</span>
-    <span style="font-size:12px;color:var(--muted)">Tendi a spingere verso Z3/Z4. Usa la FC come guida: se superi 150 bpm, rallenta.</span>
+    <span style="font-size:11px;font-weight:600;color:var(--red);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🏃 Corsa Z2</span>
+    <span style="font-size:12px;color:var(--muted)">FC sotto 150 anche se il passo scende. Il caldo romano spinge la FC 5–8 bpm sopra: rallenta senza sentirti in colpa.</span>
+  </div>
+  <div class="hstat" style="border-color:rgba(122,184,245,.2)">
+    <span style="font-size:11px;font-weight:600;color:var(--blue);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🏊 Fibre veloci</span>
+    <span style="font-size:12px;color:var(--muted)">Gli sprint brevi (200m corsa, 50m nuoto) mantengono le fibre di tipo II. Dopo i 35 anni si atrofizzano se non stimolate.</span>
+  </div>
+  <div class="hstat" style="border-color:rgba(200,90,245,.2)">
+    <span style="font-size:11px;font-weight:600;color:var(--purple);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">💪 Palestra</span>
+    <span style="font-size:12px;color:var(--muted)">Ratio 2:1 trazione/spinta protegge la cuffia. Non aumentare carico e volume nuoto nella stessa settimana.</span>
   </div>
   <div class="hstat">
-    <span style="font-size:11px;font-weight:600;color:var(--accent);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">📈 Nuoto target</span>
-    <span style="font-size:12px;color:var(--muted)">Obiettivo 8.000–9.000 m/settimana entro metà giugno. Focus nuove sessioni: velocità + presa senza pullbuoy.</span>
-  </div>
-  <div class="hstat" style="border-color:rgba(122,184,245,.3)">
-    <span style="font-size:11px;font-weight:600;color:var(--blue);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🎯 Drill presa</span>
-    <span style="font-size:12px;color:var(--muted)">Il braccio anticipa perché il bacino scende in respirazione. Drill catch-up + un braccio in ogni sessione per correggere la causa, non il sintomo.</span>
-  </div>
-  <div class="hstat">
-    <span style="font-size:11px;font-weight:600;color:var(--teal);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🔄 Abitudine prima</span>
-    <span style="font-size:12px;color:var(--muted)">Costruire la routine è più importante del volume. Meglio 3 sessioni costanti che 5 con poi un buco.</span>
-  </div>
-  <div class="hstat">
-    <span style="font-size:11px;font-weight:600;color:var(--blue);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">💧 Composizione</span>
-    <span style="font-size:12px;color:var(--muted)">Grasso corporeo 24,1–24,2% (4 giu). Peso 77,0 kg — ritenzione idrica post-sforzo, trend composizione stabile. Obiettivo reale: 22–23%.</span>
+    <span style="font-size:11px;font-weight:600;color:var(--accent);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">📆 Alternanza</span>
+    <span style="font-size:12px;color:var(--muted)">Martedì alterna: ripetute 200m (settimane dispari) e soglia 3–4 km (settimane pari). Mai velocità corsa + velocità nuoto in giorni adiacenti.</span>
   </div>
 </div>
 
 </main>
 
 <script>
-// ── Progress bar ────────────────────────────────────────────────
-const start = 76.6, target = 73.0, current = 77.0;
-const pct = Math.round(Math.max(0, Math.min(100, (start - current) / (start - target) * 100)));
-document.getElementById('prog-fill').style.width = pct + '%';
-document.getElementById('prog-pct').textContent = pct + '%';
-
-// ── Today highlight + past dimming ──────────────────────────────
+// Settimana corrente rolling
 (function() {
-  // Use Rome local date (UTC+2 in summer) to avoid midnight flip issues
-  const now = new Date();
-  const romeOffset = 2 * 60; // CEST = UTC+2
-  const romeMs = now.getTime() + (romeOffset - now.getTimezoneOffset()) * 60000;
-  const romeDate = new Date(romeMs);
-  const today = romeDate.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+  const rome = d => new Date(d.toLocaleString('en-US', { timeZone: 'Europe/Rome' }));
+  const today = rome(new Date());
+  const dow = today.getDay(); // 0=dom
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
 
-  const rows = document.querySelectorAll('.day-row[data-date]');
-  let todayEl = null;
+  const DAYS = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+  const sessions = {
+    1: [{ label: 'Corsa', cls: 'pill-run', href: 'corsa.html' }],
+    3: [{ label: 'Nuoto', cls: 'pill-swim', href: 'nuoto.html#tecnica' },
+        { label: 'Palestra?', cls: 'pill-gym', href: 'palestra.html' }],
+    5: [{ label: 'Corsa Z2', cls: 'pill-run', href: 'corsa.html#z2lungo' }],
+    6: [{ label: 'Nuoto', cls: 'pill-swim', href: 'nuoto.html#velocita' },
+        { label: 'Palestra?', cls: 'pill-gym', href: 'palestra.html' }],
+  };
 
-  rows.forEach(row => {
-    const d = row.dataset.date;
-    if (!d) return;
-    if (d < today) {
-      row.classList.add('past');
-    } else if (d === today) {
-      row.classList.add('today');
-      // Inject "OGGI" badge into the act-name
-      const nameEl = row.querySelector('.act-name');
-      if (nameEl) {
-        const badge = document.createElement('span');
-        badge.className = 'today-badge';
-        badge.textContent = 'OGGI';
-        nameEl.appendChild(badge);
-      }
-      todayEl = row;
+  // Determina settimana pari/dispari per il martedì
+  const tuesdayOfWeek = new Date(monday);
+  tuesdayOfWeek.setDate(monday.getDate() + 1);
+  const weekNum = Math.ceil((((tuesdayOfWeek - new Date(tuesdayOfWeek.getFullYear(), 0, 1)) / 86400000) + 1) / 7);
+  const isOdd = weekNum % 2 !== 0;
+
+  const grid = document.getElementById('week-grid');
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const isToday = d.toDateString() === today.toDateString();
+    const acts = sessions[i] || [];
+    const isRest = acts.length === 0;
+
+    // Nota martedì: specifica il tipo
+    let tuesdayExtra = [];
+    if (i === 1) {
+      tuesdayExtra = [{ label: isOdd ? 'Ripetute 200m' : 'Soglia 3–4km', cls: 'pill-run',
+        href: isOdd ? 'corsa.html#velocita' : 'corsa.html#soglia' }];
     }
-  });
 
-  // Scroll to today (or top if plan not started / already ended)
-  if (todayEl) {
-    setTimeout(() => todayEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+    const allActs = i === 1 ? tuesdayExtra : acts;
+
+    const card = document.createElement('div');
+    card.className = 'wday' + (isRest ? ' rest' : '') + (isToday ? ' today' : '');
+    card.dataset.date = d.toISOString().slice(0,10);
+
+    const day = d.getDate();
+    const monthNames = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+    card.innerHTML = `
+      <div class="wday-label">${DAYS[i]}</div>
+      <div class="wday-date">${day} <span style="font-size:11px;font-weight:400;color:var(--muted)">${monthNames[d.getMonth()]}</span></div>
+      <div class="wday-acts">
+        ${allActs.length ? allActs.map(a =>
+          `<a class="act-pill ${a.cls}" href="${a.href}">${a.label}</a>`
+        ).join('') : '<span class="act-pill pill-rest">Riposo</span>'}
+      </div>
+    `;
+    grid.appendChild(card);
   }
 })();
 </script>

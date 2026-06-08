@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Corsa — Piano 15 giorni</title>
+<title>Corsa — Piano Allenamento</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,143 +23,217 @@
 
 <div class="page-hero">
   <h1 style="color:var(--red)">🏃 Corsa</h1>
-  <p>Dati di riferimento: 6,15 km @ 5:42/km FC 157 &nbsp;·&nbsp; 8 km @ 5:50/km FC 140 &nbsp;·&nbsp; FC max 173–179</p>
+  <p>Dati di riferimento: 8 km @ 6:01/km FC 137 · FC max ~175 · Roma, estate</p>
 </div>
 
+<!-- ZONE -->
 <div class="sec">Zone personalizzate</div>
 <div class="run-zone">
   <div class="zone-card z1">
     <div class="zn">Z1 — Recupero</div>
-    <div class="zp">&gt; 6:00/km</div>
+    <div class="zp">&gt; 6:10/km</div>
     <div class="zfc">FC &lt; 135</div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px">Jogging lento, defaticante</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">Jogging defaticante</div>
   </div>
   <div class="zone-card z2">
     <div class="zn">Z2 — Aerobico</div>
-    <div class="zp">5:40–6:00/km</div>
+    <div class="zp">5:40–6:10/km</div>
     <div class="zfc">FC 135–150</div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px">Ritmo conversazione — base endurance</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">Conversazione · base endurance</div>
   </div>
   <div class="zone-card z3">
     <div class="zn">Z3 — Soglia</div>
     <div class="zp">5:20–5:40/km</div>
     <div class="zfc">FC 150–163</div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px">Sforzo sostenuto — ritmo gara</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">Sforzo sostenuto</div>
   </div>
   <div class="zone-card z4">
     <div class="zn">Z4 — Veloce</div>
     <div class="zp">&lt; 5:20/km</div>
-    <div class="zfc">FC 163–173</div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px">Fartlek o ripetute brevi</div>
+    <div class="zfc">FC 163–175</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">Ripetute e sprint</div>
   </div>
 </div>
 
-<!-- USCITA 1 -->
-<div class="sec">Uscita 1 — rientro</div>
-<div id="uscita1" class="run-card">
+<div class="note-b" style="margin-bottom:24px">
+  <strong>🌡️ Caldo romano:</strong> il calore estivo spinge la FC 5–8 bpm sopra i valori di riferimento. Se in Z2 superi 150 bpm, rallenta — non è debolezza, è fisiologia. Il corpo in estate paga un prezzo metabolico extra per termoregolarsi.
+</div>
+
+<!-- SESSIONE VELOCITÀ -->
+<div class="sec">Sessione A — Velocità (martedì dispari)</div>
+<div id="velocita" class="run-card">
   <div class="run-hdr">
-    <h3>Uscita 1 &nbsp;·&nbsp; Lunedì 11 maggio (OGGI 🔴)</h3>
-    <div class="run-sub">Prima uscita rientro &nbsp;·&nbsp; 6–7 km &nbsp;·&nbsp; Zona 2 pura &nbsp;·&nbsp; ~480 kcal</div>
+    <h3>Ripetute 200m · Martedì settimane dispari</h3>
+    <div class="run-sub">Fibre veloci · 6–8 × 200m · ~6 km tot · ~40 min</div>
   </div>
   <table class="run-table">
-    <thead><tr><th>Fase</th><th>Durata</th><th>Zona</th><th>Passo</th><th>Dist. est.</th><th>Note</th></tr></thead>
+    <thead><tr><th>Fase</th><th>Durata/Vol.</th><th>Zona</th><th>Passo</th><th>Note</th></tr></thead>
     <tbody>
-      <tr><td class="fase">Riscaldamento</td><td>10 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~1,6 km</td><td>Jogging lentissimo, non spingere mai</td></tr>
-      <tr><td class="fase">Corpo centrale</td><td>25 min</td><td class="zona" style="color:var(--accent)">Z2</td><td>5:45–5:55/km</td><td>~4,0 km</td><td>Passo conversazione costante, FC &lt; 155</td></tr>
-      <tr><td class="fase">Defaticante</td><td>5 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~0,8 km</td><td>Rallenta gradualmente, poi camminata</td></tr>
+      <tr>
+        <td class="fase">Riscaldamento</td>
+        <td>10 min</td>
+        <td class="zona" style="color:var(--teal)">Z1</td>
+        <td>&gt; 6:10/km</td>
+        <td>Jogging lento · mobilità in corsa</td>
+      </tr>
+      <tr>
+        <td class="fase">Strides</td>
+        <td>4 × 80m</td>
+        <td class="zona" style="color:var(--yellow)">Z3</td>
+        <td>~5:10/km</td>
+        <td>Accelerazioni progressive · preparano il sistema neuromuscolare</td>
+      </tr>
+      <tr>
+        <td class="fase">Ripetute</td>
+        <td>6–8 × 200m</td>
+        <td class="zona" style="color:var(--red)">Z4+</td>
+        <td>&lt; 5:00/km</td>
+        <td>Quasi massimali · recupero: camminata 90" tra ogni ripetuta</td>
+      </tr>
+      <tr>
+        <td class="fase">Defaticante</td>
+        <td>10 min</td>
+        <td class="zona" style="color:var(--teal)">Z1</td>
+        <td>&gt; 6:10/km</td>
+        <td>Jogging + camminata · abbassa gradualmente la FC</td>
+      </tr>
     </tbody>
   </table>
-  <div class="pool-total"><span>Totale stimato</span><strong>~6,4 km · ~40 min</strong></div>
+  <div class="pool-total"><span>Totale stimato</span><strong>~6 km · ~40 min</strong></div>
 </div>
 
-<!-- USCITA 2 -->
-<div class="sec">Uscita 2 — primo aumento</div>
-<div id="uscita2" class="run-card">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:24px">
+  <div class="hstat">
+    <span style="font-size:11px;font-weight:600;color:var(--red);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">⚡ Perché funziona</span>
+    <span style="font-size:12px;color:var(--muted)">I 200m mantengono le fibre di tipo II senza il costo di recupero delle ripetute lunghe. Stimolo neuromuscolare puro.</span>
+  </div>
+  <div class="hstat">
+    <span style="font-size:11px;font-weight:600;color:var(--accent);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">📈 Progressione</span>
+    <span style="font-size:12px;color:var(--muted)">Inizia con 6 ripetute. Aggiungi 1 ogni 2–3 settimane fino a 10. Non ridurre il recupero — meglio più ripetute che recupero corto.</span>
+  </div>
+  <div class="hstat">
+    <span style="font-size:11px;font-weight:600;color:var(--yellow);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🎯 Segnale di qualità</span>
+    <span style="font-size:12px;color:var(--muted)">L'ultima ripetuta deve essere eseguibile alla stessa intensità della prima. Se cali, hai fatto abbastanza.</span>
+  </div>
+</div>
+
+<!-- SESSIONE SOGLIA -->
+<div class="sec">Sessione B — Soglia (martedì pari)</div>
+<div id="soglia" class="run-card">
   <div class="run-hdr">
-    <h3>Uscita 2 &nbsp;·&nbsp; Giovedì 21 maggio</h3>
-    <div class="run-sub">Primo aumento &nbsp;·&nbsp; 7–8 km &nbsp;·&nbsp; Z2 con inserti Z3 &nbsp;·&nbsp; ~530 kcal</div>
+    <h3>Corsa a soglia · Martedì settimane pari</h3>
+    <div class="run-sub">Soglia lattica · 3–4 km continui Z3 · ~7 km tot · ~45 min</div>
   </div>
   <table class="run-table">
-    <thead><tr><th>Fase</th><th>Durata</th><th>Zona</th><th>Passo</th><th>Dist. est.</th><th>Note</th></tr></thead>
+    <thead><tr><th>Fase</th><th>Durata/Vol.</th><th>Zona</th><th>Passo</th><th>Note</th></tr></thead>
     <tbody>
-      <tr><td class="fase">Riscaldamento</td><td>10 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~1,6 km</td><td></td></tr>
-      <tr><td class="fase">Corpo centrale</td><td>28 min</td><td class="zona" style="color:var(--accent)">Z2</td><td>5:42–5:50/km</td><td>~4,8 km</td><td>Ritmo stabile</td></tr>
-      <tr><td class="fase">Inserti soglia</td><td>3 × 2 min</td><td class="zona" style="color:var(--yellow)">Z3</td><td>5:20–5:35/km</td><td>~1,0 km</td><td>Alterna 2 min Z3 con 2 min Z2</td></tr>
-      <tr><td class="fase">Defaticante</td><td>5 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~0,8 km</td><td></td></tr>
+      <tr>
+        <td class="fase">Riscaldamento</td>
+        <td>15 min</td>
+        <td class="zona" style="color:var(--teal)">Z1–Z2</td>
+        <td>&gt; 6:00/km</td>
+        <td>Più lungo del solito · la soglia richiede muscles più calde</td>
+      </tr>
+      <tr>
+        <td class="fase">Blocco soglia</td>
+        <td>3–4 km</td>
+        <td class="zona" style="color:var(--yellow)">Z3</td>
+        <td>5:20–5:35/km</td>
+        <td>Sforzo "duro ma sostenibile" · puoi dire frasi brevi · FC 150–163</td>
+      </tr>
+      <tr>
+        <td class="fase">Defaticante</td>
+        <td>10 min</td>
+        <td class="zona" style="color:var(--teal)">Z1</td>
+        <td>&gt; 6:10/km</td>
+        <td>Obbligatorio dopo la soglia · non fermarti di botto</td>
+      </tr>
     </tbody>
   </table>
-  <div class="pool-total"><span>Totale stimato</span><strong>~8,2 km · ~51 min</strong></div>
+  <div class="pool-total"><span>Totale stimato</span><strong>~7 km · ~45 min</strong></div>
 </div>
 
-<!-- USCITA 3 -->
-<div class="sec">Uscita 3 — continuità</div>
-<div id="uscita3" class="run-card">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:24px">
+  <div class="hstat">
+    <span style="font-size:11px;font-weight:600;color:var(--yellow);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">📐 Cos'è la soglia</span>
+    <span style="font-size:12px;color:var(--muted)">La velocità massima sostenibile a lungo senza accumulo di lattato. Alzarla significa correre più forte alla stessa FC.</span>
+  </div>
+  <div class="hstat">
+    <span style="font-size:11px;font-weight:600;color:var(--accent);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">📈 Progressione</span>
+    <span style="font-size:12px;color:var(--muted)">Inizia con 3 km. Aggiungi 500m ogni 2 settimane fino a 5 km. Poi abbassa il passo di 5"/km.</span>
+  </div>
+  <div class="hstat">
+    <span style="font-size:11px;font-weight:600;color:var(--red);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">⚠️ Attenzione</span>
+    <span style="font-size:12px;color:var(--muted)">Non fare soglia e ripetute nella stessa settimana. L'alternanza mensile protegge dal sovrallenamento.</span>
+  </div>
+</div>
+
+<!-- SESSIONE Z2 LUNGO -->
+<div class="sec">Sessione C — Z2 Lunga (sabato)</div>
+<div id="z2lungo" class="run-card">
   <div class="run-hdr">
-    <h3>Uscita 3 &nbsp;·&nbsp; <span style="color:var(--accent)">Giovedì 4 giugno (OGGI 🔴)</span> / Ven 29 mag / Mar 2 giu / Mer 3 giu</h3>
-    <div class="run-sub">Continuità &nbsp;·&nbsp; 7–8 km &nbsp;·&nbsp; Z2 consolidamento &nbsp;·&nbsp; ~500 kcal &nbsp;·&nbsp; ⚠️ Caldo Roma: tieni FC &lt; 150, non il passo</div>
+    <h3>Corsa lunga aerobica · Sabato mattina</h3>
+    <div class="run-sub">Motore aerobico · 8–10 km · FC &lt; 150 · ~55–65 min</div>
   </div>
   <table class="run-table">
-    <thead><tr><th>Fase</th><th>Durata</th><th>Zona</th><th>Passo</th><th>Dist. est.</th><th>Note</th></tr></thead>
+    <thead><tr><th>Fase</th><th>Durata/Vol.</th><th>Zona</th><th>Passo</th><th>Note</th></tr></thead>
     <tbody>
-      <tr><td class="fase">Riscaldamento</td><td>10 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~1,6 km</td><td></td></tr>
-      <tr><td class="fase">Corpo centrale</td><td>30 min</td><td class="zona" style="color:var(--accent)">Z2</td><td>5:40–5:50/km</td><td>~5,2 km</td><td>Prova a mantenere ritmo più regolare dell'uscita 1</td></tr>
-      <tr><td class="fase">Defaticante</td><td>5 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~0,8 km</td><td></td></tr>
+      <tr>
+        <td class="fase">Riscaldamento</td>
+        <td>10 min</td>
+        <td class="zona" style="color:var(--teal)">Z1</td>
+        <td>&gt; 6:10/km</td>
+        <td>Parti lentissimo · le prime scarpe fanno sempre male</td>
+      </tr>
+      <tr>
+        <td class="fase">Corpo centrale</td>
+        <td>40–50 min</td>
+        <td class="zona" style="color:var(--accent)">Z2</td>
+        <td>5:40–6:10/km</td>
+        <td>FC sotto 150 per tutto il blocco · guida solo la FC, ignora il passo</td>
+      </tr>
+      <tr>
+        <td class="fase">Defaticante</td>
+        <td>5 min</td>
+        <td class="zona" style="color:var(--teal)">Z1</td>
+        <td>&gt; 6:10/km</td>
+        <td>Rallenta gradualmente · non fermarti di colpo</td>
+      </tr>
     </tbody>
   </table>
-  <div class="pool-total"><span>Totale stimato</span><strong>~7,6 km · ~45 min</strong></div>
+  <div class="pool-total"><span>Totale stimato</span><strong>~8–10 km · ~55–65 min</strong></div>
 </div>
 
-<!-- USCITA 4 -->
-<div class="sec">Uscita 4 — fartlek</div>
-<div id="uscita4" class="run-card">
-  <div class="run-hdr">
-    <h3>Uscita 4 &nbsp;·&nbsp; Mercoledì 10 giugno</h3>
-    <div class="run-sub">Fartlek &nbsp;·&nbsp; 7–8 km &nbsp;·&nbsp; Mix Z2/Z3/Z4 &nbsp;·&nbsp; ~570 kcal</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:24px">
+  <div class="hstat">
+    <span style="font-size:11px;font-weight:600;color:var(--accent);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🔋 Perché il Z2</span>
+    <span style="font-size:12px;color:var(--muted)">Aumenta la densità mitocondriale e il volume sistolico. È la sessione che sposta il passo Z2 naturale verso il basso nel tempo.</span>
   </div>
-  <table class="run-table">
-    <thead><tr><th>Fase</th><th>Durata</th><th>Zona</th><th>Passo</th><th>Dist. est.</th><th>Note</th></tr></thead>
-    <tbody>
-      <tr><td class="fase">Riscaldamento</td><td>10 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~1,6 km</td><td></td></tr>
-      <tr><td class="fase">Base aerobica</td><td>20 min</td><td class="zona" style="color:var(--accent)">Z2</td><td>5:42–5:50/km</td><td>~3,4 km</td><td>Fondamenta aerobiche</td></tr>
-      <tr><td class="fase">Fartlek</td><td>5 × (1+2 min)</td><td class="zona" style="color:var(--red)">Z4/Z2</td><td>&lt;5:20 / 5:50</td><td>~2,1 km</td><td>Sprint 1 min Z4, recupero 2 min Z2. Su variazione terreno o a comando</td></tr>
-      <tr><td class="fase">Defaticante</td><td>5 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~0,8 km</td><td></td></tr>
-    </tbody>
-  </table>
-  <div class="pool-total"><span>Totale stimato</span><strong>~7,9 km · ~50 min</strong></div>
-</div>
-
-<div class="sec">Uscita 5 — corsa lunga</div>
-<div id="uscita5" class="run-card">
-  <div class="run-hdr">
-    <h3>Uscita 5 &nbsp;·&nbsp; Domenica 14 giugno</h3>
-    <div class="run-sub">Prima uscita lunga &nbsp;·&nbsp; 10–11 km &nbsp;·&nbsp; Z2 puro &nbsp;·&nbsp; ~680 kcal</div>
+  <div class="hstat">
+    <span style="font-size:11px;font-weight:600;color:var(--teal);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">📏 Progressione</span>
+    <span style="font-size:12px;color:var(--muted)">Aggiungi 1 km ogni 2–3 settimane. La distanza conta più del passo: non accelerare, allunga.</span>
   </div>
-  <table class="run-table">
-    <thead><tr><th>Fase</th><th>Durata</th><th>Zona</th><th>Passo</th><th>Dist. est.</th><th>Note</th></tr></thead>
-    <tbody>
-      <tr><td class="fase">Riscaldamento</td><td>10 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~1,6 km</td><td>Parti piano — lunga sessione davanti</td></tr>
-      <tr><td class="fase">Corpo centrale</td><td>45 min</td><td class="zona" style="color:var(--accent)">Z2</td><td>5:45–5:55/km</td><td>~7,6 km</td><td>FC &lt; 150 per tutto il blocco. Se sale, rallenta.</td></tr>
-      <tr><td class="fase">Defaticante</td><td>8 min</td><td class="zona" style="color:var(--teal)">Z1</td><td>&gt; 6:00/km</td><td>~1,2 km</td><td>Camminata + jogging lento</td></tr>
-    </tbody>
-  </table>
-  <div class="pool-total"><span>Totale stimato</span><strong>~10,4 km · ~63 min</strong></div>
+  <div class="hstat">
+    <span style="font-size:11px;font-weight:600;color:var(--blue);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🌡️ Estate Roma</span>
+    <span style="font-size:12px;color:var(--muted)">In luglio–agosto corri la mattina presto (prima delle 8). Il passo sarà più lento del solito: normale, non preoccuparti.</span>
+  </div>
 </div>
 
-<div class="sec" style="margin-top:32px">Consigli pratici</div>
+<!-- CONSIGLI -->
+<div class="sec">Consigli pratici</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:16px">
-  <div class="hstat"><span style="font-size:12px;color:var(--muted)">✓ Non guardare il passo nelle prime 2 uscite — corri a sensazione di sforzo moderato</span></div>
-  <div class="hstat"><span style="font-size:12px;color:var(--muted)">✓ FC media target: 140–155 bpm per le uscite Z2</span></div>
-  <div class="hstat"><span style="font-size:12px;color:var(--muted)">✓ Dopo il fartlek (uscita 4) concediti riposo completo il giorno successivo</span></div>
-  <div class="hstat"><span style="font-size:12px;color:var(--muted)">✓ Se le gambe sono pesanti dopo palestra+nuoto, posticipa la corsa di un giorno</span></div>
+  <div class="hstat"><span style="font-size:12px;color:var(--muted)">✓ Non fare velocità corsa e velocità nuoto in giorni vicini — è il carico sistemico che conta, non muscolare</span></div>
+  <div class="hstat"><span style="font-size:12px;color:var(--muted)">✓ Dopo le ripetute 200m, il giorno dopo usa per il nuoto tecnico (giovedì) — non è un problema</span></div>
+  <div class="hstat"><span style="font-size:12px;color:var(--muted)">✓ Se le gambe sono pesanti il sabato, scala a 6 km e tieni comunque la FC sotto 150</span></div>
+  <div class="hstat"><span style="font-size:12px;color:var(--muted)">✓ Il segnale migliore di miglioramento: il passo Z2 scende senza che tu stia cercando di andare più forte</span></div>
 </div>
 
 </main>
 
 <script>
-// Scroll to anchor if present
 if(location.hash){
-  const el=document.querySelector(location.hash);
-  if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth'}),100);
+  const el = document.querySelector(location.hash);
+  if(el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
 }
 </script>
 </body>
