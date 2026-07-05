@@ -10,6 +10,7 @@
     --surface: #f6f8f3;
     --border: #dce3d3;
     --accent: #55724a;
+    --hero: #3f5636;
     --accent2: #3f72a0;
     --text: #262b22;
     --muted: #5f6a58;
@@ -27,21 +28,37 @@
 
   /* NAV */
   nav {
-    display: flex; gap: 0; border-bottom: 1px solid var(--border);
-    padding: 0 1.5rem;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 20px; position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 0; height: 52px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
-  nav a {
-    color: var(--muted); text-decoration: none;
-    padding: .75rem 1rem; font-size: .75rem; letter-spacing: .1em;
-    text-transform: uppercase; border-bottom: 2px solid transparent;
-    transition: color .2s, border-color .2s;
+  .nav-logo {
+    font-size: 18px; font-weight: 700; color: var(--accent);
+    letter-spacing: .04em; margin-right: 24px; white-space: nowrap;
   }
-  nav a:hover { color: var(--text); }
-  nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .nav-brand { color: var(--accent) !important; font-weight: 700; margin-right: auto; }
+  .nav-links { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
+  .nav-links a {
+    padding: 6px 12px; border-radius: 8px; font-size: 13px;
+    color: var(--muted); white-space: nowrap; transition: all .2s;
+    display: flex; align-items: center; gap: 6px; text-decoration: none;
+  }
+  .nav-links a:hover { background: #eef2e7; color: var(--text); }
+  .nav-links a.active { background: var(--hero); color: #fff; border-radius: 100px; }
+  .nav-links a.active .dot { background: #fff !important; }
+  .nav-links a .dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  }
 
   /* MAIN */
-  main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; font-family: 'DM Mono', 'Courier New', monospace; }
+
+  .page-hero {
+    background: var(--hero); color: #fff; border-radius: 20px;
+    padding: 22px 24px 24px; margin-bottom: 2rem;
+  }
+  .page-hero h1 { color: #fff; }
+  .page-hero .subtitle { color: rgba(255,255,255,.72); margin-bottom: 0; }
 
   h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .25rem; }
   .subtitle { color: var(--muted); font-size: .8rem; margin-bottom: 2rem; }
@@ -186,8 +203,10 @@
 </nav>
 
 <main>
-  <h1>😴 Dati Withings</h1>
-  <p class="subtitle">Sonno · Peso · FC notturna — da Withings Health Mate</p>
+  <div class="page-hero">
+    <h1>😴 Dati Withings</h1>
+    <p class="subtitle">Sonno · Peso · FC notturna — da Withings Health Mate</p>
+  </div>
 
   <!-- STATO: non connesso -->
   <div id="view-connect" class="hidden">
