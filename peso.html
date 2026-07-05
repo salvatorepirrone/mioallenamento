@@ -179,10 +179,10 @@ async function refreshToken(rt) {
   if (data.status !== 0) throw new Error('Refresh failed');
   return data.body;
 }
-async function getValidToken() {
+async function getValidToken(force) {
   let t = getToken();
   if (!t) return null;
-  if (Date.now() > t.expires_at - 60000) {
+  if (force || Date.now() > t.expires_at - 60000) {
     const fresh = await refreshToken(t.refresh_token);
     saveToken(fresh);
     t = getToken();
@@ -203,7 +203,7 @@ function fmtDateIt(ts) {
   return new Date(ts * 1000).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
 }
 
-async function loadWithings(garminLatest) {
+async function loadWithings(garminLatest, retried) {
   const token = await getValidToken();
   if (!token) {
     document.getElementById('withings-loading').classList.add('hidden');
@@ -213,9 +213,18 @@ async function loadWithings(garminLatest) {
   }
   try {
     const now = Math.floor(Date.now() / 1000);
-    const body = await apiCall('/measure', {
-      action: 'getmeas', startdate: now - 30 * 86400, enddate: now, meastypes: '1,6'
-    }, token);
+    let body;
+    try {
+      body = await apiCall('/measure', {
+        action: 'getmeas', startdate: now - 30 * 86400, enddate: now, meastypes: '1,6'
+      }, token);
+    } catch (e) {
+      if (!retried && /invalid_token/i.test(e.message)) {
+        await getValidToken(true);
+        return loadWithings(garminLatest, true);
+      }
+      throw e;
+    }
 
     const groups = (body.measuregrps || []).map(g => {
       const m = {};

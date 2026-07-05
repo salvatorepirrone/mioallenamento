@@ -425,10 +425,10 @@ async function refreshToken(rt) {
   return data.body;
 }
 
-async function getValidToken() {
+async function getValidToken(force) {
   let t = getToken();
   if (!t) return null;
-  if (Date.now() > t.expires_at - 60000) {
+  if (force || Date.now() > t.expires_at - 60000) {
     const fresh = await refreshToken(t.refresh_token);
     saveToken(fresh);
     t = getToken();
@@ -450,7 +450,7 @@ async function apiCall(endpoint, params, token) {
   return data.body;
 }
 
-async function loadData() {
+async function loadData(retried) {
   show('view-loading');
   try {
     const token = await getValidToken();
@@ -460,12 +460,21 @@ async function loadData() {
     const days14 = now - 14 * 86400;
 
     // Peso ultimi 30 giorni (sempre disponibile)
-    const weightData = await apiCall('/measure', {
-      action: 'getmeas',
-      startdate: now - 30*86400,
-      enddate: now,
-      meastypes: '1,6,8'
-    }, token);
+    let weightData;
+    try {
+      weightData = await apiCall('/measure', {
+        action: 'getmeas',
+        startdate: now - 30*86400,
+        enddate: now,
+        meastypes: '1,6,8'
+      }, token);
+    } catch (e) {
+      if (!retried && /invalid_token/i.test(e.message)) {
+        await getValidToken(true); // forza il refresh e riprova una volta
+        return loadData(true);
+      }
+      throw e;
+    }
 
     // Sonno ultimi 14 giorni (opzionale — richiede scope aggiuntivo)
     let sleepData = { series: [] };
