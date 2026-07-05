@@ -26,6 +26,9 @@
     cursor:pointer; border:none; text-decoration:none;
   }
   .muted-note { font-size:11px; color:var(--muted); margin-top:6px; }
+  .leg-dot-inline { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; vertical-align:middle; }
+  .chart-legend { display:flex; gap:16px; font-size:12px; color:var(--muted); margin-bottom:8px; }
+  .chart-wrap { background:var(--s1); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; margin-bottom:24px; }
   .hidden { display:none !important; }
 </style>
 </head>
@@ -96,6 +99,25 @@
 
 <div class="tip"><strong>Perché i numeri non coincidono:</strong> il peso delle due bilance è quasi sempre allineato (differenza tipica &lt;0,5 kg), ma la % di grasso corporeo viene stimata con bioimpedenza (BIA) — una corrente impercettibile che misura la resistenza dei tessuti. Ogni marca usa un percorso di misurazione e un algoritmo di conversione diversi, quindi i valori assoluti tra Garmin e Withings non sono direttamente confrontabili. Idratazione, orario della misurazione e attività recente influenzano ulteriormente il risultato.</div>
 <div class="wbox"><strong>Come usarli:</strong> scegli una sola fonte come riferimento per il trend (es. sempre Withings o sempre Garmin) e guarda la variazione nel tempo, non il valore assoluto. Confrontare le due fonti punto a punto serve solo a capire quanto siano "distanti" tra loro, non a stabilire quale sia quella "giusta".</div>
+
+<!-- GRAFICI ANDAMENTO -->
+<div class="sec">Andamento nel tempo — Peso</div>
+<div class="chart-wrap">
+  <div class="chart-legend">
+    <span><span class="leg-dot-inline" style="background:#3f72a0"></span>Garmin</span>
+    <span><span class="leg-dot-inline" style="background:#2f8f66"></span>Withings</span>
+  </div>
+  <div id="chart-weight"></div>
+</div>
+
+<div class="sec">Andamento nel tempo — % Grasso corporeo</div>
+<div class="chart-wrap">
+  <div class="chart-legend">
+    <span><span class="leg-dot-inline" style="background:#3f72a0"></span>Garmin</span>
+    <span><span class="leg-dot-inline" style="background:#2f8f66"></span>Withings</span>
+  </div>
+  <div id="chart-fat"></div>
+</div>
 
 <!-- STORICO GARMIN -->
 <div class="sec">Storico Garmin (ultime pesate)</div>
@@ -232,6 +254,8 @@ async function loadWithings(garminLatest, retried) {
       return { ts: g.date, weight: m[1], fat: m[6] };
     }).filter(g => g.weight != null).sort((a, b) => b.ts - a.ts);
 
+    renderCharts(GARMIN_DATA, groups);
+
     document.getElementById('withings-loading').classList.add('hidden');
     document.getElementById('withings-data').classList.remove('hidden');
 
@@ -268,7 +292,89 @@ async function loadWithings(garminLatest, retried) {
   }
 }
 
+// ── GRAFICI SVG (peso e % grasso nel tempo) ──────────────────────────────────
+function buildLineChartSVG(seriesList) {
+  const width = 680, height = 240;
+  const marginLeft = 46, marginRight = 16, marginTop = 16, marginBottom = 30;
+  const plotW = width - marginLeft - marginRight;
+  const plotH = height - marginTop - marginBottom;
+
+  const allPoints = seriesList.flatMap(s => s.points);
+  if (allPoints.length < 2) {
+    return '<p class="muted-note">Dati insufficienti per il grafico.</p>';
+  }
+
+  const times = allPoints.map(p => new Date(p.date).getTime());
+  const values = allPoints.map(p => p.value);
+  const minT = Math.min(...times), maxT = Math.max(...times);
+  const minV0 = Math.min(...values), maxV0 = Math.max(...values);
+  const pad = (maxV0 - minV0) * 0.15 || 1;
+  const minV = minV0 - pad, maxV = maxV0 + pad;
+
+  function xPos(date) {
+    const t = new Date(date).getTime();
+    return maxT === minT ? marginLeft + plotW / 2 : marginLeft + (t - minT) / (maxT - minT) * plotW;
+  }
+  function yPos(v) {
+    return marginTop + plotH - (v - minV) / (maxV - minV) * plotH;
+  }
+
+  let gridSvg = '';
+  const steps = 4;
+  for (let i = 0; i <= steps; i++) {
+    const v = minV + (maxV - minV) * i / steps;
+    const y = yPos(v);
+    gridSvg += `<line x1="${marginLeft}" y1="${y.toFixed(1)}" x2="${width - marginRight}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
+    gridSvg += `<text x="${marginLeft - 8}" y="${(y + 3.5).toFixed(1)}" font-size="10" text-anchor="end" fill="var(--muted)">${v.toFixed(1)}</text>`;
+  }
+
+  const uniqueDates = [...new Set(allPoints.map(p => p.date))].sort();
+  const tickCount = Math.min(6, uniqueDates.length);
+  let xLabelsSvg = '';
+  for (let i = 0; i < tickCount; i++) {
+    const idx = Math.round(i * (uniqueDates.length - 1) / (tickCount - 1 || 1));
+    const d = uniqueDates[idx];
+    const x = xPos(d);
+    const label = new Date(d).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+    xLabelsSvg += `<text x="${x.toFixed(1)}" y="${height - marginBottom + 16}" font-size="10" text-anchor="middle" fill="var(--muted)">${label}</text>`;
+  }
+
+  let seriesSvg = '';
+  seriesList.forEach(s => {
+    const pts = [...s.points].sort((a, b) => a.date < b.date ? -1 : 1);
+    if (pts.length === 0) return;
+    const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xPos(p.date).toFixed(1)},${yPos(p.value).toFixed(1)}`).join(' ');
+    seriesSvg += `<path d="${pathD}" fill="none" stroke="${s.color}" stroke-width="2"/>`;
+    pts.forEach(p => {
+      seriesSvg += `<circle cx="${xPos(p.date).toFixed(1)}" cy="${yPos(p.value).toFixed(1)}" r="3" fill="${s.color}"></circle>`;
+    });
+  });
+
+  return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;font-family:'DM Mono','Courier New',monospace">
+    ${gridSvg}
+    ${xLabelsSvg}
+    ${seriesSvg}
+  </svg>`;
+}
+
+function renderCharts(garminData, withingsGroups) {
+  const garminWeightPts = garminData.map(d => ({ date: d.date, value: d.weight }));
+  const garminFatPts = garminData.filter(d => d.fat != null).map(d => ({ date: d.date, value: d.fat }));
+  const withingsWeightPts = (withingsGroups || []).map(g => ({ date: new Date(g.ts * 1000).toISOString().slice(0, 10), value: g.weight }));
+  const withingsFatPts = (withingsGroups || []).filter(g => g.fat != null).map(g => ({ date: new Date(g.ts * 1000).toISOString().slice(0, 10), value: g.fat }));
+
+  document.getElementById('chart-weight').innerHTML = buildLineChartSVG([
+    { name: 'Garmin', color: '#3f72a0', points: garminWeightPts },
+    { name: 'Withings', color: '#2f8f66', points: withingsWeightPts }
+  ]);
+  document.getElementById('chart-fat').innerHTML = buildLineChartSVG([
+    { name: 'Garmin', color: '#3f72a0', points: garminFatPts },
+    { name: 'Withings', color: '#2f8f66', points: withingsFatPts }
+  ]);
+}
+
 const garminLatest = renderGarmin();
+renderCharts(GARMIN_DATA, []);
 loadWithings(garminLatest);
 </script>
 </body>
