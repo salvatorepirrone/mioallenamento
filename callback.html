@@ -429,9 +429,20 @@ async function getValidToken(force) {
   let t = getToken();
   if (!t) return null;
   if (force || Date.now() > t.expires_at - 60000) {
-    const fresh = await refreshToken(t.refresh_token);
-    saveToken(fresh);
-    t = getToken();
+    try {
+      const fresh = await refreshToken(t.refresh_token);
+      saveToken(fresh);
+      t = getToken();
+    } catch (e) {
+      // Un'altra pagina/tab potrebbe aver gia' rinfrescato lo stesso refresh_token
+      // (Withings lo invalida dopo un solo uso): ricontrolla lo storage prima di arrenderti.
+      const t2 = getToken();
+      if (t2 && t2.refresh_token !== t.refresh_token && Date.now() < t2.expires_at - 60000) {
+        t = t2;
+      } else {
+        throw e;
+      }
+    }
   }
   return t.access_token;
 }
