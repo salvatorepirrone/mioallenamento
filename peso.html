@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peso — Confronto fonti</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .src-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin-bottom:24px; }
+  .src-card { background:var(--s1); border:1px solid var(--border); border-radius:var(--r); padding:16px 18px; }
+  .src-card .src-hdr { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .src-card .src-dot { width:10px; height:10px; border-radius:50%; }
+  .src-card .src-name { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+  .src-card .src-date { font-size:11px; color:var(--muted); margin-left:auto; font-family:monospace; }
+  .src-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .src-row:last-child { border-bottom:none; }
+  .src-row .l { color:var(--muted); }
+  .src-row .v { font-family:monospace; font-weight:600; }
+  .diff-box { background:var(--s2); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; margin-bottom:24px; display:flex; gap:24px; flex-wrap:wrap; }
+  .diff-item { text-align:center; }
+  .diff-item .dv { font-size:20px; font-weight:700; font-family:monospace; display:block; }
+  .diff-item .dl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  .btn-connect {
+    display:inline-block; background:var(--accent); color:#fff; padding:.55rem 1.2rem;
+    border-radius:6px; font-size:.78rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    cursor:pointer; border:none; text-decoration:none;
+  }
+  .muted-note { font-size:11px; color:var(--muted); margin-top:6px; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">⚡ Piano</span>
+  <div class="nav-links">
+    <a href="index.html"><span class="dot" style="background:#55724a"></span>Programma</a>
+    <a href="nuoto.html"><span class="dot" style="background:#3f72a0"></span>Nuoto</a>
+    <a href="palestra.html"><span class="dot" style="background:#7a5a96"></span>Palestra</a>
+    <a href="corsa.html"><span class="dot" style="background:#b94a3a"></span>Corsa</a><a href="nutrizione.html"><span class="dot" style="background:#a15a29"></span>Nutrizione 🥗</a>
+    <a href="peso.html" class="active"><span class="dot" style="background:#8f6a1f"></span>Peso ⚖️</a>
+    <a href="callback.html"><span class="dot" style="background:#257566"></span>Sonno 😴</a>
+  </div>
+</nav>
+
+<main>
+
+<div class="page-hero">
+  <h1>⚖️ Peso — Confronto fonti</h1>
+  <p>Withings vs Garmin &nbsp;·&nbsp; stessa persona, stesso giorno, numeri diversi — ecco perché</p>
+</div>
+
+<!-- ULTIMA MISURAZIONE -->
+<div class="sec">Ultima misurazione a confronto</div>
+<div class="src-grid">
+
+  <div class="src-card" style="border-left:3px solid var(--blue)">
+    <div class="src-hdr">
+      <span class="src-dot" style="background:var(--blue)"></span>
+      <span class="src-name" style="color:var(--blue)">Garmin</span>
+      <span class="src-date" id="garmin-date">—</span>
+    </div>
+    <div class="src-row"><span class="l">Peso</span><span class="v" id="garmin-weight">—</span></div>
+    <div class="src-row"><span class="l">Grasso corporeo</span><span class="v" id="garmin-fat">—</span></div>
+    <div class="src-row"><span class="l">Massa muscolare schel.</span><span class="v" id="garmin-muscle">—</span></div>
+    <div class="src-row"><span class="l">Massa ossea</span><span class="v" id="garmin-bone">—</span></div>
+    <div class="src-row"><span class="l">Acqua corporea</span><span class="v" id="garmin-water">—</span></div>
+    <div class="muted-note">Dati aggiornati manualmente da Garmin Connect (nessuna API live collegata)</div>
+  </div>
+
+  <div class="src-card" style="border-left:3px solid var(--good,#2f8f66)">
+    <div class="src-hdr">
+      <span class="src-dot" style="background:#2f8f66"></span>
+      <span class="src-name" style="color:#2f8f66">Withings</span>
+      <span class="src-date" id="withings-date">—</span>
+    </div>
+    <div id="withings-connect" class="hidden">
+      <p class="muted-note" style="margin-bottom:8px">Non connesso.</p>
+      <a href="callback.html" class="btn-connect">Connetti su pagina Sonno</a>
+    </div>
+    <div id="withings-loading" class="muted-note">Caricamento dati Withings...</div>
+    <div id="withings-data" class="hidden">
+      <div class="src-row"><span class="l">Peso</span><span class="v" id="withings-weight">—</span></div>
+      <div class="src-row"><span class="l">Grasso corporeo</span><span class="v" id="withings-fat">—</span></div>
+    </div>
+    <div class="muted-note">Live da Withings Health Mate (stesso account collegato alla pagina Sonno)</div>
+  </div>
+
+</div>
+
+<!-- DIFFERENZA -->
+<div class="diff-box" id="diff-box">
+  <div class="diff-item"><span class="dv" id="diff-weight">—</span><span class="dl">Δ Peso</span></div>
+  <div class="diff-item"><span class="dv" id="diff-fat">—</span><span class="dl">Δ Grasso corporeo</span></div>
+</div>
+
+<div class="tip"><strong>Perché i numeri non coincidono:</strong> il peso delle due bilance è quasi sempre allineato (differenza tipica &lt;0,5 kg), ma la % di grasso corporeo viene stimata con bioimpedenza (BIA) — una corrente impercettibile che misura la resistenza dei tessuti. Ogni marca usa un percorso di misurazione e un algoritmo di conversione diversi, quindi i valori assoluti tra Garmin e Withings non sono direttamente confrontabili. Idratazione, orario della misurazione e attività recente influenzano ulteriormente il risultato.</div>
+<div class="wbox"><strong>Come usarli:</strong> scegli una sola fonte come riferimento per il trend (es. sempre Withings o sempre Garmin) e guarda la variazione nel tempo, non il valore assoluto. Confrontare le due fonti punto a punto serve solo a capire quanto siano "distanti" tra loro, non a stabilire quale sia quella "giusta".</div>
+
+<!-- STORICO GARMIN -->
+<div class="sec">Storico Garmin (ultime pesate)</div>
+<table class="log-table" style="margin-bottom:24px">
+  <thead><tr><th>Data</th><th>Peso</th><th>Grasso</th><th>Massa musc.</th><th>Massa ossea</th><th>Acqua</th></tr></thead>
+  <tbody id="garmin-history-body"></tbody>
+</table>
+
+<!-- STORICO WITHINGS -->
+<div class="sec">Storico Withings (ultimi 30 giorni)</div>
+<table class="log-table" style="margin-bottom:16px">
+  <thead><tr><th>Data</th><th>Peso</th><th>Grasso</th></tr></thead>
+  <tbody id="withings-history-body"><tr><td colspan="3" style="color:var(--muted);text-align:center">Caricamento...</td></tr></tbody>
+</table>
+
+<div class="hidden">
+  <span class="hidden"></span>
+</div>
+
+</main>
+
+<script>
+// ── DATI GARMIN (statici, aggiornati manualmente da Garmin Connect) ──────────
+const GARMIN_DATA = [
+  { date: '2026-07-05', label: '5 lug', weight: 76.1, fat: 24.5, muscle: 29.9, bone: 3.8, water: 55.1 },
+  { date: '2026-07-04', label: '4 lug', weight: 76.8, fat: 24.4, muscle: 30.0, bone: 3.8, water: 55.2 },
+  { date: '2026-07-03', label: '3 lug', weight: 76.1, fat: 24.9, muscle: 29.8, bone: 3.8, water: 54.8 },
+  { date: '2026-07-02', label: '2 lug', weight: 76.1, fat: 24.5, muscle: 29.9, bone: 3.8, water: 55.2 },
+  { date: '2026-07-01', label: '1 lug', weight: 76.4, fat: 23.8, muscle: 29.9, bone: 3.9, water: 55.6 },
+  { date: '2026-06-29', label: '29 giu', weight: 77.6, fat: 24.3, muscle: 30.2, bone: 3.9, water: 55.2 },
+  { date: '2026-06-24', label: '24 giu', weight: 76.1, fat: 24.1, muscle: 29.9, bone: 3.8, water: 55.4 },
+  { date: '2026-06-21', label: '21 giu', weight: 77.5, fat: null, muscle: null, bone: null, water: null },
+  { date: '2026-06-11', label: '11 giu', weight: 75.1, fat: 24.4, muscle: 29.6, bone: 3.7, water: 55.2 },
+  { date: '2026-06-10', label: '10 giu', weight: 76.4, fat: 24.6, muscle: 29.9, bone: 3.8, water: 55.0 },
+  { date: '2026-06-09', label: '9 giu',  weight: 76.1, fat: 24.9, muscle: 29.8, bone: 3.8, water: 54.8 },
+];
+
+function fmt1(n) { return (n === null || n === undefined) ? '—' : n.toFixed(1); }
+
+function renderGarmin() {
+  const latest = GARMIN_DATA[0];
+  document.getElementById('garmin-date').textContent = latest.label;
+  document.getElementById('garmin-weight').textContent = `${fmt1(latest.weight)} kg`;
+  document.getElementById('garmin-fat').textContent = `${fmt1(latest.fat)} %`;
+  document.getElementById('garmin-muscle').textContent = `${fmt1(latest.muscle)} kg`;
+  document.getElementById('garmin-bone').textContent = `${fmt1(latest.bone)} kg`;
+  document.getElementById('garmin-water').textContent = `${fmt1(latest.water)} %`;
+
+  const tbody = document.getElementById('garmin-history-body');
+  tbody.innerHTML = GARMIN_DATA.map(d => `
+    <tr>
+      <td class="lt-num">${d.label}</td>
+      <td class="lt-num">${fmt1(d.weight)} kg</td>
+      <td class="lt-num">${fmt1(d.fat)} %</td>
+      <td class="lt-num">${fmt1(d.muscle)} kg</td>
+      <td class="lt-num">${fmt1(d.bone)} kg</td>
+      <td class="lt-num">${fmt1(d.water)} %</td>
+    </tr>`).join('');
+
+  return latest;
+}
+
+// ── WITHINGS (live, riusa lo stesso token salvato dalla pagina Sonno) ────────
+const CLIENT_ID = '3fbf541859fb9995d2e1ea7e89754aafc8375d2e6af6cc20846de2db87a91445';
+const REDIRECT_URI = 'https://miopianoallenamento.netlify.app/callback';
+const TOKEN_KEY = 'withings_token';
+
+function getToken() { try { return JSON.parse(localStorage.getItem(TOKEN_KEY)); } catch { return null; } }
+function saveToken(data) {
+  localStorage.setItem(TOKEN_KEY, JSON.stringify({
+    access_token: data.access_token, refresh_token: data.refresh_token,
+    expires_at: Date.now() + data.expires_in * 1000
+  }));
+}
+async function refreshToken(rt) {
+  const res = await fetch('/.netlify/functions/withings-token', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: rt })
+  });
+  const data = await res.json();
+  if (data.status !== 0) throw new Error('Refresh failed');
+  return data.body;
+}
+async function getValidToken() {
+  let t = getToken();
+  if (!t) return null;
+  if (Date.now() > t.expires_at - 60000) {
+    const fresh = await refreshToken(t.refresh_token);
+    saveToken(fresh);
+    t = getToken();
+  }
+  return t.access_token;
+}
+async function apiCall(endpoint, params, token) {
+  const body = new URLSearchParams({ ...params, access_token: token });
+  const res = await fetch(`https://wbsapi.withings.net${endpoint}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body
+  });
+  const data = await res.json();
+  if (data.status !== 0) throw new Error(`API ${endpoint}: ${data.error || data.status}`);
+  return data.body;
+}
+
+function fmtDateIt(ts) {
+  return new Date(ts * 1000).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+}
+
+async function loadWithings(garminLatest) {
+  const token = await getValidToken();
+  if (!token) {
+    document.getElementById('withings-loading').classList.add('hidden');
+    document.getElementById('withings-connect').classList.remove('hidden');
+    document.getElementById('withings-history-body').innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center">Non connesso — vai su Sonno per collegare Withings</td></tr>';
+    return;
+  }
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const body = await apiCall('/measure', {
+      action: 'getmeas', startdate: now - 30 * 86400, enddate: now, meastypes: '1,6'
+    }, token);
+
+    const groups = (body.measuregrps || []).map(g => {
+      const m = {};
+      (g.measures || []).forEach(x => m[x.type] = x.value * Math.pow(10, x.unit));
+      return { ts: g.date, weight: m[1], fat: m[6] };
+    }).filter(g => g.weight != null).sort((a, b) => b.ts - a.ts);
+
+    document.getElementById('withings-loading').classList.add('hidden');
+    document.getElementById('withings-data').classList.remove('hidden');
+
+    if (groups.length > 0) {
+      const latest = groups[0];
+      document.getElementById('withings-date').textContent = fmtDateIt(latest.ts);
+      document.getElementById('withings-weight').textContent = `${latest.weight.toFixed(1)} kg`;
+      document.getElementById('withings-fat').textContent = latest.fat != null ? `${latest.fat.toFixed(1)} %` : '—';
+
+      // Differenza vs Garmin più recente
+      if (garminLatest) {
+        const dw = latest.weight - garminLatest.weight;
+        const df = (latest.fat != null && garminLatest.fat != null) ? latest.fat - garminLatest.fat : null;
+        document.getElementById('diff-weight').textContent = `${dw > 0 ? '+' : ''}${dw.toFixed(1)} kg`;
+        document.getElementById('diff-fat').textContent = df != null ? `${df > 0 ? '+' : ''}${df.toFixed(1)} pt` : '—';
+      }
+    }
+
+    const tbody = document.getElementById('withings-history-body');
+    if (groups.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center">Nessun dato disponibile</td></tr>';
+    } else {
+      tbody.innerHTML = groups.slice(0, 15).map(g => `
+        <tr>
+          <td class="lt-num">${fmtDateIt(g.ts)}</td>
+          <td class="lt-num">${g.weight.toFixed(1)} kg</td>
+          <td class="lt-num">${g.fat != null ? g.fat.toFixed(1) + ' %' : '—'}</td>
+        </tr>`).join('');
+    }
+  } catch (e) {
+    console.error(e);
+    document.getElementById('withings-loading').classList.add('hidden');
+    document.getElementById('withings-history-body').innerHTML = `<tr><td colspan="3" style="color:var(--muted);text-align:center">Errore: ${e.message}</td></tr>`;
+  }
+}
+
+const garminLatest = renderGarmin();
+loadWithings(garminLatest);
+</script>
+</body>
+</html>
