@@ -6,16 +6,16 @@
 <title>Withings — Piano Allenamento</title>
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --border: #2a2a2a;
-    --accent: #e8ff47;
-    --accent2: #47b4ff;
-    --text: #f0f0f0;
-    --muted: #888;
-    --good: #4ade80;
-    --warn: #facc15;
-    --bad: #f87171;
+    --bg: #ffffff;
+    --surface: #f6f8f3;
+    --border: #dce3d3;
+    --accent: #55724a;
+    --accent2: #3f72a0;
+    --text: #262b22;
+    --muted: #5f6a58;
+    --good: #2f8f66;
+    --warn: #8f6a1f;
+    --bad: #b94a3a;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -58,7 +58,7 @@
 
   /* CONNECT BUTTON */
   .btn-connect {
-    display: inline-block; background: var(--accent); color: #000;
+    display: inline-block; background: var(--accent); color: #ffffff;
     padding: .65rem 1.5rem; border-radius: 6px; font-family: inherit;
     font-size: .8rem; font-weight: 700; letter-spacing: .05em;
     text-transform: uppercase; cursor: pointer; border: none;
@@ -98,8 +98,8 @@
     height: 8px; border-radius: 4px; background: var(--border);
     display: flex; overflow: hidden; margin: .5rem 0;
   }
-  .seg-deep { background: #6366f1; }
-  .seg-light { background: #818cf8; }
+  .seg-deep { background: #6b7fa0; }
+  .seg-light { background: #9aa8cc; }
   .seg-rem { background: var(--accent2); }
   .seg-awake { background: var(--border); }
   .sleep-legend {
@@ -149,9 +149,9 @@
     display: inline-block; padding: .15rem .5rem; border-radius: 3px;
     font-size: .65rem; font-weight: 600; letter-spacing: .05em;
   }
-  .badge-good { background: rgba(74,222,128,.15); color: var(--good); }
-  .badge-ok { background: rgba(250,204,21,.15); color: var(--warn); }
-  .badge-bad { background: rgba(248,113,113,.15); color: var(--bad); }
+  .badge-good { background: rgba(47,143,102,.15); color: var(--good); }
+  .badge-ok { background: rgba(166,124,36,.15); color: var(--warn); }
+  .badge-bad { background: rgba(185,74,58,.15); color: var(--bad); }
 
   /* SPINNER */
   .spinner {
@@ -163,7 +163,7 @@
 
   /* APNEA ALERT */
   .alert {
-    border: 1px solid var(--warn); background: rgba(250,204,21,.05);
+    border: 1px solid var(--warn); background: rgba(166,124,36,.05);
     border-radius: 6px; padding: .75rem 1rem; font-size: .8rem;
     color: var(--warn); margin-top: 1rem;
   }
@@ -177,11 +177,11 @@
 <nav>
   <span class="nav-logo">⚡ Piano</span>
   <div class="nav-links">
-    <a href="index.html"><span class="dot" style="background:#c8f55a"></span>Programma</a>
-    <a href="nuoto.html"><span class="dot" style="background:#7ab8f5"></span>Nuoto</a>
-    <a href="palestra.html"><span class="dot" style="background:#c85af5"></span>Palestra</a>
-    <a href="corsa.html"><span class="dot" style="background:#f55a5a"></span>Corsa</a>
-    <a href="callback.html" class="active"><span class="dot" style="background:#5af5c8"></span>Sonno 😴</a>
+    <a href="index.html"><span class="dot" style="background:#55724a"></span>Programma</a>
+    <a href="nuoto.html"><span class="dot" style="background:#3f72a0"></span>Nuoto</a>
+    <a href="palestra.html"><span class="dot" style="background:#7a5a96"></span>Palestra</a>
+    <a href="corsa.html"><span class="dot" style="background:#b94a3a"></span>Corsa</a>
+    <a href="callback.html" class="active"><span class="dot" style="background:#257566"></span>Sonno 😴</a>
   </div>
 </nav>
 
@@ -232,9 +232,9 @@
         <div class="score-wrap">
           <div class="score-ring">
             <svg width="80" height="80" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" stroke="#2a2a2a" stroke-width="8"/>
+              <circle cx="40" cy="40" r="34" fill="none" stroke="#dce3d3" stroke-width="8"/>
               <circle id="score-arc" cx="40" cy="40" r="34" fill="none"
-                stroke="#e8ff47" stroke-width="8" stroke-linecap="round"
+                stroke="#55724a" stroke-width="8" stroke-linecap="round"
                 stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
             </svg>
             <div class="score-num" id="score-num">—</div>
@@ -250,10 +250,10 @@
         <div class="sleep-bar">
           <div class="sleep-bar-track" id="stage-bar"></div>
           <div class="sleep-legend">
-            <span><span class="leg-dot" style="background:#6366f1"></span>Profondo</span>
-            <span><span class="leg-dot" style="background:#818cf8"></span>Leggero</span>
-            <span><span class="leg-dot" style="background:#47b4ff"></span>REM</span>
-            <span><span class="leg-dot" style="background:#2a2a2a"></span>Sveglio</span>
+            <span><span class="leg-dot" style="background:#6b7fa0"></span>Profondo</span>
+            <span><span class="leg-dot" style="background:#9aa8cc"></span>Leggero</span>
+            <span><span class="leg-dot" style="background:#3f72a0"></span>REM</span>
+            <span><span class="leg-dot" style="background:#dce3d3"></span>Sveglio</span>
           </div>
         </div>
         <div id="apnea-alert" class="alert hidden">⚠️ Rilevate possibili apnee — valuta consulto medico.</div>
