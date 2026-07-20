@@ -21,8 +21,7 @@
 }
 .ph-vel   { background: rgba(200,245,90,.12); color: var(--accent); }
 .ph-sog   { background: rgba(90,245,200,.12); color: var(--teal); }
-.ph-cons  { background: rgba(122,184,245,.12); color: var(--blue); }
-.ph-chiu  { background: rgba(200,90,245,.12); color: var(--purple); }
+.ph-barca { background: rgba(122,184,245,.12); color: var(--blue); }
 
 .trend-line { color: var(--muted); font-size: 13px; margin: 10px 0 20px; line-height: 1.6; }
 .trend-line b { color: var(--text); }
@@ -37,6 +36,13 @@
 .act-table tr:last-child td { border-bottom: none; }
 .act-table .fase { font-weight: 600; }
 .act-note { font-size: 12px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+
+.boat-box {
+  background: rgba(122,184,245,.06); border-left: 2px solid var(--blue);
+  padding: 14px 16px; border-radius: 0 var(--r) var(--r) 0; margin-bottom: 28px;
+  font-size: 13px; color: var(--muted); line-height: 1.6;
+}
+.boat-box strong { color: var(--blue); }
 </style>
 </head>
 <body>
@@ -58,8 +64,7 @@
 
 <div class="hero">
   <h1>Piano allenamento</h1>
-  <p>Blocco 15 Giu – 19 Lug 2026 · Focus: velocità, benessere &amp; riduzione massa grassa</p>
-  <p style="margin-top:6px;color:var(--yellow)">⏳ Blocco concluso il 19 lug — in attesa di definizione del prossimo ciclo.</p>
+  <p>Blocco 21 Lug – 7 Ago 2026 · Focus: velocità/soglia invariate, nessuno scarico pre-partenza</p>
 
   <div class="hero-stats">
     <div class="hstat"><span class="v">73,9 kg</span><span class="l">Peso attuale (Withings)</span></div>
@@ -69,11 +74,14 @@
   </div>
 
   <p class="trend-line">
-    <b>75,8 kg</b> 5 lug &nbsp;→&nbsp; <b>74,8 kg</b> 14 lug &nbsp;→&nbsp; <b>73,9 kg</b> 20 lug (oggi).
-    Discesa netta nelle ultime due settimane. La % di grasso Withings oscilla molto tra le pesate (11–19%) —
-    rumore tipico della bioimpedenza da polso/bilancia: il peso resta l'indicatore di trend più affidabile,
-    non il singolo valore di grasso corporeo.
+    <b>75,8 kg</b> 5 lug &nbsp;→&nbsp; <b>74,8 kg</b> 14 lug &nbsp;→&nbsp; <b>73,9 kg</b> 20 lug.
   </p>
+</div>
+
+<div class="boat-box">
+  <strong>⛵ Dall'8 agosto:</strong> settimana in barca, nessuno schema fisso. Solo nuotate in acque libere
+  quando possibile, focus tecnica/Z2 — senza muro e cronometro non ha senso inseguire intervalli strutturati.
+  Da rivedere insieme più avanti in base alla logistica.
 </div>
 
 <!-- ULTIMI ALLENAMENTI -->
@@ -92,175 +100,96 @@
   <tr><td>5 lug</td><td class="fase">Piscina</td><td>1.800 m</td><td>55:00</td><td>123/165</td><td>505</td></tr>
 </table>
 <p class="act-note">
-  Le sedute in piscina del 13 e 18 lug erano sessioni di <b>velocità</b> — l'orologio classifica talvolta
-  come "farfalla" alcune vasche a stile libero veloce (rilevamento stile impreciso ad alta cadenza), ma
-  passo e tempo restano corretti. La corsa del 19 lug ha sostituito la sessione di Palestra + Nuoto velocità
-  prevista per domenica.
+  13 e 18 lug: sedute di velocità in vasca (sprint 50 m con recupero pieno) — l'orologio classifica talvolta
+  come "farfalla" alcune vasche a stile libero veloce, ma passo e tempo restano corretti. Il 18 lug includeva
+  anche un blocco finale a soglia (6×100 m @15″ rec).
 </p>
 
 <!-- SETTIMANA 1 -->
 <div class="week-block">
-  <div class="week-title"><span class="phase-tag ph-vel">Velocità</span> Settimana 1 &nbsp;<span>15–21 giu</span></div>
+  <div class="week-title"><span class="phase-tag ph-vel">Velocità</span> Settimana 1 &nbsp;<span>21–26 lug</span></div>
   <div class="day-grid">
-    <div class="day-row rest"><div><div class="day-date">Lun 15 Giu</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo</div></div></div>
-      <span class="act-kcal">—</span></div>
-    <div class="day-row"><div><div class="day-date">Mar 16 Giu</div></div>
+    <div class="day-row rest"><div><div class="day-date">Lun 20 Lug</div></div>
+      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div><div><div class="act-name">Camminata veloce</div></div></div>
+      <span class="act-kcal">~150 kcal</span></div>
+    <div class="day-row"><div><div class="day-date">Mar 21 Lug</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
         <div><div class="act-name">Corsa — Velocità</div><div class="act-detail">Allunghi 4×80 m + ripetute 8×200 m · presto mattina (caldo)</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~520 kcal</span><a class="act-link" href="corsa.html#velocita">→</a></div></div>
-    <div class="day-row rest"><div><div class="day-date">Mer 17 Giu</div></div>
+    <div class="day-row rest"><div><div class="day-date">Mer 22 Lug</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo</div></div></div>
       <span class="act-kcal">—</span></div>
-    <div class="day-row"><div><div class="day-date">Gio 18 Giu</div></div>
+    <div class="day-row"><div><div class="day-date">Gio 23 Lug</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
         <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza A → tecnica + soglia ~2.000 m</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~640 kcal</span><a class="act-link" href="palestra.html#sessA-block">P</a><a class="act-link" href="nuoto.html#sessA">N</a></div></div>
-    <div class="day-row rest"><div><div class="day-date">Ven 19 Giu</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo</div></div></div>
-      <span class="act-kcal">—</span></div>
-    <div class="day-row"><div><div class="day-date">Sab 20 Giu</div></div>
+    <div class="day-row rest"><div><div class="day-date">Ven 24 Lug</div></div>
+      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div><div><div class="act-name">Camminata veloce</div></div></div>
+      <span class="act-kcal">~150 kcal</span></div>
+    <div class="day-row"><div><div class="day-date">Sab 25 Lug</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
         <div><div class="act-name">Corsa lunga</div><div class="act-detail">8–10 km, Z2 puro — FC &lt; 150 · presto mattina (caldo)</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~650 kcal</span><a class="act-link" href="corsa.html#lungo">→</a></div></div>
-    <div class="day-row"><div><div class="day-date">Dom 21 Giu</div></div>
+    <div class="day-row"><div><div class="day-date">Dom 26 Lug</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto velocità</div><div class="act-detail">Forza B → sprint 8–10×50 ~2.500 m</div></div></div>
+        <div><div class="act-name">Palestra + Nuoto velocità</div><div class="act-detail">Forza B → sprint 8–12×50 ~2.500 m, recupero pieno</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~720 kcal</span><a class="act-link" href="palestra.html#sessB-block">P</a><a class="act-link" href="nuoto.html#sessBdom">N</a></div></div>
   </div>
 </div>
 
 <!-- SETTIMANA 2 -->
 <div class="week-block">
-  <div class="week-title"><span class="phase-tag ph-sog">Soglia</span> Settimana 2 &nbsp;<span>22–28 giu</span></div>
+  <div class="week-title"><span class="phase-tag ph-sog">Soglia</span> Settimana 2 &nbsp;<span>27 lug – 2 ago</span></div>
   <div class="day-grid">
-    <div class="day-row rest"><div><div class="day-date">Lun 22 Giu</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo</div></div></div>
-      <span class="act-kcal">—</span></div>
-    <div class="day-row"><div><div class="day-date">Mar 23 Giu</div></div>
+    <div class="day-row rest"><div><div class="day-date">Lun 27 Lug</div></div>
+      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div><div><div class="act-name">Camminata veloce</div></div></div>
+      <span class="act-kcal">~150 kcal</span></div>
+    <div class="day-row"><div><div class="day-date">Mar 28 Lug</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
         <div><div class="act-name">Corsa — Soglia</div><div class="act-detail">Allunghi 4×80 m + 3×8 min Z3 · presto mattina (caldo)</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~560 kcal</span><a class="act-link" href="corsa.html#soglia">→</a></div></div>
-    <div class="day-row rest"><div><div class="day-date">Mer 24 Giu</div></div>
+    <div class="day-row rest"><div><div class="day-date">Mer 29 Lug</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo</div></div></div>
       <span class="act-kcal">—</span></div>
-    <div class="day-row"><div><div class="day-date">Gio 25 Giu</div></div>
+    <div class="day-row"><div><div class="day-date">Gio 30 Lug</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
         <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza A → tecnica + soglia ~2.000 m</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~640 kcal</span><a class="act-link" href="palestra.html#sessA-block">P</a><a class="act-link" href="nuoto.html#sessA">N</a></div></div>
-    <div class="day-row rest"><div><div class="day-date">Ven 26 Giu</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo</div></div></div>
-      <span class="act-kcal">—</span></div>
-    <div class="day-row"><div><div class="day-date">Sab 27 Giu</div></div>
+    <div class="day-row rest"><div><div class="day-date">Ven 31 Lug</div></div>
+      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div><div><div class="act-name">Camminata veloce</div></div></div>
+      <span class="act-kcal">~150 kcal</span></div>
+    <div class="day-row"><div><div class="day-date">Sab 1 Ago</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
         <div><div class="act-name">Corsa lunga</div><div class="act-detail">8–10 km, Z2 puro — FC &lt; 150 · presto mattina (caldo)</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~650 kcal</span><a class="act-link" href="corsa.html#lungo">→</a></div></div>
-    <div class="day-row"><div><div class="day-date">Dom 28 Giu</div></div>
+    <div class="day-row"><div><div class="day-date">Dom 2 Ago</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto velocità</div><div class="act-detail">Forza B → sprint 8–10×50 ~2.500 m</div></div></div>
+        <div><div class="act-name">Palestra + Nuoto velocità</div><div class="act-detail">Forza B → sprint 8–12×50 ~2.500 m, recupero pieno</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~720 kcal</span><a class="act-link" href="palestra.html#sessB-block">P</a><a class="act-link" href="nuoto.html#sessBdom">N</a></div></div>
   </div>
 </div>
 
-<!-- SETTIMANA 3 -->
+<!-- SETTIMANA 3 (parziale, pre-barca, nessuna riduzione) -->
 <div class="week-block">
-  <div class="week-title"><span class="phase-tag ph-vel">Velocità</span> Settimana 3 &nbsp;<span>29 giu – 5 lug</span></div>
+  <div class="week-title"><span class="phase-tag ph-vel">Velocità</span> Settimana 3 &nbsp;<span>3–7 ago · pre-barca</span></div>
   <div class="day-grid">
-    <div class="day-row rest"><div><div class="day-date">Lun 29 Giu</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo</div></div></div>
-      <span class="act-kcal">—</span></div>
-    <div class="day-row"><div><div class="day-date">Mar 30 Giu</div></div>
+    <div class="day-row rest"><div><div class="day-date">Lun 3 Ago</div></div>
+      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div><div><div class="act-name">Camminata veloce</div></div></div>
+      <span class="act-kcal">~150 kcal</span></div>
+    <div class="day-row"><div><div class="day-date">Mar 4 Ago</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
         <div><div class="act-name">Corsa — Velocità</div><div class="act-detail">Allunghi 4×80 m + ripetute 8×200 m · presto mattina (caldo)</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~520 kcal</span><a class="act-link" href="corsa.html#velocita">→</a></div></div>
-    <div class="day-row rest"><div><div class="day-date">Mer 1 Lug</div></div>
+    <div class="day-row rest"><div><div class="day-date">Mer 5 Ago</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo</div></div></div>
       <span class="act-kcal">—</span></div>
-    <div class="day-row"><div><div class="day-date">Gio 2 Lug</div></div>
+    <div class="day-row"><div><div class="day-date">Gio 6 Ago</div></div>
       <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza A → tecnica + soglia ~2.000 m</div></div></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~640 kcal</span><a class="act-link" href="palestra.html#sessA-block">P</a><a class="act-link" href="nuoto.html#sessA">N</a></div></div>
-    <div class="day-row rest"><div><div class="day-date">Ven 3 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo</div></div></div>
-      <span class="act-kcal">—</span></div>
-    <div class="day-row"><div><div class="day-date">Sab 4 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name">Corsa lunga</div><div class="act-detail">8–10 km, Z2 puro — FC &lt; 150 · presto mattina (caldo)</div></div></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~650 kcal</span><a class="act-link" href="corsa.html#lungo">→</a></div></div>
-    <div class="day-row" id="day-actual-5lug"><div><div class="day-date">Dom 5 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto velocità</div><div class="act-detail">Forza B → sprint 8–10×50 ~2.500 m — svolto: 1.800 m, 123/165 bpm</div></div></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">505 kcal</span><a class="act-link" href="palestra.html#sessB-block">P</a><a class="act-link" href="nuoto.html#sessBdom">N</a></div></div>
-  </div>
-</div>
-
-<!-- SETTIMANA 4 -->
-<div class="week-block">
-  <div class="week-title"><span class="phase-tag ph-cons">Consolidamento</span> Settimana 4 &nbsp;<span>6–12 lug</span></div>
-  <div class="day-grid">
-    <div class="day-row"><div><div class="day-date">Lun 6 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div>
-        <div><div class="act-name">Camminata veloce</div><div class="act-detail">30–40 min, passo sostenuto</div></div></div>
-      <span class="act-kcal">~150 kcal</span></div>
-    <div class="day-row" id="day-actual-8lug"><div><div class="day-date">Mar 7 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name">Corsa — Soglia</div><div class="act-detail">Allunghi 4×80 m + 3×8 min Z3 · presto mattina (caldo) — svolta 8 lug: 8,30 km, 151/172 bpm</div></div></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">623 kcal</span><a class="act-link" href="corsa.html#soglia">→</a></div></div>
-    <div class="day-row"><div><div class="day-date">Mer 8 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div>
-        <div><div class="act-name">Camminata veloce</div><div class="act-detail">30–40 min, passo sostenuto</div></div></div>
-      <span class="act-kcal">~150 kcal</span></div>
-    <div class="day-row" id="day-actual-11lug"><div><div class="day-date">Gio 9 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza A → tecnica + soglia ~2.000 m — svolto 11 lug: 2.000 m, 117/153 bpm</div></div></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">552 kcal</span><a class="act-link" href="palestra.html#sessA-block">P</a><a class="act-link" href="nuoto.html#sessA">N</a></div></div>
-    <div class="day-row"><div><div class="day-date">Ven 10 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div>
-        <div><div class="act-name">Camminata veloce</div><div class="act-detail">30–40 min, passo sostenuto</div></div></div>
-      <span class="act-kcal">~150 kcal</span></div>
-    <div class="day-row" id="day-actual-13lug"><div><div class="day-date">Sab 11 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name">Corsa lunga</div><div class="act-detail">8–10 km, Z2 puro — FC &lt; 150 · svolta come Pesi+Nuoto velocità 13 lug: 1.600 m, 125/150 bpm</div></div></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">530 kcal</span><a class="act-link" href="corsa.html#lungo">→</a></div></div>
-    <div class="day-row"><div><div class="day-date">Dom 12 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto velocità</div><div class="act-detail">Forza B → sprint 8–10×50 ~2.500 m</div></div></div>
+        <div><div class="act-name">Palestra + Nuoto velocità</div><div class="act-detail">Forza B → sprint 8–12×50 ~2.500 m — ultima seduta di qualità prima della barca</div></div></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~720 kcal</span><a class="act-link" href="palestra.html#sessB-block">P</a><a class="act-link" href="nuoto.html#sessBdom">N</a></div></div>
-  </div>
-</div>
-
-<!-- SETTIMANA 5 -->
-<div class="week-block">
-  <div class="week-title"><span class="phase-tag ph-chiu">Chiusura</span> Settimana 5 &nbsp;<span>13–19 lug</span></div>
-  <div class="day-grid">
-    <div class="day-row"><div><div class="day-date">Lun 13 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div>
-        <div><div class="act-name">Camminata veloce</div><div class="act-detail">30–40 min, passo sostenuto</div></div></div>
-      <span class="act-kcal">~150 kcal</span></div>
-    <div class="day-row"><div><div class="day-date">Mar 14 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name">Corsa — Velocità</div><div class="act-detail">Allunghi 4×80 m + ripetute 8×200 m · presto mattina (caldo)</div></div></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~520 kcal</span><a class="act-link" href="corsa.html#velocita">→</a></div></div>
-    <div class="day-row"><div><div class="day-date">Mer 15 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--blue)"></div>
-        <div><div class="act-name">Nuoto — svolto</div><div class="act-detail">2.000 m, 128/152 bpm — sostituisce camminata veloce</div></div></div>
-      <span class="act-kcal">448 kcal</span></div>
-    <div class="day-row" id="day-actual-16lug"><div><div class="day-date">Gio 16 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--purple)"></div>
-        <div><div class="act-name">Palestra + Nuoto</div><div class="act-detail">Forza A → tecnica + soglia ~2.000 m</div></div></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="act-kcal">~640 kcal</span><a class="act-link" href="palestra.html#sessA-block">P</a><a class="act-link" href="nuoto.html#sessA">N</a></div></div>
-    <div class="day-row"><div><div class="day-date">Ven 17 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--teal)"></div>
-        <div><div class="act-name">Camminata veloce</div><div class="act-detail">30–40 min, passo sostenuto</div></div></div>
-      <span class="act-kcal">~150 kcal</span></div>
-    <div class="day-row"><div><div class="day-date">Sab 18 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--blue)"></div>
-        <div><div class="act-name">Nuoto velocità — svolto</div><div class="act-detail">2.100 m, 125/158 bpm</div></div></div>
-      <span class="act-kcal">562 kcal</span></div>
-    <div class="day-row" style="border-color:var(--yellow);background:rgba(245,200,90,.04)"><div><div class="day-date">Dom 19 Lug</div></div>
-      <div class="day-act"><div class="act-dot" style="background:var(--red)"></div>
-        <div><div class="act-name" style="color:var(--yellow)">Corsa — svolta al posto di Palestra+Nuoto</div><div class="act-detail">7,01 km, 146/170 bpm — FC in deriva da Z3 a Z4/Z5, passo stabile</div></div></div>
-      <span class="act-kcal">516 kcal</span></div>
+    <div class="day-row rest"><div><div class="day-date">Ven 7 Ago</div></div>
+      <div class="day-act"><div class="act-dot" style="background:var(--muted)"></div><div><div class="act-name">Riposo / partenza</div></div></div>
+      <span class="act-kcal">—</span></div>
   </div>
 </div>
 
@@ -297,15 +226,16 @@
     <span style="font-size:11px;font-weight:600;color:var(--teal);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🏊‍♂️ Nuoto veloce</span>
     <span style="font-size:12px;color:var(--muted)">L'orologio talvolta classifica come "farfalla" vasche veloci a stile libero (rilevamento stile impreciso ad alta cadenza) — il tempo/passo restano comunque corretti.</span>
   </div>
+  <div class="hstat" style="border-color:rgba(122,184,245,.2)">
+    <span style="font-size:11px;font-weight:600;color:var(--blue);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">⛵ Pre-barca</span>
+    <span style="font-size:12px;color:var(--muted)">Nessuno scarico prima della partenza: il blocco mantiene intensità piena fino al 6 ago. L'ultima seduta (Forza B + nuoto velocità) chiude in bellezza prima della pausa in barca.</span>
+  </div>
 </div>
 
 </main>
 
 <script>
-// Highlight today
-const days = {
-  '2026-06-15':'day-0'
-};
+const days = { '2026-07-20':'day-0' };
 const today = new Date().toISOString().slice(0,10);
 const id = days[today];
 if(id){
