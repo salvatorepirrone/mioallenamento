@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor FIT — Piano Allenamento</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ---- editor-specific components, mapped onto the site's real light/blue theme ---- */
+  .vl-card {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 20px; margin-bottom: 16px;
+  }
+  .vl-drop {
+    border: 2px dashed var(--border); border-radius: 12px; padding: 40px 20px;
+    text-align: center; color: var(--muted); cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .vl-drop:hover, .vl-drop.drag { border-color: var(--accent); background: var(--s2); color: var(--text); }
+  .vl-drop input { display: none; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-top: 4px; }
+  .vl-stat { background: var(--s2); border-radius: 10px; padding: 12px 14px; }
+  .vl-stat .n { font-family: monospace; font-size: 1.3rem; color: var(--accent); font-weight: 700; }
+  .vl-stat .l { font-size: 0.7rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
+  select, input[type=number], input[type=range] {
+    background: #fff; color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 7px; font-family: inherit; font-size: 0.82rem;
+  }
+  button {
+    background: #fff; color: var(--text); border: 1px solid var(--border);
+    border-radius: 100px; padding: 7px 15px; font-family: inherit; font-size: 0.82rem;
+    cursor: pointer; font-weight: 600; transition: all .2s;
+  }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+  button.primary:hover { background: var(--hero); border-color: var(--hero); color: #fff; }
+  button.primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.small { padding: 4px 12px; font-size: 0.76rem; }
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .toolbar .spacer { flex: 1; }
+  .msg { font-size: 0.85rem; padding: 11px 15px; border-radius: 9px; margin-bottom: 14px; }
+  .msg.error { background: rgba(185,74,58,.08); color: var(--red); border: 1px solid rgba(185,74,58,.25); }
+  .msg.ok { background: rgba(47,111,158,.08); color: var(--accent); border: 1px solid rgba(47,111,158,.25); }
+  .hint { color: var(--muted); font-size: 0.78rem; margin-top: 6px; }
+
+  .action-panel { background: var(--s2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; min-height: 20px; }
+  .action-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .action-row + .action-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .action-panel .hint { margin-top: 0; }
+  .action-panel .spacer { flex: 1; }
+  .split-panel { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .split-panel .grp { display: flex; flex-direction: column; gap: 4px; }
+  .split-panel label { font-size: 0.7rem; color: var(--muted); }
+
+  .timeline {
+    display: flex; align-items: flex-end; gap: 4px; overflow-x: auto;
+    padding: 10px 8px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--s2);
+  }
+  .bar-col {
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    width: 38px; flex: 0 0 auto; height: 100%; cursor: pointer; border-radius: 6px; padding-top: 2px;
+  }
+  .bar-col:hover { background: rgba(47,111,158,0.07); }
+  .bar-col.selected { background: rgba(47,111,158,0.12); }
+  .bar-label { font-family: monospace; font-size: 0.6rem; line-height: 1.25; text-align: center; color: var(--muted); margin-bottom: 5px; white-space: nowrap; }
+  .bar-label .idx { opacity: .6; }
+  .bar-label .dur { font-weight: 700; color: var(--text); }
+  .bar { width: 100%; min-height: 5px; border-radius: 4px 4px 2px 2px; border: 2px solid transparent; box-sizing: border-box; }
+  .bar-col:hover .bar { filter: brightness(1.08) saturate(1.15); }
+  .bar-col.selected .bar { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(47,111,158,0.2); }
+  .bar.stroke-freestyle { background: var(--teal); }
+  .bar.stroke-backstroke { background: var(--blue); }
+  .bar.stroke-breaststroke { background: var(--orange); }
+  .bar.stroke-butterfly { background: var(--purple); }
+  .bar.stroke-drill { background: var(--yellow); }
+  .bar.stroke-mixed, .bar.stroke-im { background: var(--muted); }
+  .bar.idle { background: repeating-linear-gradient(45deg, var(--s3), var(--s3) 5px, var(--border) 5px, var(--border) 10px); }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-size: 0.72rem; color: var(--muted); }
+  .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  /* ---- guide, below the tool ---- */
+  .guide-step { display: flex; gap: 12px; margin-bottom: 16px; }
+  .guide-step .gnum {
+    flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.78rem; font-family: monospace;
+  }
+  .guide-step .gtxt { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .guide-step .gtxt b { color: var(--text); display: block; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">⚡ Piano</span>
+  <div class="nav-links">
+    <a href="index.html"><span class="dot" style="background:#2E6DA4"></span>Programma</a>
+    <a href="nuoto.html"><span class="dot" style="background:#7ab8f5"></span>Nuoto</a>
+    <a href="palestra.html"><span class="dot" style="background:#c85af5"></span>Palestra</a>
+    <a href="corsa.html"><span class="dot" style="background:#f55a5a"></span>Corsa</a>
+    <a href="nutrizione.html"><span class="dot" style="background:#f5965a"></span>Nutrizione 🥗</a>
+    <a href="peso.html"><span class="dot" style="background:#f5c85a"></span>Peso ⚖️</a>
+    <a href="callback.html"><span class="dot" style="background:#5af5c8"></span>Sonno 😴</a>
+    <a href="editor.html" class="active"><span class="dot" style="background:#f55ac8"></span>Editor FIT</a>
+  </div>
+</nav>
+
+<main>
+
+<div class="page-hero">
+  <h1>Editor FIT</h1>
+  <p>Correggi i length di una nuotata in vasca: dividi, unisci, cambia stile — poi scarica un .fit corretto per Garmin Connect.</p>
+</div>
+
+<div id="uploadCard" class="vl-card">
+  <div class="vl-drop" id="dropZone">
+    <div>Trascina qui il file .fit oppure clicca per selezionarlo</div>
+    <input type="file" id="fileInput" accept=".fit">
+  </div>
+  <div id="loadMsg"></div>
+</div>
+
+<div id="editorCard" class="vl-card" style="display:none">
+  <div class="summary" id="summary"></div>
+</div>
+
+<div id="tableCard" class="vl-card" style="display:none">
+  <div class="toolbar" style="margin-bottom:16px">
+    <span class="hint">Clicca sui blocchi per selezionarli — le azioni disponibili compaiono qui sopra.</span>
+    <div class="spacer"></div>
+    <button class="primary" id="downloadBtnMain">Scarica FIT corretto</button>
+  </div>
+  <div id="actionPanel" class="action-panel"></div>
+  <div class="timeline" id="timeline"></div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<!-- GUIDA -->
+<div class="sec">Come funziona</div>
+<div class="vl-card">
+  <div class="guide-step">
+    <div class="gnum">1</div>
+    <div class="gtxt"><b>Carica il file .fit</b>Scarica l'attività da Garmin Connect (Esporta originale) e trascinala qui sopra. La pagina controlla subito il file e corregge da sola eventuali incoerenze già presenti.</div>
+  </div>
+  <div class="guide-step">
+    <div class="gnum">2</div>
+    <div class="gtxt"><b>Leggi la timeline</b>Ogni colonnina è una vasca (length): l'altezza è la durata, il colore lo stile (vedi legenda sotto il grafico).</div>
+  </div>
+  <div class="guide-step">
+    <div class="gnum">3</div>
+    <div class="gtxt"><b>Seleziona e modifica</b>Un clic seleziona una vasca e mostra le azioni per quella singola vasca (Dividi, cambia stile/tipo). Ctrl+clic (⌘+clic su Mac) aggiunge altre vasche <i>adiacenti</i> alla selezione, per unirle.</div>
+  </div>
+  <div class="guide-step">
+    <div class="gnum">4</div>
+    <div class="gtxt"><b>Scarica e ricarica</b>Il pulsante in alto genera un nuovo .fit con tutti i totali ricalcolati. Cancella l'attività originale su Garmin Connect prima di ricaricare quella corretta, per evitare doppioni.</div>
+  </div>
+  <div class="note-b" style="margin-top:16px;margin-bottom:0">
+    <strong>Nessun dato lascia il tuo browser</strong> — tutta la lettura e la modifica del file avviene localmente, non c'è upload su nessun server.
+  </div>
+</div>
+
+</main>
+
+<script>
+/* ============ FIT core (reader/writer) ============ */
+function baseTypeInfo(bt) {
+  switch (bt) {
+    case 0x00: return { size: 1, kind: 'uint', invalid: 0xFF };
+    case 0x01: return { size: 1, kind: 'int', invalid: 0x7F };
+    case 0x02: return { size: 1, kind: 'uint', invalid: 0xFF };
+    case 0x83: return { size: 2, kind: 'int', invalid: 0x7FFF };
+    case 0x84: return { size: 2, kind: 'uint', invalid: 0xFFFF };
+    case 0x85: return { size: 4, kind: 'int', invalid: 0x7FFFFFFF };
+    case 0x86: return { size: 4, kind: 'uint', invalid: 0xFFFFFFFF };
+    case 0x07: return { size: 1, kind: 'string', invalid: 0x00 };
+    case 0x88: return { size: 4, kind: 'float' };
+    case 0x89: return { size: 8, kind: 'double' };
+    case 0x0A: return { size: 1, kind: 'uint', invalid: 0x00 };
+    case 0x8B: return { size: 2, kind: 'uint', invalid: 0x0000 };
+    case 0x8C: return { size: 4, kind: 'uint', invalid: 0x00000000 };
+    case 0x0D: return { size: 1, kind: 'byte' };
+    case 0x8E: return { size: 8, kind: 'int64' };
+    case 0x8F: return { size: 8, kind: 'uint64' };
+    case 0x90: return { size: 8, kind: 'uint64' };
+    default: return { size: 1, kind: 'byte' };
+  }
+}
+const CRC_TABLE = [0x0000,0xCC01,0xD801,0x1400,0xF001,0x3C00,0x2800,0xE401,
+                   0xA001,0x6C00,0x7800,0xB401,0x5000,0x9C01,0x8801,0x4400];
+function crc16Byte(crc, byte) {
+  let tmp = CRC_TABLE[crc & 0xF];
+  crc = (crc >> 4) & 0x0FFF;
+  crc = crc ^ tmp ^ CRC_TABLE[byte & 0xF];
+  tmp = CRC_TABLE[crc & 0xF];
+  crc = (crc >> 4) & 0x0FFF;
+  crc = crc ^ tmp ^ CRC_TABLE[(byte >> 4) & 0xF];
+  return crc;
+}
+function crc16(bytes, start, end) {
+  let crc = 0;
+  for (let i = start; i < end; i++) crc = crc16Byte(crc, bytes[i]);
+  return crc;
+}
+function decodeScalar(bytes, baseType, little) {
+  const info = baseTypeInfo(baseType);
+  if (info.kind === 'string') {
+    let s = '';
+    for (const c of bytes) { if (c === 0) break; s += String.fromCharCode(c); }
+    return s;
+  }
+  const n = Math.max(1, Math.floor(bytes.length / info.size));
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const vals = [];
+  for (let i = 0; i < n; i++) {
+    const off = i * info.size;
+    let v;
+    switch (info.size) {
+      case 1: v = info.kind === 'int' ? view.getInt8(off) : view.getUint8(off); break;
+      case 2: v = info.kind === 'int' ? view.getInt16(off, little) : view.getUint16(off, little); break;
+      case 4:
+        v = info.kind === 'float' ? view.getFloat32(off, little)
+          : info.kind === 'int' ? view.getInt32(off, little) : view.getUint32(off, little);
+        break;
+      case 8:
+        v = info.kind === 'double' ? view.getFloat64(off, little)
+          : info.kind === 'int64' ? view.getBigInt64(off, little) : view.getBigUint64(off, little);
+        break;
+      default: v = view.getUint8(off);
+    }
+    vals.push(v);
+  }
+  return vals.length === 1 ? vals[0] : vals;
+}
+function encodeScalar(value, baseType, size, little) {
+  const info = baseTypeInfo(baseType);
+  const out = new Uint8Array(size);
+  const view = new DataView(out.buffer);
+  if (info.kind === 'string') {
+    for (let i = 0; i < size; i++) out[i] = i < value.length ? value.charCodeAt(i) : 0;
+    return out;
+  }
+  switch (size) {
+    case 1: info.kind === 'int' ? view.setInt8(0, value) : view.setUint8(0, value & 0xFF); break;
+    case 2: info.kind === 'int' ? view.setInt16(0, value, little) : view.setUint16(0, value & 0xFFFF, little); break;
+    case 4:
+      if (info.kind === 'float') view.setFloat32(0, value, little);
+      else info.kind === 'int' ? view.setInt32(0, value, little) : view.setUint32(0, value >>> 0, little);
+      break;
+    case 8:
+      if (info.kind === 'double') view.setFloat64(0, value, little);
+      else info.kind === 'int64' ? view.setBigInt64(0, BigInt(value), little) : view.setBigUint64(0, BigInt(value), little);
+      break;
+  }
+  return out;
+}
+function isInvalid(rawVal, baseType) {
+  const info = baseTypeInfo(baseType);
+  if (info.invalid === undefined) return false;
+  return rawVal === info.invalid;
+}
+function readFit(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer);
+  const view = new DataView(arrayBuffer);
+  const headerSize = view.getUint8(0);
+  const protocolVersion = view.getUint8(1);
+  const profileVersion = view.getUint16(2, true);
+  const dataSize = view.getUint32(4, true);
+  const dataType = String.fromCharCode(...bytes.slice(8, 12));
+  if (dataType !== '.FIT') throw new Error('Non è un file FIT valido (magic string mancante)');
+  let offset = headerSize;
+  const end = headerSize + dataSize;
+  const localDefs = {};
+  const messages = [];
+  while (offset < end) {
+    const hdr = bytes[offset]; offset += 1;
+    if (hdr & 0x80) throw new Error('Formato con compressed timestamp header non supportato da questo strumento');
+    const isDef = (hdr & 0x40) !== 0;
+    const localNum = hdr & 0x0F;
+    if (isDef) {
+      const hasDevData = (hdr & 0x20) !== 0;
+      offset += 1;
+      const arch = bytes[offset]; offset += 1;
+      const little = arch === 0;
+      const globalMesgNum = little ? view.getUint16(offset, true) : view.getUint16(offset, false);
+      offset += 2;
+      const numFields = bytes[offset]; offset += 1;
+      const fields = [];
+      for (let i = 0; i < numFields; i++) {
+        fields.push({ defNum: bytes[offset], size: bytes[offset + 1], baseType: bytes[offset + 2] });
+        offset += 3;
+      }
+      let devFieldsDef = [];
+      if (hasDevData) {
+        const numDev = bytes[offset]; offset += 1;
+        for (let i = 0; i < numDev; i++) {
+          devFieldsDef.push({ fieldNum: bytes[offset], size: bytes[offset + 1], devDataIndex: bytes[offset + 2] });
+          offset += 3;
+        }
+      }
+      localDefs[localNum] = { globalMesgNum, little, fields, devFieldsDef };
+    } else {
+      const def = localDefs[localNum];
+      if (!def) throw new Error('Messaggio dati senza definizione locale: file corrotto o non supportato');
+      const fieldsOut = [];
+      for (const fd of def.fields) {
+        const b = bytes.slice(offset, offset + fd.size);
+        fieldsOut.push({ defNum: fd.defNum, baseType: fd.baseType, size: fd.size, bytes: b });
+        offset += fd.size;
+      }
+      const devOut = [];
+      for (const dd of def.devFieldsDef) {
+        const b = bytes.slice(offset, offset + dd.size);
+        devOut.push({ fieldNum: dd.fieldNum, devDataIndex: dd.devDataIndex, size: dd.size, bytes: b });
+        offset += dd.size;
+      }
+      messages.push({ mesgNum: def.globalMesgNum, little: def.little, fields: fieldsOut, devFields: devOut });
+    }
+  }
+  return { header: { headerSize, protocolVersion, profileVersion, dataType }, messages };
+}
+function buildFit(messages, opts) {
+  opts = opts || {};
+  const protocolVersion = opts.protocolVersion ?? 0x10;
+  const profileVersion = opts.profileVersion ?? 2167;
+  const chunks = [];
+  const slots = new Array(16).fill(null);
+  let clock = 0;
+  function fieldSig(fields, devFields) {
+    return fields.map(f => `${f.defNum}:${f.size}:${f.baseType}`).join(',') + '|' +
+           devFields.map(f => `${f.fieldNum}:${f.size}:${f.devDataIndex}`).join(',');
+  }
+  function pickSlot(mesgNum, sig) {
+    for (let i = 0; i < 16; i++) if (slots[i] && slots[i].mesgNum === mesgNum && slots[i].sig === sig) return { idx: i, reuse: true };
+    let freeIdx = slots.findIndex(s => s === null);
+    if (freeIdx === -1) {
+      let oldest = 0;
+      for (let i = 1; i < 16; i++) if (slots[i].order < slots[oldest].order) oldest = i;
+      freeIdx = oldest;
+    }
+    return { idx: freeIdx, reuse: false };
+  }
+  for (const msg of messages) {
+    const little = msg.little !== false;
+    const sig = fieldSig(msg.fields, msg.devFields || []);
+    const { idx, reuse } = pickSlot(msg.mesgNum, sig);
+    slots[idx] = { mesgNum: msg.mesgNum, sig, order: clock++ };
+    if (!reuse) {
+      const hasDev = (msg.devFields || []).length > 0;
+      const defHdr = 0x40 | (hasDev ? 0x20 : 0) | idx;
+      const defBytes = [defHdr, 0x00, little ? 0x00 : 0x01];
+      const mesgNumBytes = new Uint8Array(2);
+      new DataView(mesgNumBytes.buffer).setUint16(0, msg.mesgNum, little);
+      defBytes.push(mesgNumBytes[0], mesgNumBytes[1]);
+      defBytes.push(msg.fields.length);
+      for (const f of msg.fields) defBytes.push(f.defNum, f.size, f.baseType);
+      if (hasDev) {
+        defBytes.push(msg.devFields.length);
+        for (const f of msg.devFields) defBytes.push(f.fieldNum, f.size, f.devDataIndex);
+      }
+      chunks.push(Uint8Array.from(defBytes));
+    }
+    const pieces = [Uint8Array.from([idx])];
+    let totalLen = 1;
+    for (const f of msg.fields) { pieces.push(f.bytes); totalLen += f.bytes.length; }
+    for (const f of (msg.devFields || [])) { pieces.push(f.bytes); totalLen += f.bytes.length; }
+    const merged = new Uint8Array(totalLen);
+    let o = 0;
+    for (const p of pieces) { merged.set(p, o); o += p.length; }
+    chunks.push(merged);
+  }
+  let dataSize = 0;
+  for (const c of chunks) dataSize += c.length;
+  const headerSize = 12;
+  const header = new Uint8Array(headerSize);
+  const hv = new DataView(header.buffer);
+  hv.setUint8(0, headerSize);
+  hv.setUint8(1, protocolVersion);
+  hv.setUint16(2, profileVersion, true);
+  hv.setUint32(4, dataSize, true);
+  header.set([0x2E, 0x46, 0x49, 0x54], 8);
+  const total = new Uint8Array(headerSize + dataSize + 2);
+  total.set(header, 0);
+  let o = headerSize;
+  for (const c of chunks) { total.set(c, o); o += c.length; }
+  const crc = crc16(total, 0, headerSize + dataSize);
+  new DataView(total.buffer).setUint16(headerSize + dataSize, crc, true);
+  return total;
+}
+
+/* ============ Semantic swim layer ============ */
+const SWIM_STROKE = { 0: 'freestyle', 1: 'backstroke', 2: 'breaststroke', 3: 'butterfly', 4: 'drill', 5: 'mixed', 6: 'im' };
+const SWIM_STROKE_LABEL = { freestyle: 'Stile libero', backstroke: 'Dorso', breaststroke: 'Rana', butterfly: 'Delfino', drill: 'Drill', mixed: 'Misto', im: 'Misto IM' };
+const SWIM_STROKE_REV = Object.fromEntries(Object.entries(SWIM_STROKE).map(([k, v]) => [v, Number(k)]));
+const LENGTH_TYPE_REV = { idle: 0, active: 1 };
+const L = { start_time: 2, elapsed: 3, timer: 4, strokes: 5, avg_speed: 6, swim_stroke: 7, cadence: 9, length_type: 12, message_index: 254 };
+const P = { start_time: 2, elapsed: 7, timer: 8, distance: 9, calories: 11, avg_speed: 13, avg_hr: 15, max_hr: 16, num_lengths: 32, first_length_index: 35, swim_stroke: 38, num_active_lengths: 40, stroke_count: 75, min_hr: 63, message_index: 254 };
+const S = { distance: 9, avg_speed: 14, pool_length: 44, num_active_lengths: 47, num_laps: 26 };
+const R = { heart_rate: 3, timestamp: 253 };
+
+function getField(msg, defNum) {
+  const f = msg.fields.find(x => x.defNum === defNum);
+  if (!f) return undefined;
+  const raw = decodeScalar(f.bytes, f.baseType, msg.little);
+  if (isInvalid(raw, f.baseType)) return null;
+  return raw;
+}
+function setField(msg, defNum, rawValue) {
+  const f = msg.fields.find(x => x.defNum === defNum);
+  if (!f) return false;
+  f.bytes = encodeScalar(rawValue, f.baseType, f.size, msg.little);
+  return true;
+}
+function getScaled(msg, defNum, scale, offset) {
+  const raw = getField(msg, defNum);
+  if (raw === null || raw === undefined) return null;
+  let v = raw;
+  if (offset) v -= offset;
+  if (scale) v = v / scale;
+  return v;
+}
+function setScaled(msg, defNum, value, scale, offset) {
+  let raw = value;
+  if (scale) raw = raw * scale;
+  if (offset) raw = raw + offset;
+  setField(msg, defNum, Math.round(raw));
+}
+function cloneMsg(msg) {
+  return {
+    mesgNum: msg.mesgNum, little: msg.little,
+    fields: msg.fields.map(f => ({ defNum: f.defNum, baseType: f.baseType, size: f.size, bytes: f.bytes.slice() })),
+    devFields: (msg.devFields || []).map(f => ({ fieldNum: f.fieldNum, devDataIndex: f.devDataIndex, size: f.size, bytes: f.bytes.slice() })),
+  };
+}
+function readLengthRow(msg, idx, lapMsg) {
+  const elapsed = getScaled(msg, L.elapsed, 1000, 0);
+  const timer = getScaled(msg, L.timer, 1000, 0);
+  const strokeRaw = getField(msg, L.swim_stroke);
+  const typeRaw = getField(msg, L.length_type);
+  return {
+    idx, lapMsg, msg,
+    startTimeRaw: getField(msg, L.start_time),
+    elapsed, timer,
+    strokes: getField(msg, L.strokes) ?? 0,
+    avgSpeed: getScaled(msg, L.avg_speed, 1000, 0),
+    cadence: getField(msg, L.cadence) ?? 0,
+    strokeRaw, stroke: strokeRaw === null || strokeRaw === undefined ? null : SWIM_STROKE[strokeRaw],
+    typeRaw, type: typeRaw === null || typeRaw === undefined ? null : (typeRaw === 1 ? 'active' : 'idle'),
+  };
+}
+function loadSwimActivity(parsed) {
+  const messages = parsed.messages;
+  const sessionMsg = messages.find(m => m.mesgNum === 18);
+  const lapMsgsAll = messages.filter(m => m.mesgNum === 19);
+  const lengthMsgsAll = messages.filter(m => m.mesgNum === 101);
+  if (!sessionMsg) throw new Error('Nessun messaggio "session" trovato: non sembra un file di attività valido.');
+  if (lengthMsgsAll.length === 0) throw new Error('Nessun messaggio "length" trovato: questo file non è una nuotata in vasca (pool swim).');
+  const poolLength = getScaled(sessionMsg, S.pool_length, 100, 0) ?? 50;
+
+  // map each length message -> its owning lap MESSAGE OBJECT (not an index, so it stays
+  // correct even after new laps get inserted later)
+  const msgLapMap = new WeakMap();
+  lapMsgsAll.forEach((lap) => {
+    const first = getField(lap, P.first_length_index);
+    const n = getField(lap, P.num_lengths);
+    if (first === null || first === undefined || !n) return;
+    for (let i = first; i < first + n; i++) if (lengthMsgsAll[i]) msgLapMap.set(lengthMsgsAll[i], lap);
+  });
+
+  const lengths = lengthMsgsAll.map((msg, i) => readLengthRow(msg, i, msgLapMap.get(msg) || null));
+  return { messages, sessionMsg, lapMsgsAll, lengthMsgsAll, poolLength, lengths, msgLapMap };
+}
+
+function hrStatsForRange(state, startRaw, elapsedSec) {
+  const endRaw = startRaw + elapsedSec;
+  let sum = 0, count = 0, max = -Infinity, min = Infinity;
+  for (const m of state.messages) {
+    if (m.mesgNum !== 20) continue;
+    const ts = getField(m, R.timestamp);
+    if (ts === null || ts === undefined || ts < startRaw || ts >= endRaw) continue;
+    const hr = getField(m, R.heart_rate);
+    if (hr === null || hr === undefined) continue;
+    sum += hr; count++;
+    if (hr > max) max = hr;
+    if (hr < min) min = hr;
+  }
+  if (count === 0) return null;
+  return { avg: Math.round(sum / count), max, min };
+}
+
+// Genuine Garmin idle/rest length messages are never referenced by any lap's
+// first_length_index/num_lengths range. If we mark one "active" without giving it
+// a lap of its own, Garmin Connect's interval view has nothing to delimit it and
+// merges it into a neighbouring interval. This creates that missing lap.
+function ensureLapFor(state, msg) {
+  if (state.msgLapMap.get(msg)) return;
+  const template = state.lapMsgsAll.find(l => getField(l, P.num_lengths) === 1) || state.lapMsgsAll[0];
+  if (!template) return;
+
+  const newLap = cloneMsg(template);
+  const startRaw = getField(msg, L.start_time);
+  const elapsed = getScaled(msg, L.elapsed, 1000, 0) || 0;
+  const strokeRaw = getField(msg, L.swim_stroke);
+  const strokes = getField(msg, L.strokes) || 0;
+
+  setField(newLap, P.start_time, startRaw);
+  setScaled(newLap, P.elapsed, elapsed, 1000, 0);
+  setScaled(newLap, P.timer, elapsed, 1000, 0);
+  setScaled(newLap, P.distance, state.poolLength, 100, 0);
+  setField(newLap, P.num_lengths, 1);
+  setField(newLap, P.num_active_lengths, 1);
+  setField(newLap, P.first_length_index, 0);
+  if (strokeRaw !== null && strokeRaw !== undefined) setField(newLap, P.swim_stroke, strokeRaw);
+  setField(newLap, P.stroke_count, strokes);
+  if (elapsed > 0) setScaled(newLap, P.avg_speed, state.poolLength / elapsed, 1000, 0);
+  setField(newLap, P.calories, 0xFFFF);
+
+  const hr = startRaw !== null && startRaw !== undefined ? hrStatsForRange(state, startRaw, elapsed) : null;
+  if (hr) {
+    setField(newLap, P.avg_hr, hr.avg);
+    setField(newLap, P.max_hr, hr.max);
+    setField(newLap, P.min_hr, hr.min);
+  } else {
+    setField(newLap, P.avg_hr, 0xFF);
+    setField(newLap, P.max_hr, 0xFF);
+    setField(newLap, P.min_hr, 0xFF);
+  }
+
+  const pos = findLapInsertPos(state, startRaw);
+  state.messages.splice(pos + 1, 0, newLap);
+  state.msgLapMap.set(msg, newLap);
+}
+
+function findLapInsertPos(state, startRaw) {
+  let lastGoodPos = -1;
+  for (let i = 0; i < state.messages.length; i++) {
+    const m = state.messages[i];
+    if (m.mesgNum !== 19) continue;
+    const st = getField(m, P.start_time);
+    if (st !== null && st !== undefined && st <= startRaw) lastGoodPos = i;
+  }
+  return lastGoodPos;
+}
+
+function recompute(state) {
+  const lengthMsgsAll = state.messages.filter(m => m.mesgNum === 101);
+  const lapOf = state.msgLapMap;
+
+  const preGroups = new Map();
+  lengthMsgsAll.forEach(msg => {
+    const lap = lapOf.get(msg);
+    if (!lap) return;
+    if (!preGroups.has(lap)) preGroups.set(lap, []);
+    preGroups.get(lap).push(msg);
+  });
+  const rawLaps = state.messages.filter(m => m.mesgNum === 19);
+  const defunctLaps = rawLaps.filter(lap => {
+    const hadLengths = getField(lap, P.num_lengths);
+    return (!preGroups.has(lap) || preGroups.get(lap).length === 0) && hadLengths && hadLengths > 0;
+  });
+  for (const lap of defunctLaps) {
+    const pos = state.messages.indexOf(lap);
+    if (pos !== -1) state.messages.splice(pos, 1);
+  }
+
+  const lapMsgsAll = state.messages.filter(m => m.mesgNum === 19)
+    .sort((a, b) => (getField(a, P.start_time) || 0) - (getField(b, P.start_time) || 0));
+
+  const perLap = new Map();
+  lengthMsgsAll.forEach((msg, newIdx) => {
+    setField(msg, L.message_index, newIdx);
+    const lap = lapOf.get(msg);
+    if (!lap) return;
+    if (!perLap.has(lap)) perLap.set(lap, []);
+    perLap.get(lap).push(msg);
+  });
+
+  const poolLength = state.poolLength;
+
+  lapMsgsAll.forEach((lap, newLapIdx) => {
+    setField(lap, P.message_index, newLapIdx);
+    const group = perLap.get(lap) || [];
+    if (group.length === 0) return;
+    const first = getField(group[0], L.message_index);
+    setField(lap, P.first_length_index, first);
+    setField(lap, P.num_lengths, group.length);
+
+    let activeCount = 0, sumStrokes = 0, sumTimer = 0, sumElapsed = 0;
+    for (const m of group) {
+      if (getField(m, L.length_type) === 1) activeCount++;
+      sumStrokes += getField(m, L.strokes) || 0;
+      sumTimer += getScaled(m, L.timer, 1000, 0) || 0;
+      sumElapsed += getScaled(m, L.elapsed, 1000, 0) || 0;
+    }
+    const newDistance = activeCount * poolLength;
+    setScaled(lap, P.elapsed, sumElapsed, 1000, 0);
+    setScaled(lap, P.timer, sumTimer, 1000, 0);
+    setScaled(lap, P.distance, newDistance, 100, 0);
+    setField(lap, P.num_active_lengths, activeCount);
+    if (sumTimer > 0) setScaled(lap, P.avg_speed, newDistance / sumTimer, 1000, 0);
+    setField(lap, P.stroke_count, sumStrokes);
+  });
+
+  let totalActive = 0, totalTimer = 0;
+  lengthMsgsAll.forEach(m => {
+    if (getField(m, L.length_type) === 1) totalActive++;
+    totalTimer += getScaled(m, L.timer, 1000, 0) || 0;
+  });
+  const sessionDistance = totalActive * poolLength;
+  setScaled(state.sessionMsg, S.distance, sessionDistance, 100, 0);
+  setField(state.sessionMsg, S.num_active_lengths, totalActive);
+  setField(state.sessionMsg, S.num_laps, lapMsgsAll.length);
+  if (totalTimer > 0) setScaled(state.sessionMsg, S.avg_speed, sessionDistance / totalTimer, 1000, 0);
+
+  state.lengths = lengthMsgsAll.map((msg, i) => readLengthRow(msg, i, lapOf.get(msg) || null));
+  state.lapMsgsAll = lapMsgsAll;
+
+  return { totalActive, sessionDistance };
+}
+
+function splitLength(state, idx, splitSeconds, strokeA, strokeB) {
+  const orig = state.lengths[idx];
+  if (splitSeconds <= 0 || splitSeconds >= orig.elapsed) throw new Error('Il punto di divisione deve essere interno alla durata del length');
+  const msgA = orig.msg;
+  const msgB = cloneMsg(orig.msg);
+  const totalStrokes = orig.strokes || 0;
+  const strokesA = Math.round(totalStrokes * splitSeconds / orig.elapsed);
+  const strokesB = totalStrokes - strokesA;
+  const remain = orig.elapsed - splitSeconds;
+  setScaled(msgA, L.elapsed, splitSeconds, 1000, 0);
+  setScaled(msgA, L.timer, splitSeconds, 1000, 0);
+  setField(msgA, L.strokes, strokesA);
+  if (orig.type === 'active') {
+    setScaled(msgA, L.avg_speed, state.poolLength / splitSeconds, 1000, 0);
+    setField(msgA, L.cadence, Math.round(strokesA / (splitSeconds / 60)));
+  }
+  if (strokeA) setField(msgA, L.swim_stroke, SWIM_STROKE_REV[strokeA]);
+  setField(msgB, L.start_time, orig.startTimeRaw + splitSeconds);
+  setScaled(msgB, L.elapsed, remain, 1000, 0);
+  setScaled(msgB, L.timer, remain, 1000, 0);
+  setField(msgB, L.strokes, strokesB);
+  if (orig.type === 'active') {
+    setScaled(msgB, L.avg_speed, state.poolLength / remain, 1000, 0);
+    setField(msgB, L.cadence, Math.round(strokesB / (remain / 60)));
+  }
+  if (strokeB) setField(msgB, L.swim_stroke, SWIM_STROKE_REV[strokeB]);
+
+  const origLap = state.msgLapMap.get(msgA);
+  if (origLap) state.msgLapMap.set(msgB, origLap);
+
+  const pos = state.messages.indexOf(msgA);
+  state.messages.splice(pos + 1, 0, msgB);
+
+  if (orig.type === 'active') {
+    ensureLapFor(state, msgA);
+    if (!state.msgLapMap.get(msgB)) state.msgLapMap.set(msgB, state.msgLapMap.get(msgA));
+  }
+
+  return recompute(state);
+}
+
+function mergeLengths(state, idxList) {
+  const idxs = [...idxList].sort((a, b) => a - b);
+  for (let i = 1; i < idxs.length; i++) if (idxs[i] !== idxs[i - 1] + 1) throw new Error('Puoi unire solo length adiacenti e contigui');
+  const rows = idxs.map(i => state.lengths[i]);
+  const keepMsg = rows[0].msg;
+  const sumElapsed = rows.reduce((a, r) => a + r.elapsed, 0);
+  const sumTimer = rows.reduce((a, r) => a + r.timer, 0);
+  const sumStrokes = rows.reduce((a, r) => a + (r.strokes || 0), 0);
+  const anyActive = rows.some(r => r.type === 'active');
+  setScaled(keepMsg, L.elapsed, sumElapsed, 1000, 0);
+  setScaled(keepMsg, L.timer, sumTimer, 1000, 0);
+  setField(keepMsg, L.strokes, sumStrokes);
+  if (anyActive && sumTimer > 0) {
+    setScaled(keepMsg, L.avg_speed, state.poolLength / sumTimer, 1000, 0);
+    setField(keepMsg, L.cadence, Math.round(sumStrokes / (sumTimer / 60)));
+    setField(keepMsg, L.length_type, LENGTH_TYPE_REV.active);
+  }
+  if (anyActive && !state.msgLapMap.get(keepMsg)) {
+    const donorLap = rows.map(r => state.msgLapMap.get(r.msg)).find(Boolean);
+    if (donorLap) state.msgLapMap.set(keepMsg, donorLap);
+  }
+  for (let i = 1; i < rows.length; i++) {
+    const pos = state.messages.indexOf(rows[i].msg);
+    if (pos !== -1) state.messages.splice(pos, 1);
+  }
+  if (anyActive) ensureLapFor(state, keepMsg);
+  return recompute(state);
+}
+
+function setLengthStroke(state, idx, strokeName) {
+  setField(state.lengths[idx].msg, L.swim_stroke, SWIM_STROKE_REV[strokeName]);
+  return recompute(state);
+}
+
+function toggleLengthType(state, idx) {
+  const row = state.lengths[idx];
+  const msg = row.msg;
+  const newType = row.type === 'active' ? 'idle' : 'active';
+  setField(msg, L.length_type, LENGTH_TYPE_REV[newType]);
+  if (newType === 'active') {
+    if (row.strokeRaw === null || row.strokeRaw === undefined) setField(msg, L.swim_stroke, SWIM_STROKE_REV['freestyle']);
+    let strokes = getField(msg, L.strokes);
+    if (strokes === null || strokes === undefined) strokes = 0;
+    setField(msg, L.strokes, strokes);
+    const timer = getScaled(msg, L.timer, 1000, 0) || row.elapsed || 0;
+    if (timer > 0) {
+      setScaled(msg, L.avg_speed, state.poolLength / timer, 1000, 0);
+      setField(msg, L.cadence, strokes > 0 ? Math.round(strokes / (timer / 60)) : 0);
+    }
+    ensureLapFor(state, msg);
+  } else {
+    const oldLap = state.msgLapMap.get(msg);
+    setField(msg, L.strokes, 0xFFFF);
+    setField(msg, L.cadence, 0xFF);
+    setField(msg, L.avg_speed, 0xFFFF);
+    setField(msg, L.swim_stroke, 0xFF);
+    if (oldLap) {
+      state.msgLapMap.delete(msg);
+      const stillUsed = state.lengths.some(r => r.idx !== idx && state.msgLapMap.get(r.msg) === oldLap);
+      if (!stillUsed) {
+        const pos = state.messages.indexOf(oldLap);
+        if (pos !== -1) state.messages.splice(pos, 1);
+      }
+    }
+  }
+  return recompute(state);
+}
+
+/* ============ UI wiring ============ */
+const STROKE_ABBR = { freestyle: 'SL', backstroke: 'DO', breaststroke: 'RA', butterfly: 'DE', drill: 'DRI', mixed: 'MIS', im: 'IM' };
+const STROKE_COLOR = {
+  freestyle: 'rgba(79,209,197,.45)', backstroke: 'rgba(99,140,255,.45)', breaststroke: 'rgba(255,166,77,.45)',
+  butterfly: 'rgba(200,120,255,.45)', drill: 'rgba(232,255,71,.4)', mixed: 'rgba(170,170,170,.4)', im: 'rgba(170,170,170,.4)'
+};
+
+let state = null;
+let selected = new Set();
+let splitOpen = false;
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const loadMsg = document.getElementById('loadMsg');
+const editorCard = document.getElementById('editorCard');
+const tableCard = document.getElementById('tableCard');
+const summaryEl = document.getElementById('summary');
+const actionPanel = document.getElementById('actionPanel');
+const timelineEl = document.getElementById('timeline');
+const legendEl = document.getElementById('legend');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+// Detect and fix inconsistencies that may already exist in an uploaded file (e.g. left over
+// from an earlier, buggy edit elsewhere): a lap whose declared duration/content doesn't match
+// the length(s) it claims to reference. Such laps are discarded and, if that leaves any active
+// length without a lap, a fresh correct one is created for it — restoring a genuinely
+// self-consistent file before the user makes any further edits.
+function repairSwimActivity(state) {
+  const badLaps = [];
+  state.lapMsgsAll.forEach((lap) => {
+    const fl = getField(lap, P.first_length_index);
+    const n = getField(lap, P.num_lengths);
+    if (fl === null || fl === undefined || !n) return;
+    const seg = state.lengthMsgsAll.slice(fl, fl + n);
+    const segTime = seg.reduce((a, m) => a + (getScaled(m, L.elapsed, 1000, 0) || 0), 0);
+    const lapTime = getScaled(lap, P.elapsed, 1000, 0) || 0;
+    if (Math.abs(segTime - lapTime) > 1.0) badLaps.push(lap);
+  });
+
+  for (const lap of badLaps) {
+    const pos = state.messages.indexOf(lap);
+    if (pos !== -1) state.messages.splice(pos, 1);
+  }
+  state.lapMsgsAll = state.messages.filter(m => m.mesgNum === 19);
+  state.lengthMsgsAll = state.messages.filter(m => m.mesgNum === 101);
+  for (const len of state.lengthMsgsAll) {
+    const lap = state.msgLapMap.get(len);
+    if (lap && badLaps.includes(lap)) state.msgLapMap.delete(len);
+  }
+  state.lengths = state.lengthMsgsAll.map((msg, i) => readLengthRow(msg, i, state.msgLapMap.get(msg) || null));
+
+  // check for orphaned active lengths regardless of whether any bad lap was found above —
+  // a length can lack a lap entirely (not just have a wrong one) if an earlier session removed
+  // its lap without cleaning up, or if it was never covered in the first place
+  const orphans = state.lengths.filter(r => r.type === 'active' && !r.lapMsg);
+  for (const o of orphans) ensureLapFor(state, o.msg);
+
+  if (badLaps.length === 0 && orphans.length === 0) return { fixed: 0 };
+
+  recompute(state);
+  return { fixed: badLaps.length, orphansRepaired: orphans.length };
+}
+
+function handleFile(file) {
+  originalFilename = file.name.replace(/\.fit$/i, '');
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = readFit(reader.result);
+      state = loadSwimActivity(parsed);
+      const repairResult = repairSwimActivity(state);
+      selected.clear();
+      splitOpen = false;
+      loadMsg.innerHTML = (repairResult.fixed > 0 || repairResult.orphansRepaired > 0)
+        ? `<div class="msg ok">File caricato: ${state.lengths.length} length trovati. Trovate e corrette automaticamente ${repairResult.fixed} incoerenze e ${repairResult.orphansRepaired || 0} vasche senza lap nel file di partenza.</div>`
+        : `<div class="msg ok">File caricato: ${state.lengths.length} length trovati.</div>`;
+      render();
+    } catch (err) {
+      state = null;
+      loadMsg.innerHTML = `<div class="msg error">Errore: ${err.message}</div>`;
+      editorCard.style.display = 'none';
+      tableCard.style.display = 'none';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function fmtTime(sec) {
+  const s = Math.round(sec);
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}:${String(r).padStart(2, '0')}`;
+}
+
+function toggleSelect(i, ev) {
+  const multi = ev && (ev.ctrlKey || ev.metaKey);
+  if (multi) {
+    if (selected.has(i)) selected.delete(i); else selected.add(i);
+  } else {
+    if (selected.size === 1 && selected.has(i)) selected.clear();
+    else { selected.clear(); selected.add(i); }
+  }
+  splitOpen = false;
+  render();
+}
+
+function render() {
+  if (!state) return;
+  editorCard.style.display = '';
+  tableCard.style.display = '';
+
+  const activeCount = state.lengths.filter(r => r.type === 'active').length;
+  const totalDistance = activeCount * state.poolLength;
+  const totalTime = state.lengths.reduce((a, r) => a + (r.elapsed || 0), 0);
+
+  summaryEl.innerHTML = `
+    <div class="vl-stat"><div class="n">${state.lengths.length}</div><div class="l">Length totali</div></div>
+    <div class="vl-stat"><div class="n">${activeCount}</div><div class="l">Length attivi</div></div>
+    <div class="vl-stat"><div class="n">${totalDistance}m</div><div class="l">Distanza</div></div>
+    <div class="vl-stat"><div class="n">${fmtTime(totalTime)}</div><div class="l">Durata totale</div></div>
+    <div class="vl-stat"><div class="n">${state.poolLength}m</div><div class="l">Vasca</div></div>
+  `;
+
+  renderTimeline();
+  renderActionPanel();
+  renderLegend();
+}
+
+function renderTimeline() {
+  const maxElapsed = Math.max(1, ...state.lengths.map(r => r.elapsed || 1));
+  const maxBarPx = 170;
+  const scale = maxBarPx / maxElapsed;
+  const labelSpace = 46;
+  timelineEl.style.height = (maxBarPx + labelSpace + 12) + 'px';
+
+  timelineEl.innerHTML = '';
+  state.lengths.forEach((row, i) => {
+    const strokeClass = row.type === 'active' ? `stroke-${row.stroke}` : 'idle';
+    const barPx = Math.max(5, Math.round((row.elapsed || 0) * scale));
+    const col = document.createElement('div');
+    col.className = `bar-col ${selected.has(i) ? 'selected' : ''}`;
+    col.dataset.i = i;
+    col.title = row.type === 'active'
+      ? `#${i} · ${SWIM_STROKE_LABEL[row.stroke] || row.stroke} · ${fmtTime(row.elapsed)} · ${row.strokes} bracciate`
+      : `#${i} · riposo · ${fmtTime(row.elapsed)}`;
+    col.innerHTML = `
+      <div class="bar-label">
+        <div class="idx">#${i}</div>
+        <div class="dur">${fmtTime(row.elapsed)}</div>
+        <div>${row.type === 'active' ? (STROKE_ABBR[row.stroke] || row.stroke) : 'riposo'}</div>
+      </div>
+      <div class="bar ${strokeClass}" style="height:${barPx}px"></div>
+    `;
+    col.addEventListener('click', (ev) => toggleSelect(i, ev));
+    timelineEl.appendChild(col);
+  });
+}
+
+function strokeSelectHtml(idOrRole, current) {
+  const isMain = typeof idOrRole === 'number';
+  const opts = Object.entries(SWIM_STROKE_LABEL).map(([val, label]) =>
+    `<option value="${val}" ${val === current ? 'selected' : ''}>${label}</option>`).join('');
+  if (isMain) return `<select data-role="stroke" data-i="${idOrRole}">${opts}</select>`;
+  return `<select data-role="${idOrRole}">${opts}</select>`;
+}
+
+function renderActionPanel() {
+  const arr = [...selected].sort((a, b) => a - b);
+  let html = '';
+
+  if (arr.length === 0) {
+    html = `<div class="action-row"><span class="hint">Clicca su un length per selezionarlo. Tieni premuto Ctrl (o ⌘ su Mac) e clicca per selezionarne altri adiacenti da unire.</span></div>`;
+
+  } else if (arr.length === 1) {
+    const i = arr[0];
+    const row = state.lengths[i];
+    html += `<div class="action-row">
+      <span class="hint">Length #${i} — ${fmtTime(row.elapsed)}</span>
+      <button class="small typeToggleBtn" data-i="${i}">${row.type === 'active' ? 'Segna come riposo' : 'Segna come attivo'}</button>
+      ${row.type === 'active' ? `
+        <span class="hint">Stile</span> ${strokeSelectHtml(i, row.stroke)}
+        <span class="hint">Bracciate</span> <input type="number" min="0" class="strokesInput" data-i="${i}" value="${row.strokes}" style="width:56px">
+      ` : ''}
+      <div class="spacer"></div>
+      <button class="small splitToggleBtn">${splitOpen ? 'Annulla' : 'Dividi'}</button>
+    </div>`;
+
+    if (splitOpen) {
+      const maxSec = Math.max(1, Math.floor(row.elapsed) - 1);
+      const mid = Math.round(row.elapsed / 2);
+      html += `<div class="action-row split-panel">
+        <div class="grp">
+          <label>Punto di divisione (durata totale ${fmtTime(row.elapsed)})</label>
+          <input type="range" id="splitRange" min="1" max="${maxSec}" value="${mid}">
+          <span id="splitVal">${mid}s / ${fmtTime(row.elapsed - mid)}s</span>
+        </div>
+        ${row.type === 'active' ? `
+          <div class="grp"><label>Stile 1ª parte</label>${strokeSelectHtml('sA', row.stroke)}</div>
+          <div class="grp"><label>Stile 2ª parte</label>${strokeSelectHtml('sB', row.stroke)}</div>
+        ` : ''}
+        <button class="primary small" id="confirmSplit">Conferma divisione</button>
+      </div>`;
+    }
+
+  } else {
+    let contiguous = true;
+    for (let k = 1; k < arr.length; k++) if (arr[k] !== arr[k - 1] + 1) contiguous = false;
+    if (contiguous) {
+      html = `<div class="action-row">
+        <button class="primary small" id="confirmMerge">Unisci i ${arr.length} length selezionati</button>
+        <span class="hint">Diventeranno un unico length di ${fmtTime(arr.reduce((a, k) => a + state.lengths[k].elapsed, 0))}.</span>
+      </div>`;
+    } else {
+      html = `<div class="action-row"><span class="hint" style="color:var(--danger)">I length selezionati (${arr.length}) non sono adiacenti: per unirli devono essere consecutivi nella timeline.</span></div>`;
+    }
+  }
+
+  actionPanel.innerHTML = html;
+
+  const typeBtn = actionPanel.querySelector('.typeToggleBtn');
+  if (typeBtn) typeBtn.addEventListener('click', () => { toggleLengthType(state, Number(typeBtn.dataset.i)); render(); });
+
+  const strokeSel = actionPanel.querySelector('[data-role="stroke"]');
+  if (strokeSel) strokeSel.addEventListener('change', () => { setLengthStroke(state, Number(strokeSel.dataset.i), strokeSel.value); render(); });
+
+  const strokesInp = actionPanel.querySelector('.strokesInput');
+  if (strokesInp) strokesInp.addEventListener('change', () => {
+    const i = Number(strokesInp.dataset.i);
+    setField(state.lengths[i].msg, L.strokes, Number(strokesInp.value) || 0);
+    recompute(state);
+    render();
+  });
+
+  const splitToggleBtn = actionPanel.querySelector('.splitToggleBtn');
+  if (splitToggleBtn) splitToggleBtn.addEventListener('click', () => { splitOpen = !splitOpen; render(); });
+
+  const range = actionPanel.querySelector('#splitRange');
+  if (range) {
+    const val = actionPanel.querySelector('#splitVal');
+    const row = state.lengths[arr[0]];
+    range.addEventListener('input', () => {
+      const v = Number(range.value);
+      val.textContent = `${v}s / ${fmtTime(row.elapsed - v)}s`;
+    });
+  }
+
+  const confirmSplit = actionPanel.querySelector('#confirmSplit');
+  if (confirmSplit) confirmSplit.addEventListener('click', () => {
+    try {
+      const i = arr[0];
+      const v = Number(actionPanel.querySelector('#splitRange').value);
+      const sASel = actionPanel.querySelector('[data-role="sA"]');
+      const sBSel = actionPanel.querySelector('[data-role="sB"]');
+      splitLength(state, i, v, sASel ? sASel.value : null, sBSel ? sBSel.value : null);
+      splitOpen = false;
+      selected.clear();
+      render();
+    } catch (err) { alert(err.message); }
+  });
+
+  const confirmMerge = actionPanel.querySelector('#confirmMerge');
+  if (confirmMerge) confirmMerge.addEventListener('click', () => {
+    try {
+      mergeLengths(state, arr);
+      selected.clear();
+      render();
+    } catch (err) { alert(err.message); }
+  });
+}
+
+function renderLegend() {
+  const items = Object.entries(SWIM_STROKE_LABEL).map(([key, label]) =>
+    `<span><span class="sw" style="background:${STROKE_COLOR[key]}"></span>${label}</span>`).join('');
+  legendEl.innerHTML = items + `<span><span class="sw" style="background:#242424"></span>Riposo</span>`;
+}
+
+document.getElementById('downloadBtnMain')?.addEventListener('click', doDownload);
+
+function doDownload() {
+  if (!state) return;
+  const bytes = buildFit(state.messages, {});
+  const blob = new Blob([bytes], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${originalFilename}_corretto.fit`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

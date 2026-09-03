@@ -1,9 +1,9 @@
 :root {
   --bg: #ffffff; --s1: #f6f8f3; --s2: #eef2e7; --s3: #e4ead9;
-  --border: #dce3d3; --accent: #55724a; --teal: #257566;
+  --border: #dce3d3; --accent: #2f6f9e; --teal: #257566;
   --blue: #3f72a0; --yellow: #8f6a1f; --orange: #a15a29;
   --purple: #7a5a96; --red: #b94a3a; --text: #262b22; --muted: #5f6a58;
-  --hero: #3f5636;
+  --hero: #1c3f56;
   --r: 14px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -137,7 +137,7 @@ main { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
   padding: 3px 8px; border-radius: 5px; white-space: nowrap; flex-shrink: 0;
 }
 .bm { background: rgba(47,143,130,.1); color: var(--teal); }
-.bc { background: rgba(85,114,74,.1); color: var(--accent); }
+.bc { background: rgba(47,111,158,.1); color: var(--accent); }
 .bt { background: rgba(63,114,160,.1); color: var(--blue); }
 .bs { background: rgba(166,124,36,.1); color: var(--yellow); }
 .bp { background: rgba(181,101,46,.1); color: var(--orange); }
@@ -181,7 +181,7 @@ main { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
   display: flex; align-items: center; justify-content: center; font-family: monospace;
 }
 .tip {
-  background: rgba(85,114,74,.08); border-left: 2px solid var(--accent);
+  background: rgba(47,111,158,.08); border-left: 2px solid var(--accent);
   padding: 8px 10px; font-size: 12px; color: #3f5c35;
   margin-top: 8px; line-height: 1.5; border-radius: 0 6px 6px 0;
 }
