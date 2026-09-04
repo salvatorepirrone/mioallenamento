@@ -106,9 +106,30 @@ def get_access_token(force_refresh: bool = False) -> str:
     return body["access_token"]
 
 
+def get_height_m(access_token: str) -> float | None:
+    """L'altezza non viene misurata ad ogni pesata: va cercata su tutto lo
+    storico (nessun limite di data), non solo negli ultimi DAYS_BACK giorni."""
+    res = requests.post(
+        MEASURE_ENDPOINT,
+        data={"action": "getmeas", "meastypes": "4", "category": 1, "access_token": access_token},
+        timeout=30,
+    )
+    data = res.json()
+    if data.get("status") != 0:
+        return None
+    groups = sorted(data["body"].get("measuregrps", []), key=lambda g: g.get("date", 0), reverse=True)
+    for group in groups:
+        for m in group.get("measures", []):
+            if m["type"] == 4:
+                return m["value"] * (10 ** m["unit"])
+    return None
+
+
 def sync_weight(access_token: str) -> list[dict]:
     # L'endpoint legacy /measure vuole access_token come parametro nel body,
     # non come header Authorization: Bearer (a differenza delle API OAuth2 piu' recenti).
+    height_m = get_height_m(access_token)
+
     start = int((datetime.now(timezone.utc) - timedelta(days=DAYS_BACK)).timestamp())
     res = requests.post(
         MEASURE_ENDPOINT,
@@ -145,6 +166,7 @@ def sync_weight(access_token: str) -> list[dict]:
             "label": label_it(d),
             "weight": round(weight, 1),
             "fat": round(fat, 1) if fat is not None else None,
+            "bmi": round(weight / (height_m ** 2), 1) if height_m else None,
         })
 
     entries.sort(key=lambda e: e["date"], reverse=True)
