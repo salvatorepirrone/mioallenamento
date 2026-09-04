@@ -71,8 +71,8 @@
   <p>3 settembre – 2 dicembre 2026 · Poi 10 giorni in Argentina (3–12 dic)</p>
 
   <div class="hero-stats">
-    <div class="hstat"><span class="v">74,3 kg</span><span class="l">Peso (18 ago)</span></div>
-    <div class="hstat"><span class="v">22,7%</span><span class="l">Grasso (18 ago)</span></div>
+    <div class="hstat"><span class="v" id="hstat-weight-v">—</span><span class="l" id="hstat-weight-l">Peso</span></div>
+    <div class="hstat"><span class="v" id="hstat-fat-v">—</span><span class="l" id="hstat-fat-l">Grasso</span></div>
     <div class="hstat"><span class="v">29,4 kg</span><span class="l">Massa muscolare (18 ago)</span></div>
     <div class="hstat"><span class="v">24,6</span><span class="l">IMC (18 ago)</span></div>
   </div>
@@ -80,11 +80,6 @@
   <p class="trend-line">
     <b>74,0 kg</b> 5 ago  →  <b>74,3 kg</b> 18 ago — leggero rialzo post-vacanza, nella norma. Nessuna pesata più recente caricata.
   </p>
-</div>
-
-<div class="boat-box">
-  <strong>🏔️ 22–26 agosto:</strong> settimana in montagna (escursioni + una uscita in bici, ~52 km e 3.400 kcal totali) —
-  ottimo lavoro aerobico di base nonostante la pausa dagli schemi strutturati. Allenamenti regolari ripresi dal 29 agosto.
 </div>
 
 <!-- ULTIMI ALLENAMENTI -->
@@ -666,6 +661,25 @@ async function loadActivities() {
 }
 
 loadActivities();
+
+// ── PESO / GRASSO in hero (live da data/withings-weight.json) ──
+async function loadHeroWeight() {
+  try {
+    const res = await fetch('/data/withings-weight.json');
+    if (!res.ok) throw new Error('withings-weight.json non disponibile');
+    const data = await res.json();
+    if (!data.length) return;
+    const latest = data[0];
+    document.getElementById('hstat-weight-v').textContent = latest.weight != null ? `${latest.weight.toFixed(1).replace('.', ',')} kg` : '—';
+    document.getElementById('hstat-weight-l').textContent = `Peso (${latest.label})`;
+    document.getElementById('hstat-fat-v').textContent = latest.fat != null ? `${latest.fat.toFixed(1).replace('.', ',')}%` : '—';
+    document.getElementById('hstat-fat-l').textContent = `Grasso (${latest.label})`;
+  } catch (err) {
+    console.warn('Dati Withings non disponibili:', err);
+  }
+}
+
+loadHeroWeight();
 </script>
 </body>
 </html>
