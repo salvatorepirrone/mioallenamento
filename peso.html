@@ -20,11 +20,6 @@
   .diff-item { text-align:center; }
   .diff-item .dv { font-size:20px; font-weight:700; font-family:monospace; display:block; }
   .diff-item .dl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
-  .btn-connect {
-    display:inline-block; background:var(--accent); color:#fff; padding:.55rem 1.2rem;
-    border-radius:6px; font-size:.78rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    cursor:pointer; border:none; text-decoration:none;
-  }
   .muted-note { font-size:11px; color:var(--muted); margin-top:6px; }
   .leg-dot-inline { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; vertical-align:middle; }
   .chart-legend { display:flex; gap:16px; font-size:12px; color:var(--muted); margin-bottom:8px; }
@@ -78,16 +73,12 @@
       <span class="src-name" style="color:#2f8f66">Withings</span>
       <span class="src-date" id="withings-date">—</span>
     </div>
-    <div id="withings-connect" class="hidden">
-      <p class="muted-note" style="margin-bottom:8px">Non connesso.</p>
-      <a href="callback.html" class="btn-connect">Connetti su pagina Sonno</a>
-    </div>
     <div id="withings-loading" class="muted-note">Caricamento dati Withings...</div>
     <div id="withings-data" class="hidden">
       <div class="src-row"><span class="l">Peso</span><span class="v" id="withings-weight">—</span></div>
       <div class="src-row"><span class="l">Grasso corporeo</span><span class="v" id="withings-fat">—</span></div>
     </div>
-    <div class="muted-note">Live da Withings Health Mate (stesso account collegato alla pagina Sonno)</div>
+    <div class="muted-note">Live da Withings Health Mate (sincronizzato automaticamente dal PC)</div>
   </div>
 
 </div>
@@ -186,127 +177,49 @@ function renderGarmin() {
   return latest;
 }
 
-// ── WITHINGS (live, riusa lo stesso token salvato dalla pagina Sonno) ────────
-const CLIENT_ID = '3fbf541859fb9995d2e1ea7e89754aafc8375d2e6af6cc20846de2db87a91445';
-const REDIRECT_URI = 'https://miopianoallenamento.netlify.app/callback';
-const TOKEN_KEY = 'withings_token';
+// ── DATI WITHINGS (live, sincronizzati automaticamente dallo script withings_sync.py) ──
+let WITHINGS_DATA = [];
 
-function getToken() { try { return JSON.parse(localStorage.getItem(TOKEN_KEY)); } catch { return null; } }
-function saveToken(data) {
-  localStorage.setItem(TOKEN_KEY, JSON.stringify({
-    access_token: data.access_token, refresh_token: data.refresh_token,
-    expires_at: Date.now() + data.expires_in * 1000
-  }));
-}
-async function refreshToken(rt) {
-  const res = await fetch('/.netlify/functions/withings-token', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: rt })
-  });
-  const data = await res.json();
-  if (data.status !== 0) throw new Error('Refresh failed');
-  return data.body;
-}
-async function getValidToken(force) {
-  let t = getToken();
-  if (!t) return null;
-  if (force || Date.now() > t.expires_at - 60000) {
-    try {
-      const fresh = await refreshToken(t.refresh_token);
-      saveToken(fresh);
-      t = getToken();
-    } catch (e) {
-      // Un'altra pagina/tab potrebbe aver gia' rinfrescato lo stesso refresh_token
-      // (Withings lo invalida dopo un solo uso): ricontrolla lo storage prima di arrenderti.
-      const t2 = getToken();
-      if (t2 && t2.refresh_token !== t.refresh_token && Date.now() < t2.expires_at - 60000) {
-        t = t2;
-      } else {
-        throw e;
-      }
-    }
+async function loadWithingsData() {
+  try {
+    const res = await fetch('/data/withings-weight.json');
+    if (!res.ok) throw new Error('withings-weight.json non disponibile');
+    WITHINGS_DATA = await res.json();
+  } catch (err) {
+    console.warn('Dati Withings non disponibili:', err);
+    WITHINGS_DATA = [];
   }
-  return t.access_token;
-}
-async function apiCall(endpoint, params, token) {
-  const body = new URLSearchParams({ ...params, access_token: token });
-  const res = await fetch(`https://wbsapi.withings.net${endpoint}`, {
-    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body
-  });
-  const data = await res.json();
-  if (data.status !== 0) throw new Error(`API ${endpoint}: ${data.error || data.status}`);
-  return data.body;
 }
 
-function fmtDateIt(ts) {
-  return new Date(ts * 1000).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
-}
+function renderWithings(garminLatest) {
+  document.getElementById('withings-loading').classList.add('hidden');
 
-async function loadWithings(garminLatest, retried) {
-  const token = await getValidToken();
-  if (!token) {
-    document.getElementById('withings-loading').classList.add('hidden');
-    document.getElementById('withings-connect').classList.remove('hidden');
-    document.getElementById('withings-history-body').innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center">Non connesso — vai su Sonno per collegare Withings</td></tr>';
+  const tbody = document.getElementById('withings-history-body');
+  if (!WITHINGS_DATA.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center">Nessun dato Withings sincronizzato ancora</td></tr>';
     return;
   }
-  try {
-    const now = Math.floor(Date.now() / 1000);
-    let body;
-    try {
-      body = await apiCall('/measure', {
-        action: 'getmeas', startdate: now - 30 * 86400, enddate: now, meastypes: '1,6'
-      }, token);
-    } catch (e) {
-      if (!retried && /invalid_token/i.test(e.message)) {
-        await getValidToken(true);
-        return loadWithings(garminLatest, true);
-      }
-      throw e;
-    }
 
-    const groups = (body.measuregrps || []).map(g => {
-      const m = {};
-      (g.measures || []).forEach(x => m[x.type] = x.value * Math.pow(10, x.unit));
-      return { ts: g.date, weight: m[1], fat: m[6] };
-    }).filter(g => g.weight != null).sort((a, b) => b.ts - a.ts);
+  document.getElementById('withings-data').classList.remove('hidden');
 
-    renderCharts(GARMIN_DATA, groups);
+  const latest = WITHINGS_DATA[0];
+  document.getElementById('withings-date').textContent = latest.label;
+  document.getElementById('withings-weight').textContent = `${fmt1(latest.weight)} kg`;
+  document.getElementById('withings-fat').textContent = `${fmt1(latest.fat)} %`;
 
-    document.getElementById('withings-loading').classList.add('hidden');
-    document.getElementById('withings-data').classList.remove('hidden');
-
-    if (groups.length > 0) {
-      const latest = groups[0];
-      document.getElementById('withings-date').textContent = fmtDateIt(latest.ts);
-      document.getElementById('withings-weight').textContent = `${latest.weight.toFixed(1)} kg`;
-      document.getElementById('withings-fat').textContent = latest.fat != null ? `${latest.fat.toFixed(1)} %` : '—';
-
-      // Differenza vs Garmin più recente
-      if (garminLatest) {
-        const dw = latest.weight - garminLatest.weight;
-        const df = (latest.fat != null && garminLatest.fat != null) ? latest.fat - garminLatest.fat : null;
-        document.getElementById('diff-weight').textContent = `${dw > 0 ? '+' : ''}${dw.toFixed(1)} kg`;
-        document.getElementById('diff-fat').textContent = df != null ? `${df > 0 ? '+' : ''}${df.toFixed(1)} pt` : '—';
-      }
-    }
-
-    const tbody = document.getElementById('withings-history-body');
-    if (groups.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center">Nessun dato disponibile</td></tr>';
-    } else {
-      tbody.innerHTML = groups.slice(0, 15).map(g => `
-        <tr>
-          <td class="lt-num">${fmtDateIt(g.ts)}</td>
-          <td class="lt-num">${g.weight.toFixed(1)} kg</td>
-          <td class="lt-num">${g.fat != null ? g.fat.toFixed(1) + ' %' : '—'}</td>
-        </tr>`).join('');
-    }
-  } catch (e) {
-    console.error(e);
-    document.getElementById('withings-loading').classList.add('hidden');
-    document.getElementById('withings-history-body').innerHTML = `<tr><td colspan="3" style="color:var(--muted);text-align:center">Errore: ${e.message}</td></tr>`;
+  if (garminLatest) {
+    const dw = latest.weight - garminLatest.weight;
+    const df = (latest.fat != null && garminLatest.fat != null) ? latest.fat - garminLatest.fat : null;
+    document.getElementById('diff-weight').textContent = `${dw > 0 ? '+' : ''}${dw.toFixed(1)} kg`;
+    document.getElementById('diff-fat').textContent = df != null ? `${df > 0 ? '+' : ''}${df.toFixed(1)} pt` : '—';
   }
+
+  tbody.innerHTML = WITHINGS_DATA.slice(0, 15).map(d => `
+    <tr>
+      <td class="lt-num">${d.label}</td>
+      <td class="lt-num">${fmt1(d.weight)} kg</td>
+      <td class="lt-num">${fmt1(d.fat)} %</td>
+    </tr>`).join('');
 }
 
 // ── GRAFICI SVG (peso e % grasso nel tempo) ──────────────────────────────────
@@ -374,11 +287,11 @@ function buildLineChartSVG(seriesList) {
   </svg>`;
 }
 
-function renderCharts(garminData, withingsGroups) {
+function renderCharts(garminData, withingsData) {
   const garminWeightPts = garminData.map(d => ({ date: d.date, value: d.weight }));
   const garminFatPts = garminData.filter(d => d.fat != null).map(d => ({ date: d.date, value: d.fat }));
-  const withingsWeightPts = (withingsGroups || []).map(g => ({ date: new Date(g.ts * 1000).toISOString().slice(0, 10), value: g.weight }));
-  const withingsFatPts = (withingsGroups || []).filter(g => g.fat != null).map(g => ({ date: new Date(g.ts * 1000).toISOString().slice(0, 10), value: g.fat }));
+  const withingsWeightPts = (withingsData || []).map(d => ({ date: d.date, value: d.weight }));
+  const withingsFatPts = (withingsData || []).filter(d => d.fat != null).map(d => ({ date: d.date, value: d.fat }));
 
   document.getElementById('chart-weight').innerHTML = buildLineChartSVG([
     { name: 'Garmin', color: '#3f72a0', points: garminWeightPts },
@@ -391,10 +304,10 @@ function renderCharts(garminData, withingsGroups) {
 }
 
 (async () => {
-  await loadGarminData();
+  await Promise.all([loadGarminData(), loadWithingsData()]);
   const garminLatest = renderGarmin();
-  renderCharts(GARMIN_DATA, []);
-  loadWithings(garminLatest);
+  renderWithings(garminLatest);
+  renderCharts(GARMIN_DATA, WITHINGS_DATA);
 })();
 </script>
 </body>

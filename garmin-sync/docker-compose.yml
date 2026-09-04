@@ -8,3 +8,4 @@ services:
       - ../data:/app/output
       - ./.laps-cache:/app/laps-cache
       - ./fit-files:/app/fit-files
+      - ./.withings-session:/app/.withings-session

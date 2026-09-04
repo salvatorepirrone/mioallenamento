@@ -22,9 +22,15 @@ try {
     Log "=== Avvio sync + pulizia programma (mezzanotte) ==="
 
     Set-Location $syncDir
+
     docker compose run --rm garmin-sync
     if ($LASTEXITCODE -ne 0) {
-        throw "docker compose run e' fallito con exit code $LASTEXITCODE"
+        throw "docker compose run (garmin) e' fallito con exit code $LASTEXITCODE"
+    }
+
+    docker compose run --rm garmin-sync python withings_sync.py
+    if ($LASTEXITCODE -ne 0) {
+        throw "docker compose run (withings) e' fallito con exit code $LASTEXITCODE"
     }
 
     python "$syncDir\cleanup_past_days.py"
@@ -33,7 +39,7 @@ try {
     }
 
     Set-Location $repoRoot
-    git add data/garmin-weight.json data/garmin-activities.json index.html
+    git add data/garmin-weight.json data/garmin-activities.json data/withings-weight.json index.html
 
     $staged = git diff --cached --name-only
     if (-not $staged) {
@@ -42,7 +48,7 @@ try {
     }
 
     $today = Get-Date -Format "yyyy-MM-dd"
-    git commit -m "Aggiorna dati Garmin e rimuovi giorni passati dal programma (auto $today)"
+    git commit -m "Aggiorna dati Garmin/Withings e rimuovi giorni passati dal programma (auto $today)"
     git push origin main
 
     Log "Pubblicato su GitHub (Netlify fara' il deploy automaticamente)."
