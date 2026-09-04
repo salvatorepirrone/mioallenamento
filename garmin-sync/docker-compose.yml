@@ -6,3 +6,5 @@ services:
     volumes:
       - ./.garmin-session:/app/.garmin-session
       - ../data:/app/output
+      - ./.laps-cache:/app/laps-cache
+      - ./fit-files:/app/fit-files

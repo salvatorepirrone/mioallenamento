@@ -1,3 +1,5 @@
 garmin-sync/.env
 garmin-sync/.garmin-session/
 garmin-sync/last-run.log
+garmin-sync/.laps-cache/
+garmin-sync/fit-files/

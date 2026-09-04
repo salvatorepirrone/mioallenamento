@@ -36,6 +36,9 @@
 .act-table tr:last-child td { border-bottom: none; }
 .act-table .fase { font-weight: 600; }
 .act-note { font-size: 12px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+.act-row-clickable { cursor: pointer; }
+.act-row-clickable:hover td { background: var(--s2); }
+.hidden { display: none !important; }
 
 .boat-box {
   background: rgba(122,184,245,.06); border-left: 2px solid var(--blue);
@@ -85,21 +88,14 @@
 </div>
 
 <!-- ULTIMI ALLENAMENTI -->
-<div class="sec">Ultimi allenamenti registrati · da Garmin Connect (aggiornato al 2 set)</div>
+<div class="sec">Ultimi allenamenti registrati · da Garmin Connect (live, sincronizzato automaticamente)</div>
 <table class="act-table">
   <tr><th>Data</th><th>Attività</th><th>Distanza</th><th>Durata</th><th>FC media/max</th><th>Kcal</th></tr>
-  <tr><td>2 set</td><td class="fase">Pesi</td><td>—</td><td>41:32</td><td>87/121</td><td>172</td></tr>
-  <tr><td>31 ago</td><td class="fase">Piscina</td><td>1.900 m</td><td>50:15</td><td>119/155</td><td>425</td></tr>
-  <tr><td>30 ago</td><td class="fase">Corsa</td><td>7,01 km</td><td>40:15</td><td>146/174</td><td>503</td></tr>
-  <tr><td>29 ago</td><td class="fase">Piscina</td><td>2.000 m</td><td>48:21</td><td>124/150</td><td>450</td></tr>
-  <tr><td>21 ago</td><td class="fase">Corsa</td><td>7,12 km</td><td>41:56</td><td>127/164</td><td>469</td></tr>
-  <tr><td>16 ago</td><td class="fase">Nuoto</td><td>1.800 m</td><td>1:00:00</td><td>—/—</td><td>444</td></tr>
-  <tr><td>7 ago</td><td class="fase">Piscina</td><td>2.000 m</td><td>49:38</td><td>133/163</td><td>509</td></tr>
-  <tr><td>4 ago</td><td class="fase">Pesi</td><td>—</td><td>37:46</td><td>94/126</td><td>185</td></tr>
+  <tbody id="act-table-body">
+    <tr><td colspan="6" style="color:var(--muted);text-align:center">Caricamento...</td></tr>
+  </tbody>
 </table>
-<p class="act-note">
-  16 ago: nuotata durante il viaggio, senza fascia cardio (FC non registrata). 22–26 ago: escursioni/ciclismo non incluse in tabella, vedi nota sopra.
-</p>
+<p class="act-note">🔻 = attività con ripetute/lap registrate — clicca la riga per vedere il dettaglio di ognuna.</p>
 
 <!-- SETTIMANA 1 (ripresa) -->
 <div class="week-block">
@@ -576,6 +572,102 @@ if(id){
   const el = document.getElementById(id);
   if(el){ el.classList.add('today'); el.scrollIntoView({behavior:'smooth',block:'center'}); }
 }
+
+// ── ULTIMI ALLENAMENTI (live da data/garmin-activities.json, sincronizzato dallo script garmin-sync) ──
+const ACT_TYPE_LABELS = {
+  running: 'Corsa', trail_running: 'Corsa', treadmill_running: 'Corsa (tapis roulant)',
+  lap_swimming: 'Piscina', open_water_swimming: 'Nuoto', swimming: 'Nuoto',
+  strength_training: 'Pesi',
+  hiking: 'Escursionismo',
+  road_biking: 'Ciclismo', cycling: 'Ciclismo', mountain_biking: 'MTB',
+};
+const ACT_SWIM_TYPES = ['lap_swimming', 'open_water_swimming', 'swimming'];
+const MESI_IT = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+
+function actTypeLabel(t) { return ACT_TYPE_LABELS[t] || t || '—'; }
+
+function actDateLabel(iso) {
+  const [, m, d] = iso.split('-').map(Number);
+  return `${d} ${MESI_IT[m - 1]}`;
+}
+
+function fmtDuration(min) {
+  if (min == null) return '—';
+  const totalSec = Math.round(min * 60);
+  const h = Math.floor(totalSec / 3600);
+  const mm = Math.floor((totalSec % 3600) / 60);
+  const ss = totalSec % 60;
+  return h
+    ? `${h}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`
+    : `${mm}:${String(ss).padStart(2,'0')}`;
+}
+
+function fmtDistance(type, km) {
+  if (km == null) return '—';
+  if (ACT_SWIM_TYPES.includes(type)) return Math.round(km * 1000).toLocaleString('it-IT') + ' m';
+  return km.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' km';
+}
+
+function fmtPace(minPerKm) {
+  if (minPerKm == null) return '—';
+  const totalSec = Math.round(minPerKm * 60);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2,'0')}/km`;
+}
+
+function renderActivityRow(a, i) {
+  const hasLaps = a.laps && a.laps.length > 1;
+  const rowId = `act-laps-${i}`;
+  const clickAttr = hasLaps
+    ? ` class="act-row-clickable" onclick="document.getElementById('${rowId}').classList.toggle('hidden')"`
+    : '';
+  const mainRow = `
+    <tr${clickAttr}>
+      <td>${actDateLabel(a.date)}</td>
+      <td class="fase">${actTypeLabel(a.type)}${hasLaps ? ' 🔻' : ''}</td>
+      <td>${fmtDistance(a.type, a.distance_km)}</td>
+      <td>${fmtDuration(a.duration_min)}</td>
+      <td>${a.avg_hr ?? '—'}/${a.max_hr ?? '—'}</td>
+      <td>${a.calories != null ? Math.round(a.calories) : '—'}</td>
+    </tr>`;
+  if (!hasLaps) return mainRow;
+
+  const lapRows = a.laps.map(l => `
+    <tr>
+      <td colspan="2" style="padding-left:24px;color:var(--muted)">Lap ${l.lap}</td>
+      <td>${l.distance_m != null ? Math.round(l.distance_m) + ' m' : '—'}</td>
+      <td>${fmtPace(l.avg_pace_min_per_km)}</td>
+      <td>${l.avg_hr ?? '—'}/${l.max_hr ?? '—'}</td>
+      <td></td>
+    </tr>`).join('');
+  const detailRow = `
+    <tr id="${rowId}" class="hidden"><td colspan="6" style="padding:0">
+      <table class="act-table" style="margin:0"><tbody>${lapRows}</tbody></table>
+    </td></tr>`;
+  return mainRow + detailRow;
+}
+
+async function loadActivities() {
+  const tbody = document.getElementById('act-table-body');
+  try {
+    const res = await fetch('/data/garmin-activities.json');
+    if (!res.ok) throw new Error('garmin-activities.json non disponibile');
+    const activities = await res.json();
+
+    if (!activities.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Nessuna attività sincronizzata ancora</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = activities.slice(0, 12).map(renderActivityRow).join('');
+  } catch (err) {
+    console.warn('Attività Garmin non disponibili:', err);
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center">Dati non disponibili</td></tr>';
+  }
+}
+
+loadActivities();
 </script>
 </body>
 </html>

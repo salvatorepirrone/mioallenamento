@@ -1,6 +1,7 @@
 [
   {
     "date": "2026-09-03",
+    "activity_id": 24226860524,
     "type": "running",
     "name": "Roma - Ripetute 8x200 Claude",
     "distance_km": 7.3,
@@ -8,10 +9,237 @@
     "avg_hr": 141.0,
     "max_hr": 171.0,
     "calories": 521.0,
-    "avg_pace_min_per_km": 6.17
+    "avg_pace_min_per_km": 6.17,
+    "laps": [
+      {
+        "lap": 1,
+        "distance_m": 1000.0,
+        "duration_s": 386.0,
+        "avg_pace_min_per_km": 6.43,
+        "avg_hr": 119.0,
+        "max_hr": 129.0
+      },
+      {
+        "lap": 2,
+        "distance_m": 344.4,
+        "duration_s": 131.0,
+        "avg_pace_min_per_km": 6.34,
+        "avg_hr": 129.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 3,
+        "distance_m": 4.9,
+        "duration_s": 1.6,
+        "avg_pace_min_per_km": 5.53,
+        "avg_hr": 130.0,
+        "max_hr": 130.0
+      },
+      {
+        "lap": 4,
+        "distance_m": 220.3,
+        "duration_s": 80.0,
+        "avg_pace_min_per_km": 6.05,
+        "avg_hr": 133.0,
+        "max_hr": 139.0
+      },
+      {
+        "lap": 5,
+        "distance_m": 80.0,
+        "duration_s": 20.2,
+        "avg_pace_min_per_km": 4.2,
+        "avg_hr": 140.0,
+        "max_hr": 146.0
+      },
+      {
+        "lap": 6,
+        "distance_m": 188.2,
+        "duration_s": 80.0,
+        "avg_pace_min_per_km": 7.09,
+        "avg_hr": 138.0,
+        "max_hr": 148.0
+      },
+      {
+        "lap": 7,
+        "distance_m": 80.0,
+        "duration_s": 21.4,
+        "avg_pace_min_per_km": 4.47,
+        "avg_hr": 133.0,
+        "max_hr": 140.0
+      },
+      {
+        "lap": 8,
+        "distance_m": 187.3,
+        "duration_s": 80.0,
+        "avg_pace_min_per_km": 7.12,
+        "avg_hr": 136.0,
+        "max_hr": 146.0
+      },
+      {
+        "lap": 9,
+        "distance_m": 80.0,
+        "duration_s": 20.8,
+        "avg_pace_min_per_km": 4.34,
+        "avg_hr": 133.0,
+        "max_hr": 141.0
+      },
+      {
+        "lap": 10,
+        "distance_m": 190.8,
+        "duration_s": 80.0,
+        "avg_pace_min_per_km": 6.99,
+        "avg_hr": 138.0,
+        "max_hr": 145.0
+      },
+      {
+        "lap": 11,
+        "distance_m": 200.0,
+        "duration_s": 51.3,
+        "avg_pace_min_per_km": 4.28,
+        "avg_hr": 146.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 12,
+        "distance_m": 200.0,
+        "duration_s": 84.3,
+        "avg_pace_min_per_km": 7.03,
+        "avg_hr": 142.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 13,
+        "distance_m": 200.0,
+        "duration_s": 52.9,
+        "avg_pace_min_per_km": 4.41,
+        "avg_hr": 143.0,
+        "max_hr": 152.0
+      },
+      {
+        "lap": 14,
+        "distance_m": 200.0,
+        "duration_s": 86.1,
+        "avg_pace_min_per_km": 7.18,
+        "avg_hr": 143.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 15,
+        "distance_m": 200.0,
+        "duration_s": 53.8,
+        "avg_pace_min_per_km": 4.48,
+        "avg_hr": 144.0,
+        "max_hr": 153.0
+      },
+      {
+        "lap": 16,
+        "distance_m": 200.0,
+        "duration_s": 85.5,
+        "avg_pace_min_per_km": 7.12,
+        "avg_hr": 144.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 17,
+        "distance_m": 200.0,
+        "duration_s": 53.2,
+        "avg_pace_min_per_km": 4.43,
+        "avg_hr": 145.0,
+        "max_hr": 156.0
+      },
+      {
+        "lap": 18,
+        "distance_m": 200.0,
+        "duration_s": 87.6,
+        "avg_pace_min_per_km": 7.3,
+        "avg_hr": 146.0,
+        "max_hr": 157.0
+      },
+      {
+        "lap": 19,
+        "distance_m": 200.0,
+        "duration_s": 51.7,
+        "avg_pace_min_per_km": 4.31,
+        "avg_hr": 146.0,
+        "max_hr": 158.0
+      },
+      {
+        "lap": 20,
+        "distance_m": 200.0,
+        "duration_s": 85.2,
+        "avg_pace_min_per_km": 7.1,
+        "avg_hr": 148.0,
+        "max_hr": 160.0
+      },
+      {
+        "lap": 21,
+        "distance_m": 200.0,
+        "duration_s": 52.5,
+        "avg_pace_min_per_km": 4.37,
+        "avg_hr": 149.0,
+        "max_hr": 159.0
+      },
+      {
+        "lap": 22,
+        "distance_m": 200.0,
+        "duration_s": 86.8,
+        "avg_pace_min_per_km": 7.23,
+        "avg_hr": 154.0,
+        "max_hr": 171.0
+      },
+      {
+        "lap": 23,
+        "distance_m": 200.0,
+        "duration_s": 52.6,
+        "avg_pace_min_per_km": 4.38,
+        "avg_hr": 152.0,
+        "max_hr": 163.0
+      },
+      {
+        "lap": 24,
+        "distance_m": 200.0,
+        "duration_s": 88.7,
+        "avg_pace_min_per_km": 7.39,
+        "avg_hr": 152.0,
+        "max_hr": 164.0
+      },
+      {
+        "lap": 25,
+        "distance_m": 200.0,
+        "duration_s": 48.7,
+        "avg_pace_min_per_km": 4.06,
+        "avg_hr": 146.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 26,
+        "distance_m": 842.4,
+        "duration_s": 360.0,
+        "avg_pace_min_per_km": 7.12,
+        "avg_hr": 145.0,
+        "max_hr": 167.0
+      },
+      {
+        "lap": 27,
+        "distance_m": 1000.0,
+        "duration_s": 390.1,
+        "avg_pace_min_per_km": 6.5,
+        "avg_hr": 150.0,
+        "max_hr": 159.0
+      },
+      {
+        "lap": 28,
+        "distance_m": 79.8,
+        "duration_s": 30.0,
+        "avg_pace_min_per_km": 6.27,
+        "avg_hr": 159.0,
+        "max_hr": 171.0
+      }
+    ]
   },
   {
     "date": "2026-09-02",
+    "activity_id": 24212652326,
     "type": "strength_training",
     "name": "Pesi",
     "distance_km": null,
@@ -23,6 +251,7 @@
   },
   {
     "date": "2026-08-31",
+    "activity_id": 24209517648,
     "type": "lap_swimming",
     "name": "Piscina",
     "distance_km": 1.9,
@@ -30,10 +259,429 @@
     "avg_hr": 119.0,
     "max_hr": 155.0,
     "calories": 425.0,
-    "avg_pace_min_per_km": 26.45
+    "avg_pace_min_per_km": 26.45,
+    "laps": [
+      {
+        "lap": 1,
+        "distance_m": 400.0,
+        "duration_s": 489.6,
+        "avg_pace_min_per_km": 20.4,
+        "avg_hr": 98.0,
+        "max_hr": 115.0
+      },
+      {
+        "lap": 2,
+        "distance_m": 0.0,
+        "duration_s": 67.5,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 91.0,
+        "max_hr": 103.0
+      },
+      {
+        "lap": 3,
+        "distance_m": 50.0,
+        "duration_s": 52.0,
+        "avg_pace_min_per_km": 17.35,
+        "avg_hr": 105.0,
+        "max_hr": 113.0
+      },
+      {
+        "lap": 4,
+        "distance_m": 0.0,
+        "duration_s": 20.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 106.0,
+        "max_hr": 111.0
+      },
+      {
+        "lap": 5,
+        "distance_m": 50.0,
+        "duration_s": 53.2,
+        "avg_pace_min_per_km": 17.73,
+        "avg_hr": 108.0,
+        "max_hr": 117.0
+      },
+      {
+        "lap": 6,
+        "distance_m": 0.0,
+        "duration_s": 23.7,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 102.0,
+        "max_hr": 107.0
+      },
+      {
+        "lap": 7,
+        "distance_m": 50.0,
+        "duration_s": 51.5,
+        "avg_pace_min_per_km": 17.16,
+        "avg_hr": 109.0,
+        "max_hr": 119.0
+      },
+      {
+        "lap": 8,
+        "distance_m": 0.0,
+        "duration_s": 26.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 114.0,
+        "max_hr": 119.0
+      },
+      {
+        "lap": 9,
+        "distance_m": 50.0,
+        "duration_s": 50.7,
+        "avg_pace_min_per_km": 16.9,
+        "avg_hr": 115.0,
+        "max_hr": 124.0
+      },
+      {
+        "lap": 10,
+        "distance_m": 0.0,
+        "duration_s": 48.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 91.0,
+        "max_hr": 101.0
+      },
+      {
+        "lap": 11,
+        "distance_m": 50.0,
+        "duration_s": 62.4,
+        "avg_pace_min_per_km": 20.79,
+        "avg_hr": 100.0,
+        "max_hr": 111.0
+      },
+      {
+        "lap": 12,
+        "distance_m": 0.0,
+        "duration_s": 102.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 126.0,
+        "max_hr": 137.0
+      },
+      {
+        "lap": 13,
+        "distance_m": 50.0,
+        "duration_s": 58.5,
+        "avg_pace_min_per_km": 19.49,
+        "avg_hr": 132.0,
+        "max_hr": 137.0
+      },
+      {
+        "lap": 14,
+        "distance_m": 0.0,
+        "duration_s": 40.7,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 120.0,
+        "max_hr": 127.0
+      },
+      {
+        "lap": 15,
+        "distance_m": 50.0,
+        "duration_s": 56.5,
+        "avg_pace_min_per_km": 18.84,
+        "avg_hr": 119.0,
+        "max_hr": 134.0
+      },
+      {
+        "lap": 16,
+        "distance_m": 0.0,
+        "duration_s": 90.7,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 120.0,
+        "max_hr": 134.0
+      },
+      {
+        "lap": 17,
+        "distance_m": 50.0,
+        "duration_s": 50.7,
+        "avg_pace_min_per_km": 16.91,
+        "avg_hr": 121.0,
+        "max_hr": 128.0
+      },
+      {
+        "lap": 18,
+        "distance_m": 0.0,
+        "duration_s": 26.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 122.0,
+        "max_hr": 130.0
+      },
+      {
+        "lap": 19,
+        "distance_m": 50.0,
+        "duration_s": 59.2,
+        "avg_pace_min_per_km": 19.72,
+        "avg_hr": 124.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 20,
+        "distance_m": 0.0,
+        "duration_s": 30.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 126.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 21,
+        "distance_m": 50.0,
+        "duration_s": 59.3,
+        "avg_pace_min_per_km": 19.76,
+        "avg_hr": 124.0,
+        "max_hr": 133.0
+      },
+      {
+        "lap": 22,
+        "distance_m": 0.0,
+        "duration_s": 63.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 115.0,
+        "max_hr": 131.0
+      },
+      {
+        "lap": 23,
+        "distance_m": 50.0,
+        "duration_s": 45.7,
+        "avg_pace_min_per_km": 15.23,
+        "avg_hr": 110.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 24,
+        "distance_m": 0.0,
+        "duration_s": 22.3,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 133.0,
+        "max_hr": 140.0
+      },
+      {
+        "lap": 25,
+        "distance_m": 50.0,
+        "duration_s": 47.7,
+        "avg_pace_min_per_km": 15.89,
+        "avg_hr": 132.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 26,
+        "distance_m": 0.0,
+        "duration_s": 23.7,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 132.0,
+        "max_hr": 135.0
+      },
+      {
+        "lap": 27,
+        "distance_m": 50.0,
+        "duration_s": 49.1,
+        "avg_pace_min_per_km": 16.38,
+        "avg_hr": 132.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 28,
+        "distance_m": 0.0,
+        "duration_s": 29.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 132.0,
+        "max_hr": 138.0
+      },
+      {
+        "lap": 29,
+        "distance_m": 50.0,
+        "duration_s": 48.4,
+        "avg_pace_min_per_km": 16.13,
+        "avg_hr": 133.0,
+        "max_hr": 138.0
+      },
+      {
+        "lap": 30,
+        "distance_m": 0.0,
+        "duration_s": 30.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 132.0,
+        "max_hr": 134.0
+      },
+      {
+        "lap": 31,
+        "distance_m": 50.0,
+        "duration_s": 49.2,
+        "avg_pace_min_per_km": 16.42,
+        "avg_hr": 133.0,
+        "max_hr": 141.0
+      },
+      {
+        "lap": 32,
+        "distance_m": 0.0,
+        "duration_s": 31.8,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 140.0,
+        "max_hr": 148.0
+      },
+      {
+        "lap": 33,
+        "distance_m": 50.0,
+        "duration_s": 47.1,
+        "avg_pace_min_per_km": 15.7,
+        "avg_hr": 134.0,
+        "max_hr": 140.0
+      },
+      {
+        "lap": 34,
+        "distance_m": 0.0,
+        "duration_s": 72.8,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 124.0,
+        "max_hr": 144.0
+      },
+      {
+        "lap": 35,
+        "distance_m": 100.0,
+        "duration_s": 106.0,
+        "avg_pace_min_per_km": 17.67,
+        "avg_hr": 126.0,
+        "max_hr": 140.0
+      },
+      {
+        "lap": 36,
+        "distance_m": 0.0,
+        "duration_s": 41.2,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 130.0,
+        "max_hr": 140.0
+      },
+      {
+        "lap": 37,
+        "distance_m": 100.0,
+        "duration_s": 106.5,
+        "avg_pace_min_per_km": 17.75,
+        "avg_hr": 129.0,
+        "max_hr": 137.0
+      },
+      {
+        "lap": 38,
+        "distance_m": 0.0,
+        "duration_s": 42.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 133.0,
+        "max_hr": 151.0
+      },
+      {
+        "lap": 39,
+        "distance_m": 100.0,
+        "duration_s": 102.5,
+        "avg_pace_min_per_km": 17.09,
+        "avg_hr": 134.0,
+        "max_hr": 139.0
+      },
+      {
+        "lap": 40,
+        "distance_m": 0.0,
+        "duration_s": 41.5,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 125.0,
+        "max_hr": 133.0
+      },
+      {
+        "lap": 41,
+        "distance_m": 100.0,
+        "duration_s": 104.0,
+        "avg_pace_min_per_km": 17.33,
+        "avg_hr": 135.0,
+        "max_hr": 145.0
+      },
+      {
+        "lap": 42,
+        "distance_m": 0.0,
+        "duration_s": 40.6,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 131.0,
+        "max_hr": 143.0
+      },
+      {
+        "lap": 43,
+        "distance_m": 100.0,
+        "duration_s": 105.2,
+        "avg_pace_min_per_km": 17.53,
+        "avg_hr": 120.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 44,
+        "distance_m": 0.0,
+        "duration_s": 50.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 129.0,
+        "max_hr": 153.0
+      },
+      {
+        "lap": 45,
+        "distance_m": 50.0,
+        "duration_s": 58.9,
+        "avg_pace_min_per_km": 19.63,
+        "avg_hr": 117.0,
+        "max_hr": 131.0
+      },
+      {
+        "lap": 46,
+        "distance_m": 0.0,
+        "duration_s": 5.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 126.0,
+        "max_hr": 129.0
+      },
+      {
+        "lap": 47,
+        "distance_m": 50.0,
+        "duration_s": 61.8,
+        "avg_pace_min_per_km": 20.61,
+        "avg_hr": 145.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 48,
+        "distance_m": 0.0,
+        "duration_s": 23.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 141.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 49,
+        "distance_m": 50.0,
+        "duration_s": 55.7,
+        "avg_pace_min_per_km": 18.58,
+        "avg_hr": 122.0,
+        "max_hr": 126.0
+      },
+      {
+        "lap": 50,
+        "distance_m": 0.0,
+        "duration_s": 16.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 122.0,
+        "max_hr": 126.0
+      },
+      {
+        "lap": 51,
+        "distance_m": 50.0,
+        "duration_s": 56.9,
+        "avg_pace_min_per_km": 18.97,
+        "avg_hr": 126.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 52,
+        "distance_m": 0.0,
+        "duration_s": 10.6,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 136.0,
+        "max_hr": 137.0
+      }
+    ]
   },
   {
     "date": "2026-08-30",
+    "activity_id": 24176757858,
     "type": "running",
     "name": "Roma Corsa",
     "distance_km": 7.01,
@@ -41,10 +689,77 @@
     "avg_hr": 146.0,
     "max_hr": 174.0,
     "calories": 503.0,
-    "avg_pace_min_per_km": 5.75
+    "avg_pace_min_per_km": 5.75,
+    "laps": [
+      {
+        "lap": 1,
+        "distance_m": 1000.0,
+        "duration_s": 365.5,
+        "avg_pace_min_per_km": 6.09,
+        "avg_hr": 118.0,
+        "max_hr": 127.0
+      },
+      {
+        "lap": 2,
+        "distance_m": 1000.0,
+        "duration_s": 353.5,
+        "avg_pace_min_per_km": 5.89,
+        "avg_hr": 133.0,
+        "max_hr": 138.0
+      },
+      {
+        "lap": 3,
+        "distance_m": 1000.0,
+        "duration_s": 350.4,
+        "avg_pace_min_per_km": 5.84,
+        "avg_hr": 140.0,
+        "max_hr": 144.0
+      },
+      {
+        "lap": 4,
+        "distance_m": 1000.0,
+        "duration_s": 358.1,
+        "avg_pace_min_per_km": 5.97,
+        "avg_hr": 148.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 5,
+        "distance_m": 1000.0,
+        "duration_s": 325.3,
+        "avg_pace_min_per_km": 5.42,
+        "avg_hr": 154.0,
+        "max_hr": 162.0
+      },
+      {
+        "lap": 6,
+        "distance_m": 1000.0,
+        "duration_s": 342.5,
+        "avg_pace_min_per_km": 5.71,
+        "avg_hr": 163.0,
+        "max_hr": 172.0
+      },
+      {
+        "lap": 7,
+        "distance_m": 1000.0,
+        "duration_s": 317.7,
+        "avg_pace_min_per_km": 5.3,
+        "avg_hr": 169.0,
+        "max_hr": 174.0
+      },
+      {
+        "lap": 8,
+        "distance_m": 6.7,
+        "duration_s": 2.2,
+        "avg_pace_min_per_km": 5.62,
+        "avg_hr": 166.0,
+        "max_hr": 166.0
+      }
+    ]
   },
   {
     "date": "2026-08-29",
+    "activity_id": 24159747848,
     "type": "lap_swimming",
     "name": "Piscina",
     "distance_km": 2.0,
@@ -52,10 +767,397 @@
     "avg_hr": 124.0,
     "max_hr": 150.0,
     "calories": 450.0,
-    "avg_pace_min_per_km": 24.18
+    "avg_pace_min_per_km": 24.18,
+    "laps": [
+      {
+        "lap": 1,
+        "distance_m": 300.0,
+        "duration_s": 342.1,
+        "avg_pace_min_per_km": 19.01,
+        "avg_hr": 112.0,
+        "max_hr": 119.0
+      },
+      {
+        "lap": 2,
+        "distance_m": 50.0,
+        "duration_s": 66.4,
+        "avg_pace_min_per_km": 22.14,
+        "avg_hr": 112.0,
+        "max_hr": 118.0
+      },
+      {
+        "lap": 3,
+        "distance_m": 0.0,
+        "duration_s": 9.6,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 102.0,
+        "max_hr": 106.0
+      },
+      {
+        "lap": 4,
+        "distance_m": 50.0,
+        "duration_s": 89.5,
+        "avg_pace_min_per_km": 29.82,
+        "avg_hr": 105.0,
+        "max_hr": 118.0
+      },
+      {
+        "lap": 5,
+        "distance_m": 0.0,
+        "duration_s": 15.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 100.0,
+        "max_hr": 104.0
+      },
+      {
+        "lap": 6,
+        "distance_m": 50.0,
+        "duration_s": 61.7,
+        "avg_pace_min_per_km": 20.55,
+        "avg_hr": 123.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 7,
+        "distance_m": 0.0,
+        "duration_s": 15.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 130.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 8,
+        "distance_m": 50.0,
+        "duration_s": 69.0,
+        "avg_pace_min_per_km": 22.98,
+        "avg_hr": 104.0,
+        "max_hr": 121.0
+      },
+      {
+        "lap": 9,
+        "distance_m": 0.0,
+        "duration_s": 15.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 107.0,
+        "max_hr": 110.0
+      },
+      {
+        "lap": 10,
+        "distance_m": 50.0,
+        "duration_s": 63.3,
+        "avg_pace_min_per_km": 21.11,
+        "avg_hr": 130.0,
+        "max_hr": 146.0
+      },
+      {
+        "lap": 11,
+        "distance_m": 0.0,
+        "duration_s": 15.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 141.0,
+        "max_hr": 145.0
+      },
+      {
+        "lap": 12,
+        "distance_m": 50.0,
+        "duration_s": 75.5,
+        "avg_pace_min_per_km": 25.18,
+        "avg_hr": 121.0,
+        "max_hr": 135.0
+      },
+      {
+        "lap": 13,
+        "distance_m": 0.0,
+        "duration_s": 15.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 125.0,
+        "max_hr": 128.0
+      },
+      {
+        "lap": 14,
+        "distance_m": 50.0,
+        "duration_s": 60.5,
+        "avg_pace_min_per_km": 20.16,
+        "avg_hr": 128.0,
+        "max_hr": 140.0
+      },
+      {
+        "lap": 15,
+        "distance_m": 0.0,
+        "duration_s": 93.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 104.0,
+        "max_hr": 137.0
+      },
+      {
+        "lap": 16,
+        "distance_m": 100.0,
+        "duration_s": 100.7,
+        "avg_pace_min_per_km": 16.78,
+        "avg_hr": 107.0,
+        "max_hr": 120.0
+      },
+      {
+        "lap": 17,
+        "distance_m": 0.0,
+        "duration_s": 25.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 110.0,
+        "max_hr": 119.0
+      },
+      {
+        "lap": 18,
+        "distance_m": 100.0,
+        "duration_s": 104.4,
+        "avg_pace_min_per_km": 17.4,
+        "avg_hr": 133.0,
+        "max_hr": 137.0
+      },
+      {
+        "lap": 19,
+        "distance_m": 0.0,
+        "duration_s": 25.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 128.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 20,
+        "distance_m": 100.0,
+        "duration_s": 105.0,
+        "avg_pace_min_per_km": 17.5,
+        "avg_hr": 139.0,
+        "max_hr": 146.0
+      },
+      {
+        "lap": 21,
+        "distance_m": 0.0,
+        "duration_s": 25.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 137.0,
+        "max_hr": 144.0
+      },
+      {
+        "lap": 22,
+        "distance_m": 100.0,
+        "duration_s": 107.8,
+        "avg_pace_min_per_km": 17.96,
+        "avg_hr": 140.0,
+        "max_hr": 150.0
+      },
+      {
+        "lap": 23,
+        "distance_m": 0.0,
+        "duration_s": 25.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 133.0,
+        "max_hr": 137.0
+      },
+      {
+        "lap": 24,
+        "distance_m": 100.0,
+        "duration_s": 107.2,
+        "avg_pace_min_per_km": 17.86,
+        "avg_hr": 133.0,
+        "max_hr": 138.0
+      },
+      {
+        "lap": 25,
+        "distance_m": 0.0,
+        "duration_s": 25.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 130.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 26,
+        "distance_m": 100.0,
+        "duration_s": 113.8,
+        "avg_pace_min_per_km": 18.96,
+        "avg_hr": 129.0,
+        "max_hr": 134.0
+      },
+      {
+        "lap": 27,
+        "distance_m": 0.0,
+        "duration_s": 57.8,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 121.0,
+        "max_hr": 131.0
+      },
+      {
+        "lap": 28,
+        "distance_m": 100.0,
+        "duration_s": 102.7,
+        "avg_pace_min_per_km": 17.11,
+        "avg_hr": 127.0,
+        "max_hr": 135.0
+      },
+      {
+        "lap": 29,
+        "distance_m": 0.0,
+        "duration_s": 30.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 127.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 30,
+        "distance_m": 100.0,
+        "duration_s": 104.4,
+        "avg_pace_min_per_km": 17.4,
+        "avg_hr": 128.0,
+        "max_hr": 133.0
+      },
+      {
+        "lap": 31,
+        "distance_m": 0.0,
+        "duration_s": 30.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 127.0,
+        "max_hr": 131.0
+      },
+      {
+        "lap": 32,
+        "distance_m": 100.0,
+        "duration_s": 103.4,
+        "avg_pace_min_per_km": 17.24,
+        "avg_hr": 130.0,
+        "max_hr": 138.0
+      },
+      {
+        "lap": 33,
+        "distance_m": 0.0,
+        "duration_s": 14.6,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 137.0,
+        "max_hr": 139.0
+      },
+      {
+        "lap": 34,
+        "distance_m": 100.0,
+        "duration_s": 108.0,
+        "avg_pace_min_per_km": 18.0,
+        "avg_hr": 134.0,
+        "max_hr": 142.0
+      },
+      {
+        "lap": 35,
+        "distance_m": 0.0,
+        "duration_s": 46.7,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 120.0,
+        "max_hr": 133.0
+      },
+      {
+        "lap": 36,
+        "distance_m": 50.0,
+        "duration_s": 54.0,
+        "avg_pace_min_per_km": 17.98,
+        "avg_hr": 114.0,
+        "max_hr": 134.0
+      },
+      {
+        "lap": 37,
+        "distance_m": 0.0,
+        "duration_s": 25.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 132.0,
+        "max_hr": 134.0
+      },
+      {
+        "lap": 38,
+        "distance_m": 50.0,
+        "duration_s": 55.8,
+        "avg_pace_min_per_km": 18.6,
+        "avg_hr": 125.0,
+        "max_hr": 131.0
+      },
+      {
+        "lap": 39,
+        "distance_m": 0.0,
+        "duration_s": 25.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 125.0,
+        "max_hr": 134.0
+      },
+      {
+        "lap": 40,
+        "distance_m": 50.0,
+        "duration_s": 59.6,
+        "avg_pace_min_per_km": 19.87,
+        "avg_hr": 131.0,
+        "max_hr": 143.0
+      },
+      {
+        "lap": 41,
+        "distance_m": 0.0,
+        "duration_s": 25.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 135.0,
+        "max_hr": 142.0
+      },
+      {
+        "lap": 42,
+        "distance_m": 50.0,
+        "duration_s": 58.0,
+        "avg_pace_min_per_km": 19.34,
+        "avg_hr": 130.0,
+        "max_hr": 142.0
+      },
+      {
+        "lap": 43,
+        "distance_m": 0.0,
+        "duration_s": 25.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 133.0,
+        "max_hr": 141.0
+      },
+      {
+        "lap": 44,
+        "distance_m": 0.0,
+        "duration_s": 12.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 119.0,
+        "max_hr": 123.0
+      },
+      {
+        "lap": 45,
+        "distance_m": 100.0,
+        "duration_s": 123.5,
+        "avg_pace_min_per_km": 20.58,
+        "avg_hr": 126.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 46,
+        "distance_m": 0.0,
+        "duration_s": 6.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 136.0,
+        "max_hr": 137.0
+      },
+      {
+        "lap": 47,
+        "distance_m": 50.0,
+        "duration_s": 56.6,
+        "avg_pace_min_per_km": 18.86,
+        "avg_hr": 132.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 48,
+        "distance_m": 0.0,
+        "duration_s": 5.3,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 136.0,
+        "max_hr": 137.0
+      }
+    ]
   },
   {
     "date": "2026-08-26",
+    "activity_id": 24123848618,
     "type": "hiking",
     "name": "Cortina d'Ampezzo Escursionismo",
     "distance_km": 1.27,
@@ -67,6 +1169,7 @@
   },
   {
     "date": "2026-08-26",
+    "activity_id": 24122605656,
     "type": "hiking",
     "name": "Cortina d'Ampezzo",
     "distance_km": 7.86,
@@ -78,6 +1181,7 @@
   },
   {
     "date": "2026-08-24",
+    "activity_id": 24097190581,
     "type": "hiking",
     "name": "Cortina d'Ampezzo Escursionismo",
     "distance_km": 4.1,
@@ -89,6 +1193,7 @@
   },
   {
     "date": "2026-08-24",
+    "activity_id": 24100144920,
     "type": "hiking",
     "name": "Auronzo di Cadore Escursionismo",
     "distance_km": 5.15,
@@ -100,6 +1205,7 @@
   },
   {
     "date": "2026-08-23",
+    "activity_id": 24085399187,
     "type": "hiking",
     "name": "Cortina d'Ampezzo Escursionismo",
     "distance_km": 7.9,
@@ -111,6 +1217,7 @@
   },
   {
     "date": "2026-08-22",
+    "activity_id": 24072133842,
     "type": "road_biking",
     "name": "San Candido Ciclismo su strada",
     "distance_km": 40.85,
@@ -118,10 +1225,85 @@
     "avg_hr": 105.0,
     "max_hr": 161.0,
     "calories": 814.0,
-    "avg_pace_min_per_km": 3.82
+    "avg_pace_min_per_km": 3.82,
+    "laps": [
+      {
+        "lap": 1,
+        "distance_m": 5000.0,
+        "duration_s": 1014.8,
+        "avg_pace_min_per_km": 3.38,
+        "avg_hr": 102.0,
+        "max_hr": 154.0
+      },
+      {
+        "lap": 2,
+        "distance_m": 5000.0,
+        "duration_s": 1009.3,
+        "avg_pace_min_per_km": 3.36,
+        "avg_hr": 111.0,
+        "max_hr": 161.0
+      },
+      {
+        "lap": 3,
+        "distance_m": 5000.0,
+        "duration_s": 1756.9,
+        "avg_pace_min_per_km": 5.86,
+        "avg_hr": 106.0,
+        "max_hr": 138.0
+      },
+      {
+        "lap": 4,
+        "distance_m": 5000.0,
+        "duration_s": 838.2,
+        "avg_pace_min_per_km": 2.79,
+        "avg_hr": 101.0,
+        "max_hr": 131.0
+      },
+      {
+        "lap": 5,
+        "distance_m": 5000.0,
+        "duration_s": 786.0,
+        "avg_pace_min_per_km": 2.62,
+        "avg_hr": 108.0,
+        "max_hr": 143.0
+      },
+      {
+        "lap": 6,
+        "distance_m": 5000.0,
+        "duration_s": 885.7,
+        "avg_pace_min_per_km": 2.95,
+        "avg_hr": 106.0,
+        "max_hr": 151.0
+      },
+      {
+        "lap": 7,
+        "distance_m": 5000.0,
+        "duration_s": 1268.8,
+        "avg_pace_min_per_km": 4.23,
+        "avg_hr": 108.0,
+        "max_hr": 152.0
+      },
+      {
+        "lap": 8,
+        "distance_m": 5000.0,
+        "duration_s": 977.9,
+        "avg_pace_min_per_km": 3.26,
+        "avg_hr": 100.0,
+        "max_hr": 138.0
+      },
+      {
+        "lap": 9,
+        "distance_m": 853.6,
+        "duration_s": 836.1,
+        "avg_pace_min_per_km": 16.32,
+        "avg_hr": 101.0,
+        "max_hr": 126.0
+      }
+    ]
   },
   {
     "date": "2026-08-21",
+    "activity_id": 24063325458,
     "type": "running",
     "name": "San Vito di Cadore - Ripetute 8x200 Claude",
     "distance_km": 7.12,
@@ -129,10 +1311,237 @@
     "avg_hr": 127.0,
     "max_hr": 164.0,
     "calories": 469.0,
-    "avg_pace_min_per_km": 5.89
+    "avg_pace_min_per_km": 5.89,
+    "laps": [
+      {
+        "lap": 1,
+        "distance_m": 1000.0,
+        "duration_s": 349.4,
+        "avg_pace_min_per_km": 5.82,
+        "avg_hr": 106.0,
+        "max_hr": 117.0
+      },
+      {
+        "lap": 2,
+        "distance_m": 1000.0,
+        "duration_s": 354.6,
+        "avg_pace_min_per_km": 5.91,
+        "avg_hr": 122.0,
+        "max_hr": 133.0
+      },
+      {
+        "lap": 3,
+        "distance_m": 45.8,
+        "duration_s": 16.0,
+        "avg_pace_min_per_km": 5.83,
+        "avg_hr": 131.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 4,
+        "distance_m": 80.0,
+        "duration_s": 21.5,
+        "avg_pace_min_per_km": 4.47,
+        "avg_hr": 135.0,
+        "max_hr": 141.0
+      },
+      {
+        "lap": 5,
+        "distance_m": 223.0,
+        "duration_s": 80.0,
+        "avg_pace_min_per_km": 5.98,
+        "avg_hr": 139.0,
+        "max_hr": 143.0
+      },
+      {
+        "lap": 6,
+        "distance_m": 80.0,
+        "duration_s": 21.1,
+        "avg_pace_min_per_km": 4.4,
+        "avg_hr": 139.0,
+        "max_hr": 144.0
+      },
+      {
+        "lap": 7,
+        "distance_m": 223.9,
+        "duration_s": 80.0,
+        "avg_pace_min_per_km": 5.96,
+        "avg_hr": 140.0,
+        "max_hr": 146.0
+      },
+      {
+        "lap": 8,
+        "distance_m": 80.0,
+        "duration_s": 21.6,
+        "avg_pace_min_per_km": 4.51,
+        "avg_hr": 137.0,
+        "max_hr": 141.0
+      },
+      {
+        "lap": 9,
+        "distance_m": 203.9,
+        "duration_s": 80.0,
+        "avg_pace_min_per_km": 6.54,
+        "avg_hr": 138.0,
+        "max_hr": 143.0
+      },
+      {
+        "lap": 10,
+        "distance_m": 80.0,
+        "duration_s": 20.3,
+        "avg_pace_min_per_km": 4.22,
+        "avg_hr": 134.0,
+        "max_hr": 138.0
+      },
+      {
+        "lap": 11,
+        "distance_m": 215.4,
+        "duration_s": 80.0,
+        "avg_pace_min_per_km": 6.19,
+        "avg_hr": 135.0,
+        "max_hr": 142.0
+      },
+      {
+        "lap": 12,
+        "distance_m": 200.0,
+        "duration_s": 50.4,
+        "avg_pace_min_per_km": 4.2,
+        "avg_hr": 138.0,
+        "max_hr": 150.0
+      },
+      {
+        "lap": 13,
+        "distance_m": 200.0,
+        "duration_s": 78.4,
+        "avg_pace_min_per_km": 6.54,
+        "avg_hr": 145.0,
+        "max_hr": 151.0
+      },
+      {
+        "lap": 14,
+        "distance_m": 200.0,
+        "duration_s": 57.3,
+        "avg_pace_min_per_km": 4.77,
+        "avg_hr": 145.0,
+        "max_hr": 151.0
+      },
+      {
+        "lap": 15,
+        "distance_m": 200.0,
+        "duration_s": 83.5,
+        "avg_pace_min_per_km": 6.96,
+        "avg_hr": 146.0,
+        "max_hr": 152.0
+      },
+      {
+        "lap": 16,
+        "distance_m": 200.0,
+        "duration_s": 56.2,
+        "avg_pace_min_per_km": 4.68,
+        "avg_hr": 156.0,
+        "max_hr": 164.0
+      },
+      {
+        "lap": 17,
+        "distance_m": 200.0,
+        "duration_s": 80.2,
+        "avg_pace_min_per_km": 6.69,
+        "avg_hr": 128.0,
+        "max_hr": 160.0
+      },
+      {
+        "lap": 18,
+        "distance_m": 200.0,
+        "duration_s": 55.6,
+        "avg_pace_min_per_km": 4.63,
+        "avg_hr": 121.0,
+        "max_hr": 129.0
+      },
+      {
+        "lap": 19,
+        "distance_m": 200.0,
+        "duration_s": 81.9,
+        "avg_pace_min_per_km": 6.83,
+        "avg_hr": 123.0,
+        "max_hr": 130.0
+      },
+      {
+        "lap": 20,
+        "distance_m": 200.0,
+        "duration_s": 53.3,
+        "avg_pace_min_per_km": 4.44,
+        "avg_hr": 125.0,
+        "max_hr": 131.0
+      },
+      {
+        "lap": 21,
+        "distance_m": 200.0,
+        "duration_s": 84.5,
+        "avg_pace_min_per_km": 7.04,
+        "avg_hr": 124.0,
+        "max_hr": 129.0
+      },
+      {
+        "lap": 22,
+        "distance_m": 200.0,
+        "duration_s": 56.2,
+        "avg_pace_min_per_km": 4.69,
+        "avg_hr": 124.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 23,
+        "distance_m": 200.0,
+        "duration_s": 87.2,
+        "avg_pace_min_per_km": 7.26,
+        "avg_hr": 125.0,
+        "max_hr": 133.0
+      },
+      {
+        "lap": 24,
+        "distance_m": 200.0,
+        "duration_s": 56.5,
+        "avg_pace_min_per_km": 4.71,
+        "avg_hr": 123.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 25,
+        "distance_m": 200.0,
+        "duration_s": 89.0,
+        "avg_pace_min_per_km": 7.42,
+        "avg_hr": 127.0,
+        "max_hr": 133.0
+      },
+      {
+        "lap": 26,
+        "distance_m": 200.0,
+        "duration_s": 59.3,
+        "avg_pace_min_per_km": 4.94,
+        "avg_hr": 132.0,
+        "max_hr": 139.0
+      },
+      {
+        "lap": 27,
+        "distance_m": 885.4,
+        "duration_s": 360.0,
+        "avg_pace_min_per_km": 6.78,
+        "avg_hr": 124.0,
+        "max_hr": 147.0
+      },
+      {
+        "lap": 28,
+        "distance_m": 4.0,
+        "duration_s": 1.7,
+        "avg_pace_min_per_km": 7.31,
+        "avg_hr": 148.0,
+        "max_hr": 148.0
+      }
+    ]
   },
   {
     "date": "2026-08-16",
+    "activity_id": 23998572888,
     "type": "swimming",
     "name": "Piscina - velocità ",
     "distance_km": 1.8,
@@ -144,6 +1553,7 @@
   },
   {
     "date": "2026-08-07",
+    "activity_id": 23889772802,
     "type": "lap_swimming",
     "name": "Tecnica + soglia",
     "distance_km": 2.0,
@@ -151,10 +1561,373 @@
     "avg_hr": 133.0,
     "max_hr": 163.0,
     "calories": 509.0,
-    "avg_pace_min_per_km": 24.82
+    "avg_pace_min_per_km": 24.82,
+    "laps": [
+      {
+        "lap": 1,
+        "distance_m": 300.0,
+        "duration_s": 338.5,
+        "avg_pace_min_per_km": 18.81,
+        "avg_hr": 109.0,
+        "max_hr": 116.0
+      },
+      {
+        "lap": 2,
+        "distance_m": 100.0,
+        "duration_s": 130.8,
+        "avg_pace_min_per_km": 21.79,
+        "avg_hr": 105.0,
+        "max_hr": 111.0
+      },
+      {
+        "lap": 3,
+        "distance_m": 0.0,
+        "duration_s": 58.1,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 118.0,
+        "max_hr": 131.0
+      },
+      {
+        "lap": 4,
+        "distance_m": 50.0,
+        "duration_s": 60.1,
+        "avg_pace_min_per_km": 20.02,
+        "avg_hr": 125.0,
+        "max_hr": 134.0
+      },
+      {
+        "lap": 5,
+        "distance_m": 0.0,
+        "duration_s": 15.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 133.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 6,
+        "distance_m": 50.0,
+        "duration_s": 57.5,
+        "avg_pace_min_per_km": 19.18,
+        "avg_hr": 130.0,
+        "max_hr": 135.0
+      },
+      {
+        "lap": 7,
+        "distance_m": 0.0,
+        "duration_s": 15.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 132.0,
+        "max_hr": 135.0
+      },
+      {
+        "lap": 8,
+        "distance_m": 50.0,
+        "duration_s": 58.3,
+        "avg_pace_min_per_km": 19.44,
+        "avg_hr": 136.0,
+        "max_hr": 142.0
+      },
+      {
+        "lap": 9,
+        "distance_m": 0.0,
+        "duration_s": 15.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 139.0,
+        "max_hr": 142.0
+      },
+      {
+        "lap": 10,
+        "distance_m": 50.0,
+        "duration_s": 55.4,
+        "avg_pace_min_per_km": 18.46,
+        "avg_hr": 137.0,
+        "max_hr": 140.0
+      },
+      {
+        "lap": 11,
+        "distance_m": 0.0,
+        "duration_s": 15.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 138.0,
+        "max_hr": 140.0
+      },
+      {
+        "lap": 12,
+        "distance_m": 50.0,
+        "duration_s": 58.2,
+        "avg_pace_min_per_km": 19.4,
+        "avg_hr": 139.0,
+        "max_hr": 144.0
+      },
+      {
+        "lap": 13,
+        "distance_m": 0.0,
+        "duration_s": 15.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 143.0,
+        "max_hr": 145.0
+      },
+      {
+        "lap": 14,
+        "distance_m": 50.0,
+        "duration_s": 53.9,
+        "avg_pace_min_per_km": 17.97,
+        "avg_hr": 139.0,
+        "max_hr": 141.0
+      },
+      {
+        "lap": 15,
+        "distance_m": 0.0,
+        "duration_s": 121.3,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 116.0,
+        "max_hr": 137.0
+      },
+      {
+        "lap": 16,
+        "distance_m": 100.0,
+        "duration_s": 98.4,
+        "avg_pace_min_per_km": 16.4,
+        "avg_hr": 128.0,
+        "max_hr": 140.0
+      },
+      {
+        "lap": 17,
+        "distance_m": 0.0,
+        "duration_s": 25.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 140.0,
+        "max_hr": 148.0
+      },
+      {
+        "lap": 18,
+        "distance_m": 100.0,
+        "duration_s": 104.2,
+        "avg_pace_min_per_km": 17.37,
+        "avg_hr": 149.0,
+        "max_hr": 157.0
+      },
+      {
+        "lap": 19,
+        "distance_m": 0.0,
+        "duration_s": 25.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 150.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 20,
+        "distance_m": 100.0,
+        "duration_s": 105.0,
+        "avg_pace_min_per_km": 17.5,
+        "avg_hr": 150.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 21,
+        "distance_m": 0.0,
+        "duration_s": 25.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 148.0,
+        "max_hr": 153.0
+      },
+      {
+        "lap": 22,
+        "distance_m": 100.0,
+        "duration_s": 107.2,
+        "avg_pace_min_per_km": 17.87,
+        "avg_hr": 151.0,
+        "max_hr": 163.0
+      },
+      {
+        "lap": 23,
+        "distance_m": 0.0,
+        "duration_s": 25.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 154.0,
+        "max_hr": 163.0
+      },
+      {
+        "lap": 24,
+        "distance_m": 100.0,
+        "duration_s": 105.0,
+        "avg_pace_min_per_km": 17.5,
+        "avg_hr": 150.0,
+        "max_hr": 158.0
+      },
+      {
+        "lap": 25,
+        "distance_m": 0.0,
+        "duration_s": 25.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 151.0,
+        "max_hr": 159.0
+      },
+      {
+        "lap": 26,
+        "distance_m": 100.0,
+        "duration_s": 106.2,
+        "avg_pace_min_per_km": 17.7,
+        "avg_hr": 150.0,
+        "max_hr": 159.0
+      },
+      {
+        "lap": 27,
+        "distance_m": 0.0,
+        "duration_s": 120.5,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 127.0,
+        "max_hr": 159.0
+      },
+      {
+        "lap": 28,
+        "distance_m": 100.0,
+        "duration_s": 105.8,
+        "avg_pace_min_per_km": 17.63,
+        "avg_hr": 126.0,
+        "max_hr": 135.0
+      },
+      {
+        "lap": 29,
+        "distance_m": 0.0,
+        "duration_s": 30.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 130.0,
+        "max_hr": 133.0
+      },
+      {
+        "lap": 30,
+        "distance_m": 100.0,
+        "duration_s": 104.0,
+        "avg_pace_min_per_km": 17.34,
+        "avg_hr": 140.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 31,
+        "distance_m": 0.0,
+        "duration_s": 30.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 148.0,
+        "max_hr": 155.0
+      },
+      {
+        "lap": 32,
+        "distance_m": 100.0,
+        "duration_s": 103.9,
+        "avg_pace_min_per_km": 17.32,
+        "avg_hr": 143.0,
+        "max_hr": 162.0
+      },
+      {
+        "lap": 33,
+        "distance_m": 0.0,
+        "duration_s": 30.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 148.0,
+        "max_hr": 163.0
+      },
+      {
+        "lap": 34,
+        "distance_m": 100.0,
+        "duration_s": 103.7,
+        "avg_pace_min_per_km": 17.28,
+        "avg_hr": 144.0,
+        "max_hr": 152.0
+      },
+      {
+        "lap": 35,
+        "distance_m": 0.0,
+        "duration_s": 58.8,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 136.0,
+        "max_hr": 150.0
+      },
+      {
+        "lap": 36,
+        "distance_m": 50.0,
+        "duration_s": 64.2,
+        "avg_pace_min_per_km": 21.4,
+        "avg_hr": 124.0,
+        "max_hr": 142.0
+      },
+      {
+        "lap": 37,
+        "distance_m": 0.0,
+        "duration_s": 25.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 133.0,
+        "max_hr": 143.0
+      },
+      {
+        "lap": 38,
+        "distance_m": 50.0,
+        "duration_s": 63.7,
+        "avg_pace_min_per_km": 21.22,
+        "avg_hr": 135.0,
+        "max_hr": 144.0
+      },
+      {
+        "lap": 39,
+        "distance_m": 0.0,
+        "duration_s": 19.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 140.0,
+        "max_hr": 143.0
+      },
+      {
+        "lap": 40,
+        "distance_m": 50.0,
+        "duration_s": 60.1,
+        "avg_pace_min_per_km": 20.03,
+        "avg_hr": 134.0,
+        "max_hr": 146.0
+      },
+      {
+        "lap": 41,
+        "distance_m": 0.0,
+        "duration_s": 9.2,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 146.0,
+        "max_hr": 147.0
+      },
+      {
+        "lap": 42,
+        "distance_m": 50.0,
+        "duration_s": 61.6,
+        "avg_pace_min_per_km": 20.53,
+        "avg_hr": 142.0,
+        "max_hr": 146.0
+      },
+      {
+        "lap": 43,
+        "distance_m": 0.0,
+        "duration_s": 16.5,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 142.0,
+        "max_hr": 144.0
+      },
+      {
+        "lap": 44,
+        "distance_m": 100.0,
+        "duration_s": 115.6,
+        "avg_pace_min_per_km": 19.27,
+        "avg_hr": 143.0,
+        "max_hr": 154.0
+      },
+      {
+        "lap": 45,
+        "distance_m": 0.0,
+        "duration_s": 38.5,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 139.0,
+        "max_hr": 154.0
+      }
+    ]
   },
   {
     "date": "2026-08-04",
+    "activity_id": 23852433037,
     "type": "strength_training",
     "name": "Pesi",
     "distance_km": null,
@@ -166,6 +1939,7 @@
   },
   {
     "date": "2026-08-01",
+    "activity_id": 23810130977,
     "type": "lap_swimming",
     "name": "Piscina",
     "distance_km": 0.1,
@@ -173,10 +1947,37 @@
     "avg_hr": 114.0,
     "max_hr": 128.0,
     "calories": 17.0,
-    "avg_pace_min_per_km": 20.15
+    "avg_pace_min_per_km": 20.15,
+    "laps": [
+      {
+        "lap": 1,
+        "distance_m": 100.0,
+        "duration_s": 105.6,
+        "avg_pace_min_per_km": 17.6,
+        "avg_hr": 112.0,
+        "max_hr": 128.0
+      },
+      {
+        "lap": 2,
+        "distance_m": 0.0,
+        "duration_s": 12.7,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 126.0,
+        "max_hr": 128.0
+      },
+      {
+        "lap": 3,
+        "distance_m": 0.0,
+        "duration_s": 2.6,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 121.0,
+        "max_hr": 121.0
+      }
+    ]
   },
   {
     "date": "2026-08-01",
+    "activity_id": 23810130447,
     "type": "lap_swimming",
     "name": "Claude velocità",
     "distance_km": 1.7,
@@ -184,6 +1985,416 @@
     "avg_hr": 115.0,
     "max_hr": 151.0,
     "calories": 370.0,
-    "avg_pace_min_per_km": 29.26
+    "avg_pace_min_per_km": 29.26,
+    "laps": [
+      {
+        "lap": 1,
+        "distance_m": 300.0,
+        "duration_s": 330.6,
+        "avg_pace_min_per_km": 18.37,
+        "avg_hr": 125.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 2,
+        "distance_m": 100.0,
+        "duration_s": 120.5,
+        "avg_pace_min_per_km": 20.08,
+        "avg_hr": 133.0,
+        "max_hr": 141.0
+      },
+      {
+        "lap": 3,
+        "distance_m": 0.0,
+        "duration_s": 125.7,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 94.0,
+        "max_hr": 121.0
+      },
+      {
+        "lap": 4,
+        "distance_m": 50.0,
+        "duration_s": 62.1,
+        "avg_pace_min_per_km": 20.71,
+        "avg_hr": 86.0,
+        "max_hr": 105.0
+      },
+      {
+        "lap": 5,
+        "distance_m": 0.0,
+        "duration_s": 15.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 84.0,
+        "max_hr": 87.0
+      },
+      {
+        "lap": 6,
+        "distance_m": 50.0,
+        "duration_s": 59.8,
+        "avg_pace_min_per_km": 19.93,
+        "avg_hr": 93.0,
+        "max_hr": 107.0
+      },
+      {
+        "lap": 7,
+        "distance_m": 0.0,
+        "duration_s": 15.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 109.0,
+        "max_hr": 111.0
+      },
+      {
+        "lap": 8,
+        "distance_m": 50.0,
+        "duration_s": 62.9,
+        "avg_pace_min_per_km": 20.96,
+        "avg_hr": 117.0,
+        "max_hr": 121.0
+      },
+      {
+        "lap": 9,
+        "distance_m": 0.0,
+        "duration_s": 15.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 110.0,
+        "max_hr": 115.0
+      },
+      {
+        "lap": 10,
+        "distance_m": 50.0,
+        "duration_s": 56.0,
+        "avg_pace_min_per_km": 18.66,
+        "avg_hr": 117.0,
+        "max_hr": 125.0
+      },
+      {
+        "lap": 11,
+        "distance_m": 0.0,
+        "duration_s": 52.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 113.0,
+        "max_hr": 126.0
+      },
+      {
+        "lap": 12,
+        "distance_m": 50.0,
+        "duration_s": 46.9,
+        "avg_pace_min_per_km": 15.64,
+        "avg_hr": 108.0,
+        "max_hr": 127.0
+      },
+      {
+        "lap": 13,
+        "distance_m": 0.0,
+        "duration_s": 20.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 129.0,
+        "max_hr": 133.0
+      },
+      {
+        "lap": 14,
+        "distance_m": 50.0,
+        "duration_s": 48.7,
+        "avg_pace_min_per_km": 16.25,
+        "avg_hr": 123.0,
+        "max_hr": 126.0
+      },
+      {
+        "lap": 15,
+        "distance_m": 0.0,
+        "duration_s": 20.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 121.0,
+        "max_hr": 122.0
+      },
+      {
+        "lap": 16,
+        "distance_m": 50.0,
+        "duration_s": 53.4,
+        "avg_pace_min_per_km": 17.8,
+        "avg_hr": 121.0,
+        "max_hr": 127.0
+      },
+      {
+        "lap": 17,
+        "distance_m": 0.0,
+        "duration_s": 20.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 119.0,
+        "max_hr": 127.0
+      },
+      {
+        "lap": 18,
+        "distance_m": 50.0,
+        "duration_s": 49.2,
+        "avg_pace_min_per_km": 16.39,
+        "avg_hr": 122.0,
+        "max_hr": 124.0
+      },
+      {
+        "lap": 19,
+        "distance_m": 0.0,
+        "duration_s": 20.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 126.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 20,
+        "distance_m": 50.0,
+        "duration_s": 50.6,
+        "avg_pace_min_per_km": 16.88,
+        "avg_hr": 124.0,
+        "max_hr": 134.0
+      },
+      {
+        "lap": 21,
+        "distance_m": 0.0,
+        "duration_s": 20.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 133.0,
+        "max_hr": 135.0
+      },
+      {
+        "lap": 22,
+        "distance_m": 50.0,
+        "duration_s": 52.1,
+        "avg_pace_min_per_km": 17.36,
+        "avg_hr": 128.0,
+        "max_hr": 151.0
+      },
+      {
+        "lap": 23,
+        "distance_m": 0.0,
+        "duration_s": 110.6,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 110.0,
+        "max_hr": 151.0
+      },
+      {
+        "lap": 24,
+        "distance_m": 50.0,
+        "duration_s": 36.7,
+        "avg_pace_min_per_km": 12.23,
+        "avg_hr": 109.0,
+        "max_hr": 124.0
+      },
+      {
+        "lap": 25,
+        "distance_m": 0.0,
+        "duration_s": 74.3,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 123.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 26,
+        "distance_m": 50.0,
+        "duration_s": 38.4,
+        "avg_pace_min_per_km": 12.8,
+        "avg_hr": 118.0,
+        "max_hr": 135.0
+      },
+      {
+        "lap": 27,
+        "distance_m": 0.0,
+        "duration_s": 75.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 122.0,
+        "max_hr": 141.0
+      },
+      {
+        "lap": 28,
+        "distance_m": 50.0,
+        "duration_s": 39.7,
+        "avg_pace_min_per_km": 13.22,
+        "avg_hr": 114.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 29,
+        "distance_m": 0.0,
+        "duration_s": 75.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 122.0,
+        "max_hr": 143.0
+      },
+      {
+        "lap": 30,
+        "distance_m": 50.0,
+        "duration_s": 41.2,
+        "avg_pace_min_per_km": 13.72,
+        "avg_hr": 112.0,
+        "max_hr": 126.0
+      },
+      {
+        "lap": 31,
+        "distance_m": 0.0,
+        "duration_s": 75.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 114.0,
+        "max_hr": 127.0
+      },
+      {
+        "lap": 32,
+        "distance_m": 50.0,
+        "duration_s": 41.0,
+        "avg_pace_min_per_km": 13.67,
+        "avg_hr": 111.0,
+        "max_hr": 124.0
+      },
+      {
+        "lap": 33,
+        "distance_m": 0.0,
+        "duration_s": 75.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 112.0,
+        "max_hr": 127.0
+      },
+      {
+        "lap": 34,
+        "distance_m": 50.0,
+        "duration_s": 41.5,
+        "avg_pace_min_per_km": 13.83,
+        "avg_hr": 107.0,
+        "max_hr": 124.0
+      },
+      {
+        "lap": 35,
+        "distance_m": 0.0,
+        "duration_s": 75.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 114.0,
+        "max_hr": 128.0
+      },
+      {
+        "lap": 36,
+        "distance_m": 50.0,
+        "duration_s": 40.9,
+        "avg_pace_min_per_km": 13.64,
+        "avg_hr": 106.0,
+        "max_hr": 123.0
+      },
+      {
+        "lap": 37,
+        "distance_m": 0.0,
+        "duration_s": 75.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 108.0,
+        "max_hr": 123.0
+      },
+      {
+        "lap": 38,
+        "distance_m": 50.0,
+        "duration_s": 43.6,
+        "avg_pace_min_per_km": 14.52,
+        "avg_hr": 105.0,
+        "max_hr": 124.0
+      },
+      {
+        "lap": 39,
+        "distance_m": 0.0,
+        "duration_s": 114.7,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 112.0,
+        "max_hr": 128.0
+      },
+      {
+        "lap": 40,
+        "distance_m": 50.0,
+        "duration_s": 43.3,
+        "avg_pace_min_per_km": 14.45,
+        "avg_hr": 112.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 41,
+        "distance_m": 0.0,
+        "duration_s": 35.9,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 122.0,
+        "max_hr": 136.0
+      },
+      {
+        "lap": 42,
+        "distance_m": 50.0,
+        "duration_s": 43.5,
+        "avg_pace_min_per_km": 14.49,
+        "avg_hr": 104.0,
+        "max_hr": 113.0
+      },
+      {
+        "lap": 43,
+        "distance_m": 0.0,
+        "duration_s": 40.3,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 113.0,
+        "max_hr": 122.0
+      },
+      {
+        "lap": 44,
+        "distance_m": 50.0,
+        "duration_s": 44.4,
+        "avg_pace_min_per_km": 14.8,
+        "avg_hr": 110.0,
+        "max_hr": 119.0
+      },
+      {
+        "lap": 45,
+        "distance_m": 0.0,
+        "duration_s": 37.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 112.0,
+        "max_hr": 123.0
+      },
+      {
+        "lap": 46,
+        "distance_m": 50.0,
+        "duration_s": 43.7,
+        "avg_pace_min_per_km": 14.56,
+        "avg_hr": 109.0,
+        "max_hr": 129.0
+      },
+      {
+        "lap": 47,
+        "distance_m": 0.0,
+        "duration_s": 63.7,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 111.0,
+        "max_hr": 130.0
+      },
+      {
+        "lap": 48,
+        "distance_m": 100.0,
+        "duration_s": 104.7,
+        "avg_pace_min_per_km": 17.45,
+        "avg_hr": 117.0,
+        "max_hr": 129.0
+      },
+      {
+        "lap": 49,
+        "distance_m": 0.0,
+        "duration_s": 15.0,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 127.0,
+        "max_hr": 128.0
+      },
+      {
+        "lap": 50,
+        "distance_m": 100.0,
+        "duration_s": 112.8,
+        "avg_pace_min_per_km": 18.8,
+        "avg_hr": 126.0,
+        "max_hr": 132.0
+      },
+      {
+        "lap": 51,
+        "distance_m": 0.0,
+        "duration_s": 10.8,
+        "avg_pace_min_per_km": null,
+        "avg_hr": 130.0,
+        "max_hr": 131.0
+      }
+    ]
   }
 ]
