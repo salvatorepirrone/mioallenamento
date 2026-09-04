@@ -71,7 +71,7 @@ def refresh_access_token(refresh_token: str) -> dict:
     return data["body"]
 
 
-def get_access_token() -> str:
+def get_access_token(force_refresh: bool = False) -> str:
     cached = load_cached_token()
     setup_code = os.environ.get("WITHINGS_SETUP_CODE", "").strip()
     setup_refresh_token = os.environ.get("WITHINGS_SETUP_REFRESH_TOKEN", "").strip()
@@ -97,21 +97,28 @@ def get_access_token() -> str:
         )
         sys.exit(1)
 
-    if cached["expires_at"] > time.time() + 60:
+    if not force_refresh and cached["expires_at"] > time.time() + 60:
         return cached["access_token"]
 
-    print("Access token Withings scaduto, rinnovo...")
+    print("Rinnovo il token Withings...")
     body = refresh_access_token(cached["refresh_token"])
     save_token(body)
     return body["access_token"]
 
 
 def sync_weight(access_token: str) -> list[dict]:
+    # L'endpoint legacy /measure vuole access_token come parametro nel body,
+    # non come header Authorization: Bearer (a differenza delle API OAuth2 piu' recenti).
     start = int((datetime.now(timezone.utc) - timedelta(days=DAYS_BACK)).timestamp())
     res = requests.post(
         MEASURE_ENDPOINT,
-        headers={"Authorization": f"Bearer {access_token}"},
-        data={"action": "getmeas", "meastypes": "1,6", "category": 1, "startdate": start},
+        data={
+            "action": "getmeas",
+            "meastypes": "1,6",
+            "category": 1,
+            "startdate": start,
+            "access_token": access_token,
+        },
         timeout=30,
     )
     data = res.json()
@@ -153,7 +160,16 @@ def write_json(name: str, payload) -> None:
 
 def main() -> None:
     access_token = get_access_token()
-    weight = sync_weight(access_token)
+    try:
+        weight = sync_weight(access_token)
+    except RuntimeError as exc:
+        if "invalid_token" not in str(exc).lower():
+            raise
+        # Il browser (o un'altra esecuzione) potrebbe aver gia' rinnovato lo stesso
+        # refresh_token nel frattempo: forza un rinnovo e riprova prima di arrenderti.
+        print("Token rifiutato da Withings, forzo il rinnovo e riprovo...")
+        access_token = get_access_token(force_refresh=True)
+        weight = sync_weight(access_token)
     write_json("withings-weight.json", weight)
     print("Sincronizzazione Withings completata.")
 
