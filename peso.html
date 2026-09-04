@@ -69,7 +69,7 @@
     <div class="src-row"><span class="l">Massa muscolare schel.</span><span class="v" id="garmin-muscle">—</span></div>
     <div class="src-row"><span class="l">Massa ossea</span><span class="v" id="garmin-bone">—</span></div>
     <div class="src-row"><span class="l">Acqua corporea</span><span class="v" id="garmin-water">—</span></div>
-    <div class="muted-note">Dati aggiornati manualmente da Garmin Connect (nessuna API live collegata)</div>
+    <div class="muted-note">Live da Garmin Connect (sincronizzato automaticamente dal PC)</div>
   </div>
 
   <div class="src-card" style="border-left:3px solid var(--good,#2f8f66)">
@@ -141,24 +141,29 @@
 </main>
 
 <script>
-// ── DATI GARMIN (statici, aggiornati manualmente da Garmin Connect) ──────────
-const GARMIN_DATA = [
-  { date: '2026-07-05', label: '5 lug', weight: 76.1, fat: 24.5, muscle: 29.9, bone: 3.8, water: 55.1 },
-  { date: '2026-07-04', label: '4 lug', weight: 76.8, fat: 24.4, muscle: 30.0, bone: 3.8, water: 55.2 },
-  { date: '2026-07-03', label: '3 lug', weight: 76.1, fat: 24.9, muscle: 29.8, bone: 3.8, water: 54.8 },
-  { date: '2026-07-02', label: '2 lug', weight: 76.1, fat: 24.5, muscle: 29.9, bone: 3.8, water: 55.2 },
-  { date: '2026-07-01', label: '1 lug', weight: 76.4, fat: 23.8, muscle: 29.9, bone: 3.9, water: 55.6 },
-  { date: '2026-06-29', label: '29 giu', weight: 77.6, fat: 24.3, muscle: 30.2, bone: 3.9, water: 55.2 },
-  { date: '2026-06-24', label: '24 giu', weight: 76.1, fat: 24.1, muscle: 29.9, bone: 3.8, water: 55.4 },
-  { date: '2026-06-21', label: '21 giu', weight: 77.5, fat: null, muscle: null, bone: null, water: null },
-  { date: '2026-06-11', label: '11 giu', weight: 75.1, fat: 24.4, muscle: 29.6, bone: 3.7, water: 55.2 },
-  { date: '2026-06-10', label: '10 giu', weight: 76.4, fat: 24.6, muscle: 29.9, bone: 3.8, water: 55.0 },
-  { date: '2026-06-09', label: '9 giu',  weight: 76.1, fat: 24.9, muscle: 29.8, bone: 3.8, water: 54.8 },
-];
+// ── DATI GARMIN (live, sincronizzati automaticamente dallo script garmin-sync) ──────────
+let GARMIN_DATA = [];
+
+async function loadGarminData() {
+  try {
+    const res = await fetch('/data/garmin-weight.json');
+    if (!res.ok) throw new Error('garmin-weight.json non disponibile');
+    GARMIN_DATA = await res.json();
+  } catch (err) {
+    console.warn('Dati Garmin non disponibili:', err);
+    GARMIN_DATA = [];
+  }
+}
 
 function fmt1(n) { return (n === null || n === undefined) ? '—' : n.toFixed(1); }
 
 function renderGarmin() {
+  if (!GARMIN_DATA.length) {
+    document.getElementById('garmin-date').textContent = 'Nessun dato';
+    document.getElementById('garmin-history-body').innerHTML =
+      '<tr><td colspan="6" style="color:var(--muted);text-align:center">Nessun dato Garmin sincronizzato ancora — avvia lo script in garmin-sync/</td></tr>';
+    return null;
+  }
   const latest = GARMIN_DATA[0];
   document.getElementById('garmin-date').textContent = latest.label;
   document.getElementById('garmin-weight').textContent = `${fmt1(latest.weight)} kg`;
@@ -385,9 +390,12 @@ function renderCharts(garminData, withingsGroups) {
   ]);
 }
 
-const garminLatest = renderGarmin();
-renderCharts(GARMIN_DATA, []);
-loadWithings(garminLatest);
+(async () => {
+  await loadGarminData();
+  const garminLatest = renderGarmin();
+  renderCharts(GARMIN_DATA, []);
+  loadWithings(garminLatest);
+})();
 </script>
 </body>
 </html>

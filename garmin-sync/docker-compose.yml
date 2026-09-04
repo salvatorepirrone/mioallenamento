@@ -1,0 +1,8 @@
+services:
+  garmin-sync:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./.garmin-session:/app/.garmin-session
+      - ../data:/app/output

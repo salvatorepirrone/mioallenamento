@@ -1,0 +1,189 @@
+[
+  {
+    "date": "2026-09-03",
+    "type": "running",
+    "name": "Roma - Ripetute 8x200 Claude",
+    "distance_km": 7.3,
+    "duration_min": 45.0,
+    "avg_hr": 141.0,
+    "max_hr": 171.0,
+    "calories": 521.0,
+    "avg_pace_min_per_km": 6.17
+  },
+  {
+    "date": "2026-09-02",
+    "type": "strength_training",
+    "name": "Pesi",
+    "distance_km": null,
+    "duration_min": 41.5,
+    "avg_hr": 87.0,
+    "max_hr": 121.0,
+    "calories": 172.0,
+    "avg_pace_min_per_km": null
+  },
+  {
+    "date": "2026-08-31",
+    "type": "lap_swimming",
+    "name": "Piscina",
+    "distance_km": 1.9,
+    "duration_min": 50.2,
+    "avg_hr": 119.0,
+    "max_hr": 155.0,
+    "calories": 425.0,
+    "avg_pace_min_per_km": 26.45
+  },
+  {
+    "date": "2026-08-30",
+    "type": "running",
+    "name": "Roma Corsa",
+    "distance_km": 7.01,
+    "duration_min": 40.3,
+    "avg_hr": 146.0,
+    "max_hr": 174.0,
+    "calories": 503.0,
+    "avg_pace_min_per_km": 5.75
+  },
+  {
+    "date": "2026-08-29",
+    "type": "lap_swimming",
+    "name": "Piscina",
+    "distance_km": 2.0,
+    "duration_min": 48.4,
+    "avg_hr": 124.0,
+    "max_hr": 150.0,
+    "calories": 450.0,
+    "avg_pace_min_per_km": 24.18
+  },
+  {
+    "date": "2026-08-26",
+    "type": "hiking",
+    "name": "Cortina d'Ampezzo Escursionismo",
+    "distance_km": 1.27,
+    "duration_min": 38.3,
+    "avg_hr": 87.0,
+    "max_hr": 122.0,
+    "calories": 156.0,
+    "avg_pace_min_per_km": 30.09
+  },
+  {
+    "date": "2026-08-26",
+    "type": "hiking",
+    "name": "Cortina d'Ampezzo",
+    "distance_km": 7.86,
+    "duration_min": 178.5,
+    "avg_hr": 87.0,
+    "max_hr": 126.0,
+    "calories": 730.0,
+    "avg_pace_min_per_km": 22.72
+  },
+  {
+    "date": "2026-08-24",
+    "type": "hiking",
+    "name": "Cortina d'Ampezzo Escursionismo",
+    "distance_km": 4.1,
+    "duration_min": 52.6,
+    "avg_hr": 103.0,
+    "max_hr": 135.0,
+    "calories": 285.0,
+    "avg_pace_min_per_km": 12.84
+  },
+  {
+    "date": "2026-08-24",
+    "type": "hiking",
+    "name": "Auronzo di Cadore Escursionismo",
+    "distance_km": 5.15,
+    "duration_min": 193.7,
+    "avg_hr": 88.0,
+    "max_hr": 135.0,
+    "calories": 803.0,
+    "avg_pace_min_per_km": 37.59
+  },
+  {
+    "date": "2026-08-23",
+    "type": "hiking",
+    "name": "Cortina d'Ampezzo Escursionismo",
+    "distance_km": 7.9,
+    "duration_min": 207.4,
+    "avg_hr": 94.0,
+    "max_hr": 130.0,
+    "calories": 866.0,
+    "avg_pace_min_per_km": 26.25
+  },
+  {
+    "date": "2026-08-22",
+    "type": "road_biking",
+    "name": "San Candido Ciclismo su strada",
+    "distance_km": 40.85,
+    "duration_min": 156.2,
+    "avg_hr": 105.0,
+    "max_hr": 161.0,
+    "calories": 814.0,
+    "avg_pace_min_per_km": 3.82
+  },
+  {
+    "date": "2026-08-21",
+    "type": "running",
+    "name": "San Vito di Cadore - Ripetute 8x200 Claude",
+    "distance_km": 7.12,
+    "duration_min": 41.9,
+    "avg_hr": 127.0,
+    "max_hr": 164.0,
+    "calories": 469.0,
+    "avg_pace_min_per_km": 5.89
+  },
+  {
+    "date": "2026-08-16",
+    "type": "swimming",
+    "name": "Piscina - velocità ",
+    "distance_km": 1.8,
+    "duration_min": 60.0,
+    "avg_hr": null,
+    "max_hr": null,
+    "calories": 444.0,
+    "avg_pace_min_per_km": 33.33
+  },
+  {
+    "date": "2026-08-07",
+    "type": "lap_swimming",
+    "name": "Tecnica + soglia",
+    "distance_km": 2.0,
+    "duration_min": 49.6,
+    "avg_hr": 133.0,
+    "max_hr": 163.0,
+    "calories": 509.0,
+    "avg_pace_min_per_km": 24.82
+  },
+  {
+    "date": "2026-08-04",
+    "type": "strength_training",
+    "name": "Pesi",
+    "distance_km": null,
+    "duration_min": 37.8,
+    "avg_hr": 94.0,
+    "max_hr": 126.0,
+    "calories": 185.0,
+    "avg_pace_min_per_km": null
+  },
+  {
+    "date": "2026-08-01",
+    "type": "lap_swimming",
+    "name": "Piscina",
+    "distance_km": 0.1,
+    "duration_min": 2.0,
+    "avg_hr": 114.0,
+    "max_hr": 128.0,
+    "calories": 17.0,
+    "avg_pace_min_per_km": 20.15
+  },
+  {
+    "date": "2026-08-01",
+    "type": "lap_swimming",
+    "name": "Claude velocità",
+    "distance_km": 1.7,
+    "duration_min": 49.7,
+    "avg_hr": 115.0,
+    "max_hr": 151.0,
+    "calories": 370.0,
+    "avg_pace_min_per_km": 29.26
+  }
+]

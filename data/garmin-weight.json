@@ -1,0 +1,29 @@
+[
+  {
+    "date": "2026-09-04",
+    "label": "4 set",
+    "weight": 74.4,
+    "fat": 23.2,
+    "muscle": 29.4,
+    "bone": 3.8,
+    "water": 56.1
+  },
+  {
+    "date": "2026-08-18",
+    "label": "18 ago",
+    "weight": 74.3,
+    "fat": 22.7,
+    "muscle": 29.4,
+    "bone": 3.8,
+    "water": 56.4
+  },
+  {
+    "date": "2026-08-05",
+    "label": "5 ago",
+    "weight": 74.0,
+    "fat": 24.3,
+    "muscle": 29.3,
+    "bone": 3.6,
+    "water": 55.3
+  }
+]
