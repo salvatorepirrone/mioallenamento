@@ -49,7 +49,9 @@
 </style>
 </head>
 <body>
+<script>if (window.innerWidth >= 900) document.body.classList.add('nav-open');</script>
 
+<button class="nav-toggle" aria-label="Apri/chiudi menu" type="button"><span></span></button>
 <nav>
   <span class="nav-logo">⚡ Piano</span>
   <div class="nav-links">
@@ -63,6 +65,7 @@
     <a href="editor.html"><span class="dot" style="background:#f55ac8"></span>Editor FIT</a>
   </div>
 </nav>
+<div class="nav-backdrop"></div>
 
 <main>
 
@@ -678,5 +681,6 @@ async function loadHeroWeight() {
 
 loadHeroWeight();
 </script>
+<script src="nav.js"></script>
 </body>
 </html>

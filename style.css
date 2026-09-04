@@ -15,31 +15,66 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 
-/* NAV */
-nav {
-  background: var(--s1); border-bottom: 1px solid var(--border);
-  padding: 0 20px; position: sticky; top: 0; z-index: 100;
-  display: flex; align-items: center; gap: 0; height: 52px;
+/* NAV → SIDEBAR A SCOMPARSA */
+.nav-toggle {
+  position: fixed; top: 12px; left: 12px; z-index: 200;
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--s1); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 1px 4px rgba(20,40,55,.1);
 }
+.nav-toggle span {
+  position: relative; width: 18px; height: 2px; background: var(--text);
+  display: block; transition: background .2s;
+}
+.nav-toggle span::before, .nav-toggle span::after {
+  content: ''; position: absolute; left: 0; width: 18px; height: 2px;
+  background: var(--text); transition: transform .2s, top .2s;
+}
+.nav-toggle span::before { top: -6px; }
+.nav-toggle span::after { top: 6px; }
+body.nav-open .nav-toggle span { background: transparent; }
+body.nav-open .nav-toggle span::before { top: 0; transform: rotate(45deg); }
+body.nav-open .nav-toggle span::after { top: 0; transform: rotate(-45deg); }
+
+nav {
+  background: var(--s1); border-right: 1px solid var(--border);
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 150;
+  width: 230px; padding: 64px 14px 20px; height: 100vh;
+  display: flex; flex-direction: column;
+  transform: translateX(-100%); transition: transform .25s ease;
+  overflow-y: auto;
+}
+body.nav-open nav { transform: translateX(0); }
 .nav-logo {
   font-size: 18px; font-weight: 700; color: var(--accent);
-  letter-spacing: .04em; margin-right: 24px; white-space: nowrap;
+  letter-spacing: .04em; margin-bottom: 18px; white-space: nowrap;
 }
-.nav-links { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
+.nav-links { display: flex; flex-direction: column; gap: 4px; }
 .nav-links a {
-  padding: 6px 12px; border-radius: 8px; font-size: 13px;
+  padding: 9px 12px; border-radius: 8px; font-size: 13px;
   color: var(--muted); white-space: nowrap; transition: all .2s;
-  display: flex; align-items: center; gap: 6px;
+  display: flex; align-items: center; gap: 8px;
 }
 .nav-links a:hover { background: var(--s2); color: var(--text); }
-.nav-links a.active { background: var(--hero); color: #fff; border-radius: 100px; }
+.nav-links a.active { background: var(--hero); color: #fff; }
 .nav-links a.active .dot { background: #fff !important; }
 .nav-links a .dot {
   width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
 }
 
+.nav-backdrop {
+  position: fixed; inset: 0; background: rgba(15,25,35,.4); z-index: 140;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+body.nav-open .nav-backdrop { opacity: 1; pointer-events: auto; }
+@media (min-width: 900px) { .nav-backdrop { display: none; } }
+
 /* MAIN */
-main { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+main { max-width: 860px; margin: 0 auto; padding: 64px 16px 60px; }
+@media (min-width: 900px) {
+  body.nav-open main { margin-left: 230px; transition: margin-left .25s ease; }
+}
 
 /* HERO */
 .hero {
