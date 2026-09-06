@@ -14,6 +14,8 @@ Nota tecnica: la rimozione avviene per sottostringa esatta (bilanciando i tag
 cosi' il resto del file (formattazione, stile) resta identico byte per byte.
 """
 
+from __future__ import annotations
+
 import os
 import re
 import sys

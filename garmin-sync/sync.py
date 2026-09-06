@@ -6,6 +6,8 @@ salvato in /app/.garmin-session (montato su garmin-sync/.garmin-session) e riusa
 esecuzioni automatiche successive senza richiedere di nuovo le credenziali.
 """
 
+from __future__ import annotations
+
 import io
 import json
 import os
@@ -48,12 +50,25 @@ def login() -> Garmin:
         if not EMAIL or not PASSWORD:
             print("GARMIN_EMAIL / GARMIN_PASSWORD mancanti nel file .env", file=sys.stderr)
             sys.exit(1)
-        client = Garmin(
-            EMAIL,
-            PASSWORD,
-            prompt_mfa=lambda: input("Inserisci il codice MFA Garmin: ").strip(),
-        )
-        client.login(TOKENSTORE)
+        try:
+            client = Garmin(
+                EMAIL,
+                PASSWORD,
+                prompt_mfa=lambda: input("Inserisci il codice MFA Garmin: ").strip(),
+            )
+            client.login(TOKENSTORE)
+        except TypeError:
+            # Versioni piu' vecchie di garminconnect (es. su architetture senza
+            # pacchetti precompilati per le dipendenze piu' recenti, come ARM
+            # 32-bit) non accettano prompt_mfa, e client.login(tokenstore) con
+            # un tokenstore valorizzato *carica soltanto* una sessione salvata
+            # (non fa mai un login con credenziali). Bisogna passare da
+            # client.garth.login() direttamente: l'MFA usa comunque input()
+            # di default dentro garth, quindi funziona uguale in una sessione
+            # interattiva. client.garth.dump() salva poi la sessione.
+            client = Garmin(EMAIL, PASSWORD)
+            client.garth.login(EMAIL, PASSWORD)
+            client.garth.dump(TOKENSTORE)
         print(f"Login riuscito, sessione salvata in {TOKENSTORE}.")
         return client
 

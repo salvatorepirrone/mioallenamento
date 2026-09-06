@@ -2,16 +2,18 @@
 /app/output (montato su data/ del repo), sullo stesso pattern di sync.py
 per Garmin.
 
-Riusa l'endpoint pubblico gia' pubblicato su Netlify per lo scambio/refresh
-del token OAuth (/.netlify/functions/withings-token): il client secret resta
-lato server Netlify, questo script non lo vede mai.
+Parla direttamente con l'endpoint OAuth di Withings (nessun intermediario
+Netlify): il client secret vive solo in questo .env, che sta fuori dalla
+cartella pubblica del sito.
 
 Primo avvio: serve un'autorizzazione una tantum nel browser (l'utente va
 autenticato su Withings a mano, non e' automatizzabile). Il codice ottenuto
 va passato una sola volta in WITHINGS_SETUP_CODE; da quel momento il
-refresh_token viene salvato in /app/.withings-session e riusato dalle
+refresh_token viene salvato in WITHINGS_SESSION_DIR e riusato dalle
 esecuzioni automatiche successive.
 """
+
+from __future__ import annotations
 
 import json
 import os
@@ -25,7 +27,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN_ENDPOINT = "https://miopianoallenamento.netlify.app/.netlify/functions/withings-token"
+WITHINGS_CLIENT_ID = os.environ.get(
+    "WITHINGS_CLIENT_ID", "3fbf541859fb9995d2e1ea7e89754aafc8375d2e6af6cc20846de2db87a91445"
+)
+WITHINGS_CLIENT_SECRET = os.environ.get("WITHINGS_CLIENT_SECRET", "")
+WITHINGS_REDIRECT_URI = os.environ.get(
+    "WITHINGS_REDIRECT_URI", "https://pirrone.direct.quickconnect.to/callback.html"
+)
+OAUTH_ENDPOINT = "https://wbsapi.withings.net/v2/oauth2"
 MEASURE_ENDPOINT = "https://wbsapi.withings.net/measure"
 
 SESSION_DIR = Path(os.environ.get("WITHINGS_SESSION_DIR", "/app/.withings-session"))
@@ -55,8 +64,22 @@ def save_token(body: dict) -> None:
     }, indent=2), encoding="utf-8")
 
 
+def _require_client_secret() -> None:
+    if not WITHINGS_CLIENT_SECRET:
+        print("WITHINGS_CLIENT_SECRET mancante nel file .env", file=sys.stderr)
+        sys.exit(1)
+
+
 def exchange_code(code: str) -> dict:
-    res = requests.post(TOKEN_ENDPOINT, json={"grant_type": "authorization_code", "code": code}, timeout=30)
+    _require_client_secret()
+    res = requests.post(OAUTH_ENDPOINT, data={
+        "action": "requesttoken",
+        "grant_type": "authorization_code",
+        "client_id": WITHINGS_CLIENT_ID,
+        "client_secret": WITHINGS_CLIENT_SECRET,
+        "code": code,
+        "redirect_uri": WITHINGS_REDIRECT_URI,
+    }, timeout=30)
     data = res.json()
     if data.get("status") != 0:
         raise RuntimeError(f"Errore scambio codice Withings: {data}")
@@ -64,7 +87,14 @@ def exchange_code(code: str) -> dict:
 
 
 def refresh_access_token(refresh_token: str) -> dict:
-    res = requests.post(TOKEN_ENDPOINT, json={"grant_type": "refresh_token", "refresh_token": refresh_token}, timeout=30)
+    _require_client_secret()
+    res = requests.post(OAUTH_ENDPOINT, data={
+        "action": "requesttoken",
+        "grant_type": "refresh_token",
+        "client_id": WITHINGS_CLIENT_ID,
+        "client_secret": WITHINGS_CLIENT_SECRET,
+        "refresh_token": refresh_token,
+    }, timeout=30)
     data = res.json()
     if data.get("status") != 0:
         raise RuntimeError(f"Errore refresh token Withings: {data}")

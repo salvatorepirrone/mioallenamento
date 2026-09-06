@@ -386,7 +386,7 @@
 
 <script>
 const CLIENT_ID = '3fbf541859fb9995d2e1ea7e89754aafc8375d2e6af6cc20846de2db87a91445';
-const REDIRECT_URI = 'https://miopianoallenamento.netlify.app/callback';
+const REDIRECT_URI = 'https://pirrone.direct.quickconnect.to/callback.html';
 const SCOPE = 'user.metrics,user.activity';
 const TOKEN_KEY = 'withings_token';
 const PROXY = 'https://api.withings.com';
@@ -444,7 +444,7 @@ function startOAuth() {
 }
 
 async function exchangeCode(code) {
-  const res = await fetch('/.netlify/functions/withings-token', {
+  const res = await fetch('/withings-token.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ grant_type: 'authorization_code', code })
@@ -455,7 +455,7 @@ async function exchangeCode(code) {
 }
 
 async function refreshToken(rt) {
-  const res = await fetch('/.netlify/functions/withings-token', {
+  const res = await fetch('/withings-token.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: rt })
