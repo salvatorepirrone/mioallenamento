@@ -22,6 +22,10 @@ import sys
 from datetime import date
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 REPO_ROOT = Path(os.environ.get("REPO_ROOT", Path(__file__).resolve().parent.parent))
 INDEX_HTML = REPO_ROOT / "index.html"
 
