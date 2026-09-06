@@ -82,6 +82,15 @@
   body.nav-open .nav-backdrop { opacity: 1; pointer-events: auto; }
   @media (min-width: 900px) { .nav-backdrop { display: none; } }
 
+  .nav-refresh-btn {
+    margin-top: auto; padding: 9px 12px; border-radius: 8px;
+    font-size: 13px; font-family: inherit; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--border);
+    cursor: pointer; text-align: left; transition: all .2s;
+  }
+  .nav-refresh-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+  .nav-refresh-btn:disabled { opacity: .6; cursor: default; }
+
   /* MAIN */
   main { max-width: 900px; margin: 0 auto; padding: 64px 1.5rem 4rem; font-family: 'DM Mono', 'Courier New', monospace; }
   @media (min-width: 900px) {
