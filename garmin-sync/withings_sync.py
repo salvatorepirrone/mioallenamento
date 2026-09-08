@@ -36,6 +36,13 @@ WITHINGS_REDIRECT_URI = os.environ.get(
 )
 OAUTH_ENDPOINT = "https://wbsapi.withings.net/v2/oauth2"
 MEASURE_ENDPOINT = "https://wbsapi.withings.net/measure"
+SLEEP_ENDPOINT = "https://wbsapi.withings.net/v2/sleep"
+SLEEP_DAYS_BACK = 30
+SLEEP_DATA_FIELDS = (
+    "nb_rem_episodes,sleep_score,total_sleep_time,total_timeinbed,wakeupcount,"
+    "deepsleepduration,lightsleepduration,remsleepduration,sleep_efficiency,"
+    "breathing_disturbances_intensity,snoring,hr_average,hr_min,rr_average"
+)
 
 SESSION_DIR = Path(os.environ.get("WITHINGS_SESSION_DIR", "/app/.withings-session"))
 TOKEN_FILE = SESSION_DIR / "token.json"
@@ -203,6 +210,50 @@ def sync_weight(access_token: str) -> list[dict]:
     return entries
 
 
+def sync_sleep(access_token: str) -> list[dict]:
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(days=SLEEP_DAYS_BACK)
+    res = requests.post(
+        SLEEP_ENDPOINT,
+        data={
+            "action": "getsummary",
+            "startdateymd": start.date().isoformat(),
+            "enddateymd": end.date().isoformat(),
+            "data_fields": SLEEP_DATA_FIELDS,
+            "access_token": access_token,
+        },
+        timeout=30,
+    )
+    data = res.json()
+    if data.get("status") != 0:
+        raise RuntimeError(f"Errore lettura sonno Withings: {data}")
+
+    entries = []
+    for s in data["body"].get("series", []):
+        ts = s.get("startdate")
+        if not ts:
+            continue
+        d = s.get("data", {}) or {}
+        entries.append({
+            "date": date.fromtimestamp(ts).isoformat(),
+            "sleep_score": d.get("sleep_score"),
+            "total_sleep_time_min": round((d.get("total_sleep_time") or 0) / 60),
+            "total_timeinbed_min": round((d.get("total_timeinbed") or 0) / 60),
+            "deep_min": round((d.get("deepsleepduration") or 0) / 60),
+            "light_min": round((d.get("lightsleepduration") or 0) / 60),
+            "rem_min": round((d.get("remsleepduration") or 0) / 60),
+            "wakeupcount": d.get("wakeupcount"),
+            "breathing_disturbances_intensity": d.get("breathing_disturbances_intensity"),
+            "hr_min": d.get("hr_min"),
+            "hr_average": d.get("hr_average"),
+            "rr_average": d.get("rr_average"),
+            "snoring_min": round((d.get("snoring") or 0) / 60),
+        })
+
+    entries.sort(key=lambda e: e["date"], reverse=True)
+    return entries
+
+
 def write_json(name: str, payload) -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     path = OUTPUT_DIR / name
@@ -214,6 +265,7 @@ def main() -> None:
     access_token = get_access_token()
     try:
         weight = sync_weight(access_token)
+        sleep = sync_sleep(access_token)
     except RuntimeError as exc:
         if "invalid_token" not in str(exc).lower():
             raise
@@ -222,7 +274,9 @@ def main() -> None:
         print("Token rifiutato da Withings, forzo il rinnovo e riprovo...")
         access_token = get_access_token(force_refresh=True)
         weight = sync_weight(access_token)
+        sleep = sync_sleep(access_token)
     write_json("withings-weight.json", weight)
+    write_json("withings-sleep.json", sleep)
     print("Sincronizzazione Withings completata.")
 
 

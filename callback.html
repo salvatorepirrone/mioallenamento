@@ -257,22 +257,12 @@
     <p class="subtitle">Sonno · Peso · FC notturna — da Withings Health Mate</p>
   </div>
 
-  <!-- STATO: non connesso -->
-  <div id="view-connect" class="hidden">
-    <div id="status-box">
-      <div class="icon">🔗</div>
-      <strong>Connetti il tuo account Withings</strong>
-      <p style="margin:.5rem 0 1.25rem">Autorizza l'accesso ai dati di sonno e peso.</p>
-      <button class="btn-connect" onclick="startOAuth()">Connetti Withings</button>
-    </div>
-  </div>
-
   <!-- STATO: caricamento -->
   <div id="view-loading" class="hidden">
     <div id="status-box">
       <div class="spinner"></div>
       <strong>Caricamento dati...</strong>
-      <p>Recupero dati da Withings Health Mate</p>
+      <p>Recupero dati sincronizzati dal NAS</p>
     </div>
   </div>
 
@@ -280,9 +270,9 @@
   <div id="view-error" class="hidden">
     <div id="status-box">
       <div class="icon">⚠️</div>
-      <strong id="error-msg">Errore di connessione</strong>
-      <p style="margin:.5rem 0 1.25rem">Prova a riconnetterti.</p>
-      <button class="btn-connect" onclick="startOAuth()">Riprova</button>
+      <strong id="error-msg">Dati non disponibili</strong>
+      <p style="margin:.5rem 0 1.25rem">Riprova, o controlla che lo script di sync sul NAS funzioni.</p>
+      <button class="btn-connect" onclick="loadData()">Riprova</button>
       <a href="/" class="btn-secondary">← Torna al piano</a>
     </div>
   </div>
@@ -386,24 +376,13 @@
       </table>
     </div>
 
-    <div style="text-align:right">
-      <button class="btn-secondary" onclick="logout()" style="font-size:.75rem">Disconnetti</button>
-    </div>
   </div>
 
 </main>
 
 <script>
-const CLIENT_ID = '3fbf541859fb9995d2e1ea7e89754aafc8375d2e6af6cc20846de2db87a91445';
-const REDIRECT_URI = 'https://pirrone.direct.quickconnect.to/callback.html';
-const SCOPE = 'user.metrics,user.activity';
-const TOKEN_KEY = 'withings_token';
-const PROXY = 'https://api.withings.com';
-
-// ── UTILS ────────────────────────────────────────────────────────────────────
-
 function show(id) {
-  ['view-connect','view-loading','view-error','view-data'].forEach(v => {
+  ['view-loading','view-error','view-data'].forEach(v => {
     document.getElementById(v).classList.toggle('hidden', v !== id);
   });
 }
@@ -426,133 +405,23 @@ function scoreBadge(s) {
   return `<span class="badge badge-bad">${s}</span>`;
 }
 
-function saveToken(data) {
-  localStorage.setItem(TOKEN_KEY, JSON.stringify({
-    access_token: data.access_token,
-    refresh_token: data.refresh_token,
-    expires_at: Date.now() + data.expires_in * 1000
-  }));
+// -- CARICAMENTO DATI (live da data/*.json, sincronizzati dallo script sul NAS) --
+
+async function fetchJSON(path) {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`${path} non disponibile`);
+  return res.json();
 }
 
-function getToken() {
-  try { return JSON.parse(localStorage.getItem(TOKEN_KEY)); } catch { return null; }
-}
-
-function logout() {
-  localStorage.removeItem(TOKEN_KEY);
-  show('view-connect');
-}
-
-// ── OAUTH ────────────────────────────────────────────────────────────────────
-
-function startOAuth() {
-  const state = Math.random().toString(36).slice(2);
-  sessionStorage.setItem('oauth_state', state);
-  const url = `https://account.withings.com/oauth2_user/authorize2?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPE)}&state=${state}`;
-  window.location.href = url;
-}
-
-async function exchangeCode(code) {
-  const res = await fetch('/withings-token.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ grant_type: 'authorization_code', code })
-  });
-  const data = await res.json();
-  if (data.status !== 0) throw new Error(`OAuth error: ${data.error || data.status}`);
-  return data.body;
-}
-
-async function refreshToken(rt) {
-  const res = await fetch('/withings-token.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: rt })
-  });
-  const data = await res.json();
-  if (data.status !== 0) throw new Error('Refresh failed');
-  return data.body;
-}
-
-async function getValidToken(force) {
-  let t = getToken();
-  if (!t) return null;
-  if (force || Date.now() > t.expires_at - 60000) {
-    try {
-      const fresh = await refreshToken(t.refresh_token);
-      saveToken(fresh);
-      t = getToken();
-    } catch (e) {
-      // Un'altra pagina/tab potrebbe aver gia' rinfrescato lo stesso refresh_token
-      // (Withings lo invalida dopo un solo uso): ricontrolla lo storage prima di arrenderti.
-      const t2 = getToken();
-      if (t2 && t2.refresh_token !== t.refresh_token && Date.now() < t2.expires_at - 60000) {
-        t = t2;
-      } else {
-        throw e;
-      }
-    }
-  }
-  return t.access_token;
-}
-
-// ── API CALLS ────────────────────────────────────────────────────────────────
-
-async function apiCall(endpoint, params, token) {
-  const body = new URLSearchParams({ ...params, access_token: token });
-  const res = await fetch(`https://wbsapi.withings.net${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body
-  });
-  const data = await res.json();
-  if (data.status !== 0) throw new Error(`API ${endpoint}: ${data.error || data.status}`);
-  return data.body;
-}
-
-async function loadData(retried) {
+async function loadData() {
   show('view-loading');
   try {
-    const token = await getValidToken();
-    if (!token) { show('view-connect'); return; }
-
-    const now = Math.floor(Date.now() / 1000);
-    const days14 = now - 14 * 86400;
-
-    // Peso ultimi 30 giorni (sempre disponibile)
-    let weightData;
-    try {
-      weightData = await apiCall('/measure', {
-        action: 'getmeas',
-        startdate: now - 30*86400,
-        enddate: now,
-        meastypes: '1,6,8'
-      }, token);
-    } catch (e) {
-      if (!retried && /invalid_token/i.test(e.message)) {
-        await getValidToken(true); // forza il refresh e riprova una volta
-        return loadData(true);
-      }
-      throw e;
-    }
-
-    // Sonno ultimi 14 giorni (opzionale — richiede scope aggiuntivo)
-    let sleepData = { series: [] };
-    try {
-      sleepData = await apiCall('/v2/sleep', {
-        action: 'getsummary',
-        startdateymd: new Date(days14*1000).toISOString().slice(0,10),
-        enddateymd: new Date(now*1000).toISOString().slice(0,10),
-        data_fields: 'nb_rem_episodes,sleep_score,total_sleep_time,total_timeinbed,wakeupcount,deepsleepduration,lightsleepduration,remsleepduration,sleep_efficiency,breathing_disturbances_intensity,snoring,hr_average,hr_min,rr_average'
-      }, token);
-    } catch(sleepErr) {
-      console.warn('Dati sonno non disponibili:', sleepErr.message);
-      document.getElementById('sleep-unavailable').classList.remove('hidden');
-    }
-
-    renderData(sleepData, weightData);
+    const [sleep, weight] = await Promise.all([
+      fetchJSON('/data/withings-sleep.json'),
+      fetchJSON('/data/withings-weight.json')
+    ]);
+    renderData(sleep, weight);
     show('view-data');
-
   } catch (e) {
     console.error(e);
     document.getElementById('error-msg').textContent = e.message;
@@ -560,140 +429,83 @@ async function loadData(retried) {
   }
 }
 
-// ── RENDER ───────────────────────────────────────────────────────────────────
+// -- RENDER --
 
-function renderData(sleepData, weightData) {
-  const series = (sleepData.series || []).sort((a,b) => b.startdate - a.startdate);
+function renderData(sleepNights, weightData) {
+  const nights = (sleepNights || []).slice().sort((a, b) => b.date < a.date ? -1 : 1);
 
-  // ── ULTIMA NOTTE ──
-  if (series.length > 0) {
-    const s = series[0];
-    const d = s.data || {};
+  if (nights.length > 0) {
+    const d = nights[0];
 
-    // Score
     const score = d.sleep_score || null;
     document.getElementById('score-num').textContent = score || '—';
     if (score) {
       const arc = document.getElementById('score-arc');
       const circ = 213.6;
-      arc.style.strokeDashoffset = circ - (score/100)*circ;
+      arc.style.strokeDashoffset = circ - (score / 100) * circ;
       arc.style.stroke = scoreColor(score);
     }
 
-    // Dettagli
-    document.getElementById('s-duration').textContent = fmtMin(Math.round((d.total_sleep_time||0)/60));
-    document.getElementById('s-deep').textContent = fmtMin(Math.round((d.deepsleepduration||0)/60));
-    document.getElementById('s-rem').textContent = fmtMin(Math.round((d.remsleepduration||0)/60));
+    document.getElementById('s-duration').textContent = fmtMin(d.total_sleep_time_min || 0);
+    document.getElementById('s-deep').textContent = fmtMin(d.deep_min || 0);
+    document.getElementById('s-rem').textContent = fmtMin(d.rem_min || 0);
     document.getElementById('s-wakeup').textContent = d.wakeupcount != null ? `${d.wakeupcount}×` : '—';
 
-    // Barra fasi
-    const total = (d.deepsleepduration||0) + (d.lightsleepduration||0) + (d.remsleepduration||0) + ((d.total_timeinbed||0)-(d.total_sleep_time||0));
+    const total = (d.deep_min || 0) + (d.light_min || 0) + (d.rem_min || 0) + Math.max(0, (d.total_timeinbed_min || 0) - (d.total_sleep_time_min || 0));
     if (total > 0) {
       const bar = document.getElementById('stage-bar');
       bar.innerHTML = `
-        <div class="seg-deep" style="flex:${d.deepsleepduration||0}"></div>
-        <div class="seg-light" style="flex:${d.lightsleepduration||0}"></div>
-        <div class="seg-rem" style="flex:${d.remsleepduration||0}"></div>
-        <div class="seg-awake" style="flex:${Math.max(0,(d.total_timeinbed||0)-(d.total_sleep_time||0))}"></div>
+        <div class="seg-deep" style="flex:${d.deep_min || 0}"></div>
+        <div class="seg-light" style="flex:${d.light_min || 0}"></div>
+        <div class="seg-rem" style="flex:${d.rem_min || 0}"></div>
+        <div class="seg-awake" style="flex:${Math.max(0, (d.total_timeinbed_min || 0) - (d.total_sleep_time_min || 0))}"></div>
       `;
     }
 
-    // Apnea alert
-    if ((d.breathing_disturbances_intensity||0) > 40) {
+    if ((d.breathing_disturbances_intensity || 0) > 40) {
       document.getElementById('apnea-alert').classList.remove('hidden');
     }
 
-    // FC notturna
     document.getElementById('hr-min').textContent = d.hr_min ? `${d.hr_min} bpm` : '—';
     document.getElementById('hr-avg').textContent = d.hr_average || '—';
     document.getElementById('rr-val').textContent = d.rr_average ? `${d.rr_average} resp/min` : '—';
 
-    // Snoring
-    const snor = d.snoring || 0;
-    document.getElementById('snoring-val').textContent = snor ? `${Math.round(snor/60)} min` : '0 min';
+    const snor = d.snoring_min || 0;
+    document.getElementById('snoring-val').textContent = `${snor} min`;
   }
 
-  // ── STORICO ──
   const tbody = document.getElementById('history-body');
-  if (series.length === 0) {
+  if (nights.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center">Nessun dato disponibile</td></tr>';
   } else {
-    tbody.innerHTML = series.slice(0, 7).map(s => {
-      const d = s.data || {};
-      const date = new Date(s.startdate * 1000);
-      const label = date.toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short' });
+    tbody.innerHTML = nights.slice(0, 7).map(d => {
+      const date = new Date(d.date);
+      const label = date.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
       return `<tr>
         <td>${label}</td>
-        <td>${fmtMin(Math.round((d.total_sleep_time||0)/60))}</td>
-        <td>${fmtMin(Math.round((d.deepsleepduration||0)/60))}</td>
-        <td>${fmtMin(Math.round((d.remsleepduration||0)/60))}</td>
+        <td>${fmtMin(d.total_sleep_time_min || 0)}</td>
+        <td>${fmtMin(d.deep_min || 0)}</td>
+        <td>${fmtMin(d.rem_min || 0)}</td>
         <td>${scoreBadge(d.sleep_score)}</td>
       </tr>`;
     }).join('');
   }
 
-  // ── PESO ──
-  const groups = weightData.measuregrps || [];
-  if (groups.length > 0) {
-    const latest = groups.sort((a,b) => b.date - a.date)[0];
-    const measures = {};
-    (latest.measures || []).forEach(m => { measures[m.type] = m.value * Math.pow(10, m.unit); });
-
-    const w = measures[1];
-    if (w) {
-      document.getElementById('weight-val').textContent = `${w.toFixed(1)} kg`;
-      document.getElementById('weight-date').textContent = new Date(latest.date*1000).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'});
-      const diff = w - 73.0;
+  if (weightData && weightData.length > 0) {
+    const latest = weightData[0];
+    if (latest.weight != null) {
+      document.getElementById('weight-val').textContent = `${latest.weight.toFixed(1)} kg`;
+      document.getElementById('weight-date').textContent = new Date(latest.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+      const diff = latest.weight - 73.0;
       const diffEl = document.getElementById('weight-diff');
       diffEl.textContent = `${diff > 0 ? '+' : ''}${diff.toFixed(1)} kg`;
       diffEl.style.color = diff <= 0 ? 'var(--good)' : diff < 2 ? 'var(--warn)' : 'var(--bad)';
     }
-    const fat = measures[6];
-    document.getElementById('fat-val').textContent = fat ? `${fat.toFixed(1)}%` : '—';
+    document.getElementById('fat-val').textContent = latest.fat != null ? `${latest.fat.toFixed(1)}%` : '—';
   }
 }
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
-
-async function init() {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
-  const state = params.get('state');
-  const error = params.get('error');
-
-  if (error) {
-    document.getElementById('error-msg').textContent = `Autorizzazione negata: ${error}`;
-    show('view-error');
-    return;
-  }
-
-  if (code) {
-    // Torna da OAuth — pulisci URL
-    window.history.replaceState({}, '', window.location.pathname);
-    show('view-loading');
-    try {
-      const savedState = sessionStorage.getItem('oauth_state');
-      if (state && savedState && state !== savedState) throw new Error('State mismatch — riprova.');
-      const tokenData = await exchangeCode(code);
-      saveToken(tokenData);
-      await loadData();
-    } catch (e) {
-      document.getElementById('error-msg').textContent = e.message;
-      show('view-error');
-    }
-    return;
-  }
-
-  // Controlla token esistente
-  const t = getToken();
-  if (t) {
-    await loadData();
-  } else {
-    show('view-connect');
-  }
-}
-
-init();
+loadData();
 </script>
 <script src="nav.js"></script>
 </body>
