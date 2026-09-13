@@ -48,16 +48,22 @@
 .boat-box strong { color: var(--blue); }
 
 .reco-box {
-  display: flex; gap: 14px; align-items: flex-start;
-  background: rgba(200,245,90,.07); border-left: 2px solid var(--accent);
-  padding: 16px 18px; border-radius: 0 var(--r) var(--r) 0; margin-bottom: 24px;
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 18px 20px; margin-bottom: 24px;
 }
-.reco-box.reco-recovery { background: rgba(122,184,245,.07); border-left-color: var(--blue); }
+.reco-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
 .reco-icon { font-size: 26px; line-height: 1; }
 .reco-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .reco-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
-.reco-link { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 600; color: var(--accent); text-decoration: none; }
-.reco-box.reco-recovery .reco-link { color: var(--blue); }
+.reco-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.reco-opt { background: var(--s2); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; }
+.reco-opt-pref { border-color: var(--accent); background: rgba(200,245,90,.08); }
+.reco-opt-hdr { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.reco-opt-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); background: rgba(200,245,90,.15); padding: 2px 8px; border-radius: 4px; }
+.reco-opt-body { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin-bottom: 8px; }
+.reco-opt-note { font-size: 11.5px; color: var(--muted); font-style: italic; margin-bottom: 8px; }
+.reco-opt-meta { color: var(--muted); font-size: 11.5px; }
+.reco-link { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); text-decoration: none; }
 .reco-link:hover { text-decoration: underline; }
 </style>
 </head>
@@ -701,14 +707,64 @@ async function loadHeroWeight() {
 loadHeroWeight();
 
 // ── VO2max / TRAINING STATUS in hero + CONSIGLIO DEL GIORNO (live da data/garmin-fitness.json) ──
+// Il consiglio non sceglie tra 3 sessioni fisse: rigenera ogni volta il tipo e i
+// parametri della seduta (corsa e nuoto/palestra) leggendo davvero l'andamento
+// delle ultime settimane (frequenza per tipo di seduta, affaticamento, sonno),
+// cosi' resta valido anche se il piano sotto viene ripianificato o saltato.
 const TRAINING_STATUS_LABELS_IT = {
   NO_STATUS: 'Nessuno stato', DETRAINING: 'Disallenamento', RECOVERY: 'Recupero',
   MAINTAINING: 'Mantenimento', PRODUCTIVE: 'Produttivo', PEAKING: 'Picco di forma',
   OVERREACHING: 'Sovraccarico', STRAINED: 'Stress eccessivo', UNPRODUCTIVE: 'Improduttivo',
 };
 const RUN_TYPES = ['running', 'trail_running', 'treadmill_running'];
-const RECOVERY_TYPES = ['lap_swimming', 'open_water_swimming', 'swimming', 'strength_training'];
-const FATIGUE_CATEGORIES = ['OVERREACHING', 'STRAINED', 'UNPRODUCTIVE', 'DETRAINING'];
+const SWIM_TYPES = ['lap_swimming', 'open_water_swimming', 'swimming'];
+const GYM_TYPE = 'strength_training';
+const RECOVERY_TYPES = [...SWIM_TYPES, GYM_TYPE];
+const FATIGUE_CATEGORIES = ['OVERREACHING', 'STRAINED', 'UNPRODUCTIVE'];
+
+// Contenuto e link presi dalle stesse zone FC/passo calibrate in corsa.html e
+// nuoto.html per questo utente — qui non si inventano nuovi ritmi, si sceglie
+// quale sessione già nota è la più indicata oggi.
+const RUN_SESSIONS = {
+  velocita: {
+    label: 'Velocità · 6×400 m',
+    html: `Riscaldamento 15' Z1 (FC&nbsp;&lt;123) + 4×80&nbsp;m progressivi. Poi <strong>6×400&nbsp;m</strong> a 4:30–4:50/km (FC 162–172, Z4), recupero 90″ jogging Z1. Defaticamento 10' Z1.<br><span class="reco-opt-meta">~7 km · ~55 min · ~560 kcal</span>`,
+    link: 'corsa.html#c-mar-vel',
+  },
+  soglia: {
+    label: 'Soglia · 3×1000 m',
+    html: `Riscaldamento 12' Z1. Poi <strong>3×1000&nbsp;m</strong> a 5:20–5:40/km (FC 148–162, Z3), recupero 2' jogging Z1, seguiti da 15' Z2 continuo (5:45–6:00/km). Defaticamento 8' Z1.<br><span class="reco-opt-meta">~7 km · ~50 min · ~540 kcal</span>`,
+    link: 'corsa.html#c-mar-sog',
+  },
+  lungo: {
+    label: 'Lunga Z2',
+    html: `<strong>8–10&nbsp;km</strong> in Z2 puro, FC&nbsp;&lt;148, passo 5:45–6:10/km (fino a 6:30 se fa caldo). Se superi 148 cammina 1–2' e riprendi.<br><span class="reco-opt-meta">~60–70 min · ~620–680 kcal</span>`,
+    link: 'corsa.html#c-sab-z2',
+  },
+  facile: {
+    label: 'Facile rigenerante',
+    html: `<strong>20–30 min</strong> di corsa lenta in Z1 (FC&nbsp;&lt;123, passo &gt;6:15/km), solo per sciogliere le gambe — oggi è recupero attivo, niente ritmo.`,
+    link: 'corsa.html',
+  },
+};
+const SWIM_SESSIONS = {
+  tecnica: {
+    label: 'Tecnica + Soglia',
+    html: `<strong>~2.000 m</strong>: 400 riscaldamento (300 crawl + 100 dorso) → 300 drill (6×50) → 600 soglia (6×100 a ~1:45/100m) → 400 pullbuoy contrasto (4×100) → 200 dorso → 100 defaticante.`,
+    link: 'nuoto.html#sessA',
+  },
+  velocita: {
+    label: 'Velocità pura',
+    html: `<strong>~2.500 m</strong>: 400 riscaldamento → 200 drill → 300 progressivi (6×50) → 400 sprint massimali (8×50, rec. 60–75″) → 200 sprint con palette (4×50) → 600 aerobico di scarico → 200 dorso → 200 defaticante.`,
+    link: 'nuoto.html#sessBdom',
+  },
+  leggero: {
+    label: 'Tecnica leggera (recupero attivo)',
+    html: `<strong>1.200–1.500 m</strong> a ritmo facile/aerobico, solo drill e tecnica. Niente sprint né pullbuoy pesante: oggi l'acqua serve a scaricare, non a costruire.`,
+    link: 'nuoto.html',
+  },
+};
+const GYM_NOTE = 'Se hai tempo, abbina una sessione di forza (Sessione A o B, quella che non fai da più giorni).';
 
 async function fetchJSONSafe(path, fallback) {
   try {
@@ -721,14 +777,139 @@ async function fetchJSONSafe(path, fallback) {
 }
 
 function daysSinceDate(iso) {
+  if (!iso) return Infinity;
   const d = new Date(iso + 'T00:00:00');
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   return Math.round((now - d) / 86400000);
 }
 
+function fmtDays(d) {
+  if (d === Infinity) return 'più di 3 settimane';
+  if (d === 0) return 'oggi stesso';
+  if (d === 1) return '1 giorno';
+  return `${d} giorni`;
+}
+
 function mostRecentOfType(activities, types) {
   return activities.find(a => types.includes(a.type)) || null;
+}
+
+// Classifica una corsa in base a cosa e' successo davvero nella seduta
+// (distanza e passo dei lap), non a un'etichetta prestabilita.
+function classifyRun(a) {
+  if (a.distance_km != null && a.distance_km >= 7) return 'lungo';
+  const laps = a.laps || [];
+  if (laps.length >= 4 && laps.some(l => l.avg_pace_min_per_km != null && l.avg_pace_min_per_km <= 5.0)) return 'velocita';
+  if (laps.length >= 2 && laps.some(l => l.avg_pace_min_per_km != null && l.avg_pace_min_per_km > 5.0 && l.avg_pace_min_per_km <= 5.75)) return 'soglia';
+  return 'facile';
+}
+
+// Sprint in vasca vengono registrati come passo molto rapido in min/km
+// (~1:25/100m equivale a ~14 min/km): distingue così velocità da tecnica.
+function classifySwim(a) {
+  const laps = a.laps || [];
+  if (laps.length >= 6 && laps.some(l => l.avg_pace_min_per_km != null && l.avg_pace_min_per_km <= 16)) return 'velocita';
+  return 'tecnica';
+}
+
+function daysSinceByClass(activities, types, classify) {
+  const result = {};
+  for (const a of activities) {
+    if (!types.includes(a.type)) continue;
+    const cls = classify(a);
+    if (result[cls] === undefined) result[cls] = daysSinceDate(a.date);
+  }
+  return result;
+}
+
+function computeRecommendation(activities, fitness, sleepNights) {
+  const recentRun = mostRecentOfType(activities, RUN_TYPES);
+  const recentRecovery = mostRecentOfType(activities, RECOVERY_TYPES);
+  const daysSinceRun = recentRun ? daysSinceDate(recentRun.date) : Infinity;
+  const daysSinceRecovery = recentRecovery ? daysSinceDate(recentRecovery.date) : Infinity;
+  const lastRunWasHard = !!(recentRun && classifyRun(recentRun) !== 'facile');
+
+  const lastNight = (sleepNights || [])[0];
+  const poorSleep = !!(lastNight && lastNight.sleep_score != null && lastNight.sleep_score < 55);
+  const fatigueFlag = !!(fitness && FATIGUE_CATEGORIES.includes(fitness.training_status_category));
+  const highLoad = !!(fitness && fitness.acwr_ratio != null && fitness.acwr_ratio > 1.3);
+  const justRanHard = lastRunWasHard && daysSinceRun <= 1;
+  const recoveryMode = fatigueFlag || highLoad || poorSleep || justRanHard;
+
+  const reasons = [];
+  if (fatigueFlag) reasons.push(`stato allenamento Garmin "${TRAINING_STATUS_LABELS_IT[fitness.training_status_category] || fitness.training_status_category}"`);
+  if (highLoad) reasons.push(`carico acuto/cronico elevato (${fitness.acwr_ratio.toFixed(2)})`);
+  if (poorSleep) reasons.push(`sonno scarso stanotte (${lastNight.sleep_score}/100)`);
+  if (justRanHard) reasons.push(`hai corso con qualità ${daysSinceRun === 0 ? 'oggi' : 'ieri'}`);
+
+  let preferred;
+  let rationale;
+  if (recoveryMode) {
+    preferred = 'nuoto';
+    rationale = `Meglio non correre oggi: ${reasons.join('; ')}.`;
+  } else if (daysSinceRun !== daysSinceRecovery) {
+    preferred = daysSinceRun > daysSinceRecovery ? 'corsa' : 'nuoto';
+    rationale = preferred === 'corsa'
+      ? `Non corri da ${fmtDays(daysSinceRun)}, contro ${fmtDays(daysSinceRecovery)} per nuoto/palestra: la corsa è l'attività più indietro.`
+      : `Non fai nuoto/palestra da ${fmtDays(daysSinceRecovery)}, contro ${fmtDays(daysSinceRun)} per la corsa: oggi tocca ad acqua/pesi.`;
+  } else {
+    preferred = 'corsa';
+    rationale = 'La frequenza di corsa e nuoto/palestra delle ultime settimane è equilibrata: via libera a entrambe, scegli in base a come ti senti.';
+  }
+
+  // Corsa: se serve recupero è sempre facile; altrimenti si copre prima il
+  // vuoto più vecchio (lungo assente da troppo) poi si alterna velocità/soglia.
+  const runGaps = daysSinceByClass(activities, RUN_TYPES, classifyRun);
+  let runChoice;
+  if (recoveryMode) {
+    runChoice = 'facile';
+  } else if ((runGaps.lungo ?? Infinity) >= 6) {
+    runChoice = 'lungo';
+  } else {
+    runChoice = (runGaps.velocita ?? Infinity) > (runGaps.soglia ?? Infinity) ? 'velocita' : 'soglia';
+  }
+  if (fitness && fitness.training_status_category === 'DETRAINING' && runChoice === 'velocita') {
+    runChoice = 'soglia'; // ripresa più graduale dopo un calo di forma rilevato da Garmin
+  }
+
+  const swimGaps = daysSinceByClass(activities, SWIM_TYPES, classifySwim);
+  const swimChoice = recoveryMode
+    ? 'leggero'
+    : ((swimGaps.velocita ?? Infinity) > (swimGaps.tecnica ?? Infinity) ? 'velocita' : 'tecnica');
+
+  return {
+    preferred, rationale, recoveryMode,
+    run: RUN_SESSIONS[runChoice],
+    swim: SWIM_SESSIONS[swimChoice],
+  };
+}
+
+function renderRecommendation(model) {
+  const box = document.getElementById('reco-box');
+  const prefIcon = model.preferred === 'corsa' ? '🏃' : '🏊';
+  const prefLabel = model.preferred === 'corsa' ? 'Corsa' : 'Nuoto / Palestra';
+  box.innerHTML = `
+    <div class="reco-head">
+      <div class="reco-icon">${prefIcon}</div>
+      <div>
+        <div class="reco-title">Attività preferibile in base alle ultime settimane: ${prefLabel}</div>
+        <div class="reco-text">${model.rationale}</div>
+      </div>
+    </div>
+    <div class="reco-options">
+      <div class="reco-opt${model.preferred === 'corsa' ? ' reco-opt-pref' : ''}">
+        <div class="reco-opt-hdr">🏃 Se opti per la corsa <span class="reco-opt-tag">${model.run.label}</span></div>
+        <div class="reco-opt-body">${model.run.html}</div>
+        <a class="reco-link" href="${model.run.link}">Dettaglio scheda →</a>
+      </div>
+      <div class="reco-opt${model.preferred === 'nuoto' ? ' reco-opt-pref' : ''}">
+        <div class="reco-opt-hdr">🏊 Se opti per nuoto/palestra <span class="reco-opt-tag">${model.swim.label}</span></div>
+        <div class="reco-opt-body">${model.swim.html}</div>
+        ${model.recoveryMode ? '' : `<div class="reco-opt-note">${GYM_NOTE}</div>`}
+        <a class="reco-link" href="${model.swim.link}">Dettaglio scheda →</a>
+      </div>
+    </div>`;
 }
 
 async function loadHeroFitness() {
@@ -741,85 +922,6 @@ async function loadHeroFitness() {
     document.getElementById('hstat-status-v').textContent =
       TRAINING_STATUS_LABELS_IT[data.training_status_category] || data.training_status_category;
   }
-}
-
-// Regole del consiglio: priorità a segnali di affaticamento (stato allenamento
-// Garmin, carico acuto/cronico, sonno) che spingono verso recupero in acqua o
-// palestra invece della corsa; altrimenti si bilancia la frequenza corsa vs
-// nuoto/palestra delle ultime settimane.
-function computeRecommendation(activities, fitness, sleepNights) {
-  const recentRun = mostRecentOfType(activities, RUN_TYPES);
-  const recentRecovery = mostRecentOfType(activities, RECOVERY_TYPES);
-  const daysSinceRun = recentRun ? daysSinceDate(recentRun.date) : Infinity;
-  const daysSinceRecovery = recentRecovery ? daysSinceDate(recentRecovery.date) : Infinity;
-  const lastRunWasHard = !!(recentRun && recentRun.laps && recentRun.laps.length > 2);
-
-  const lastNight = (sleepNights || [])[0];
-  const poorSleep = !!(lastNight && lastNight.sleep_score != null && lastNight.sleep_score < 55);
-
-  const fatigueFlag = !!(fitness && FATIGUE_CATEGORIES.includes(fitness.training_status_category));
-  const highLoad = !!(fitness && fitness.acwr_ratio != null && fitness.acwr_ratio > 1.3);
-
-  if (fatigueFlag || highLoad || (poorSleep && daysSinceRun <= 1)) {
-    const reasons = [];
-    if (fatigueFlag) reasons.push(`stato allenamento Garmin "${TRAINING_STATUS_LABELS_IT[fitness.training_status_category] || fitness.training_status_category}"`);
-    if (highLoad) reasons.push(`carico acuto/cronico elevato (${fitness.acwr_ratio.toFixed(2)})`);
-    if (poorSleep) reasons.push(`sonno scarso stanotte (punteggio ${lastNight.sleep_score}/100)`);
-    return {
-      type: 'recovery',
-      title: 'Nuoto o palestra leggeri (oggi niente corsa)',
-      text: `Meglio evitare la corsa: ${reasons.join('; ')}. Preferisci un'uscita in acqua o palestra a bassa intensità, o un giorno di riposo.`,
-      link: 'nuoto.html',
-    };
-  }
-
-  if (lastRunWasHard && daysSinceRun <= 1) {
-    return {
-      type: 'recovery',
-      title: 'Nuoto o palestra (recupero)',
-      text: `Hai corso con ripetute/qualità ${daysSinceRun === 0 ? 'oggi' : 'ieri'}: oggi meglio un recupero attivo in acqua o palestra leggera prima della prossima corsa.`,
-      link: 'nuoto.html',
-    };
-  }
-
-  if (daysSinceRun >= 3) {
-    return {
-      type: 'run',
-      title: 'Corsa facile',
-      text: `Sono passati ${daysSinceRun === Infinity ? 'diversi giorni' : daysSinceRun + ' giorni'} dall'ultima corsa: oggi è un buon giorno per una corsa facile in Z2.`,
-      link: 'corsa.html',
-    };
-  }
-
-  if (daysSinceRecovery >= 4) {
-    return {
-      type: 'recovery',
-      title: 'Nuoto o palestra',
-      text: `Non nuoti/alleni in palestra da ${daysSinceRecovery === Infinity ? 'diversi giorni' : daysSinceRecovery + ' giorni'}: oggi puoi bilanciare con una sessione in acqua o forza.`,
-      link: 'nuoto.html',
-    };
-  }
-
-  return {
-    type: 'run',
-    title: 'Corsa facile',
-    text: 'I segnali Garmin sono nella norma: prosegui con una corsa facile per mantenere la frequenza di allenamento.',
-    link: 'corsa.html',
-  };
-}
-
-function renderRecommendation(rec) {
-  const box = document.getElementById('reco-box');
-  box.classList.toggle('reco-recovery', rec.type === 'recovery');
-  const icon = rec.type === 'run' ? '🏃' : '🏊';
-  const linkLabel = rec.type === 'run' ? 'Vai alla scheda corsa' : 'Vai a nuoto/palestra';
-  box.innerHTML = `
-    <div class="reco-icon">${icon}</div>
-    <div>
-      <div class="reco-title">${rec.title}</div>
-      <div class="reco-text">${rec.text}</div>
-      <a class="reco-link" href="${rec.link}">${linkLabel} →</a>
-    </div>`;
 }
 
 async function loadRecommendation() {
