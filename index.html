@@ -46,6 +46,19 @@
   font-size: 13px; color: var(--muted); line-height: 1.6;
 }
 .boat-box strong { color: var(--blue); }
+
+.reco-box {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: rgba(200,245,90,.07); border-left: 2px solid var(--accent);
+  padding: 16px 18px; border-radius: 0 var(--r) var(--r) 0; margin-bottom: 24px;
+}
+.reco-box.reco-recovery { background: rgba(122,184,245,.07); border-left-color: var(--blue); }
+.reco-icon { font-size: 26px; line-height: 1; }
+.reco-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.reco-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.reco-link { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 600; color: var(--accent); text-decoration: none; }
+.reco-box.reco-recovery .reco-link { color: var(--blue); }
+.reco-link:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -77,6 +90,18 @@
     <div class="hstat"><span class="v" id="hstat-weight-v">—</span><span class="l" id="hstat-weight-l">Peso</span></div>
     <div class="hstat"><span class="v" id="hstat-fat-v">—</span><span class="l" id="hstat-fat-l">Grasso</span></div>
     <div class="hstat"><span class="v" id="hstat-bmi-v">—</span><span class="l" id="hstat-bmi-l">IMC</span></div>
+    <div class="hstat"><span class="v" id="hstat-vo2-v">—</span><span class="l" id="hstat-vo2-l">VO2max</span></div>
+    <div class="hstat"><span class="v" id="hstat-status-v">—</span><span class="l" id="hstat-status-l">Training status</span></div>
+  </div>
+</div>
+
+<!-- CONSIGLIO DEL GIORNO -->
+<div class="sec">Consiglio del giorno · basato sui dati Garmin delle ultime settimane</div>
+<div class="reco-box" id="reco-box">
+  <div class="reco-icon">—</div>
+  <div>
+    <div class="reco-title">Analisi in corso…</div>
+    <div class="reco-text">Caricamento dei dati Garmin.</div>
   </div>
 </div>
 
@@ -674,6 +699,145 @@ async function loadHeroWeight() {
 }
 
 loadHeroWeight();
+
+// ── VO2max / TRAINING STATUS in hero + CONSIGLIO DEL GIORNO (live da data/garmin-fitness.json) ──
+const TRAINING_STATUS_LABELS_IT = {
+  NO_STATUS: 'Nessuno stato', DETRAINING: 'Disallenamento', RECOVERY: 'Recupero',
+  MAINTAINING: 'Mantenimento', PRODUCTIVE: 'Produttivo', PEAKING: 'Picco di forma',
+  OVERREACHING: 'Sovraccarico', STRAINED: 'Stress eccessivo', UNPRODUCTIVE: 'Improduttivo',
+};
+const RUN_TYPES = ['running', 'trail_running', 'treadmill_running'];
+const RECOVERY_TYPES = ['lap_swimming', 'open_water_swimming', 'swimming', 'strength_training'];
+const FATIGUE_CATEGORIES = ['OVERREACHING', 'STRAINED', 'UNPRODUCTIVE', 'DETRAINING'];
+
+async function fetchJSONSafe(path, fallback) {
+  try {
+    const res = await fetch(path);
+    if (!res.ok) return fallback;
+    return await res.json();
+  } catch (err) {
+    return fallback;
+  }
+}
+
+function daysSinceDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Math.round((now - d) / 86400000);
+}
+
+function mostRecentOfType(activities, types) {
+  return activities.find(a => types.includes(a.type)) || null;
+}
+
+async function loadHeroFitness() {
+  const data = await fetchJSONSafe('/data/garmin-fitness.json', null);
+  if (!data) return;
+  if (data.vo2max_running != null) {
+    document.getElementById('hstat-vo2-v').textContent = data.vo2max_running.toFixed(1).replace('.', ',');
+  }
+  if (data.training_status_category) {
+    document.getElementById('hstat-status-v').textContent =
+      TRAINING_STATUS_LABELS_IT[data.training_status_category] || data.training_status_category;
+  }
+}
+
+// Regole del consiglio: priorità a segnali di affaticamento (stato allenamento
+// Garmin, carico acuto/cronico, sonno) che spingono verso recupero in acqua o
+// palestra invece della corsa; altrimenti si bilancia la frequenza corsa vs
+// nuoto/palestra delle ultime settimane.
+function computeRecommendation(activities, fitness, sleepNights) {
+  const recentRun = mostRecentOfType(activities, RUN_TYPES);
+  const recentRecovery = mostRecentOfType(activities, RECOVERY_TYPES);
+  const daysSinceRun = recentRun ? daysSinceDate(recentRun.date) : Infinity;
+  const daysSinceRecovery = recentRecovery ? daysSinceDate(recentRecovery.date) : Infinity;
+  const lastRunWasHard = !!(recentRun && recentRun.laps && recentRun.laps.length > 2);
+
+  const lastNight = (sleepNights || [])[0];
+  const poorSleep = !!(lastNight && lastNight.sleep_score != null && lastNight.sleep_score < 55);
+
+  const fatigueFlag = !!(fitness && FATIGUE_CATEGORIES.includes(fitness.training_status_category));
+  const highLoad = !!(fitness && fitness.acwr_ratio != null && fitness.acwr_ratio > 1.3);
+
+  if (fatigueFlag || highLoad || (poorSleep && daysSinceRun <= 1)) {
+    const reasons = [];
+    if (fatigueFlag) reasons.push(`stato allenamento Garmin "${TRAINING_STATUS_LABELS_IT[fitness.training_status_category] || fitness.training_status_category}"`);
+    if (highLoad) reasons.push(`carico acuto/cronico elevato (${fitness.acwr_ratio.toFixed(2)})`);
+    if (poorSleep) reasons.push(`sonno scarso stanotte (punteggio ${lastNight.sleep_score}/100)`);
+    return {
+      type: 'recovery',
+      title: 'Nuoto o palestra leggeri (oggi niente corsa)',
+      text: `Meglio evitare la corsa: ${reasons.join('; ')}. Preferisci un'uscita in acqua o palestra a bassa intensità, o un giorno di riposo.`,
+      link: 'nuoto.html',
+    };
+  }
+
+  if (lastRunWasHard && daysSinceRun <= 1) {
+    return {
+      type: 'recovery',
+      title: 'Nuoto o palestra (recupero)',
+      text: `Hai corso con ripetute/qualità ${daysSinceRun === 0 ? 'oggi' : 'ieri'}: oggi meglio un recupero attivo in acqua o palestra leggera prima della prossima corsa.`,
+      link: 'nuoto.html',
+    };
+  }
+
+  if (daysSinceRun >= 3) {
+    return {
+      type: 'run',
+      title: 'Corsa facile',
+      text: `Sono passati ${daysSinceRun === Infinity ? 'diversi giorni' : daysSinceRun + ' giorni'} dall'ultima corsa: oggi è un buon giorno per una corsa facile in Z2.`,
+      link: 'corsa.html',
+    };
+  }
+
+  if (daysSinceRecovery >= 4) {
+    return {
+      type: 'recovery',
+      title: 'Nuoto o palestra',
+      text: `Non nuoti/alleni in palestra da ${daysSinceRecovery === Infinity ? 'diversi giorni' : daysSinceRecovery + ' giorni'}: oggi puoi bilanciare con una sessione in acqua o forza.`,
+      link: 'nuoto.html',
+    };
+  }
+
+  return {
+    type: 'run',
+    title: 'Corsa facile',
+    text: 'I segnali Garmin sono nella norma: prosegui con una corsa facile per mantenere la frequenza di allenamento.',
+    link: 'corsa.html',
+  };
+}
+
+function renderRecommendation(rec) {
+  const box = document.getElementById('reco-box');
+  box.classList.toggle('reco-recovery', rec.type === 'recovery');
+  const icon = rec.type === 'run' ? '🏃' : '🏊';
+  const linkLabel = rec.type === 'run' ? 'Vai alla scheda corsa' : 'Vai a nuoto/palestra';
+  box.innerHTML = `
+    <div class="reco-icon">${icon}</div>
+    <div>
+      <div class="reco-title">${rec.title}</div>
+      <div class="reco-text">${rec.text}</div>
+      <a class="reco-link" href="${rec.link}">${linkLabel} →</a>
+    </div>`;
+}
+
+async function loadRecommendation() {
+  try {
+    const [activities, fitness, sleep] = await Promise.all([
+      fetchJSONSafe('/data/garmin-activities.json', []),
+      fetchJSONSafe('/data/garmin-fitness.json', null),
+      fetchJSONSafe('/data/withings-sleep.json', []),
+    ]);
+    renderRecommendation(computeRecommendation(activities, fitness, sleep));
+  } catch (err) {
+    console.warn('Consiglio del giorno non disponibile:', err);
+    document.getElementById('reco-box').classList.add('hidden');
+  }
+}
+
+loadHeroFitness();
+loadRecommendation();
 </script>
 <script src="nav.js"></script>
 </body>

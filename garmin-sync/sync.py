@@ -199,6 +199,72 @@ def sync_activities(client: Garmin) -> list[dict]:
     return entries
 
 
+TRAINING_STATUS_CATEGORIES = (
+    "NO_STATUS", "DETRAINING", "RECOVERY", "MAINTAINING",
+    "PRODUCTIVE", "PEAKING", "OVERREACHING", "STRAINED", "UNPRODUCTIVE",
+)
+
+
+def sync_fitness(client: Garmin) -> dict:
+    """VO2max e training status, usati dalla home per il consiglio di allenamento
+    del giorno. Garmin non li ricalcola tutti i giorni: si cerca a ritroso finche'
+    non si trova un valore valido."""
+    today = date.today()
+    vo2max_running = None
+    vo2max_date = None
+    for days_back in range(0, 14):
+        d = today - timedelta(days=days_back)
+        try:
+            raw = client.get_max_metrics(d.isoformat())
+        except Exception:
+            continue
+        if not raw:
+            continue
+        generic = (raw[0] or {}).get("generic") or {}
+        v = generic.get("vo2MaxPreciseValue") or generic.get("vo2MaxValue")
+        if v:
+            vo2max_running = round(v, 1)
+            vo2max_date = generic.get("calendarDate") or d.isoformat()
+            break
+
+    training_status_label = None
+    training_status_category = None
+    training_status_date = None
+    acwr_ratio = None
+    acwr_status = None
+    try:
+        raw = client.get_training_status(today.isoformat())
+    except Exception:
+        raw = None
+    if raw:
+        devices = (raw.get("mostRecentTrainingStatus") or {}).get("latestTrainingStatusData") or {}
+        for device_data in devices.values():
+            phrase = device_data.get("trainingStatusFeedbackPhrase") or ""
+            training_status_label = phrase
+            # La fase (es. "PRODUCTIVE") e' il prefisso della frase, che include
+            # anche una variante numerica del messaggio (es. "PRODUCTIVE_3").
+            for cat in TRAINING_STATUS_CATEGORIES:
+                if phrase.startswith(cat):
+                    training_status_category = cat
+                    break
+            training_status_date = device_data.get("calendarDate")
+            load = device_data.get("acuteTrainingLoadDTO") or {}
+            acwr_ratio = load.get("dailyAcuteChronicWorkloadRatio")
+            acwr_status = load.get("acwrStatus")
+            if device_data.get("primaryTrainingDevice"):
+                break
+
+    return {
+        "vo2max_running": vo2max_running,
+        "vo2max_date": vo2max_date,
+        "training_status_label": training_status_label,
+        "training_status_category": training_status_category,
+        "training_status_date": training_status_date,
+        "acwr_ratio": acwr_ratio,
+        "acwr_status": acwr_status,
+    }
+
+
 def write_json(name: str, payload) -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     path = OUTPUT_DIR / name
@@ -214,6 +280,9 @@ def main() -> None:
 
     activities = sync_activities(client)
     write_json("garmin-activities.json", activities)
+
+    fitness = sync_fitness(client)
+    write_json("garmin-fitness.json", fitness)
 
     print("Sincronizzazione completata.")
 
