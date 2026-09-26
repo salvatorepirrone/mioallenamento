@@ -760,17 +760,37 @@ const SWIM_SESSIONS = {
     html: `<strong>~2.000 m</strong>: 400 riscaldamento (300 crawl + 100 dorso) → 300 drill (6×50) → 600 soglia (6×100 a ~1:45/100m) → 400 pullbuoy contrasto (4×100) → 200 dorso → 100 defaticante.`,
     link: 'nuoto.html#sessA',
   },
-  velocita: {
-    label: 'Velocità pura',
-    html: `<strong>~2.500 m</strong>: 400 riscaldamento → 200 drill → 300 progressivi (6×50) → 400 sprint massimali (8×50, rec. 60–75″) → 200 sprint con palette (4×50) → 600 aerobico di scarico → 200 dorso → 200 defaticante.`,
-    link: 'nuoto.html#sessBdom',
-  },
   leggero: {
     label: 'Tecnica leggera (recupero attivo)',
     html: `<strong>1.200–1.500 m</strong> a ritmo facile/aerobico, solo drill e tecnica. Niente sprint né pullbuoy pesante: oggi l'acqua serve a scaricare, non a costruire.`,
     link: 'nuoto.html',
   },
 };
+// Tre varianti di velocità (vasca corta 25 m), stesso obiettivo (fibre veloci)
+// ma angolo diverso: si ruota per giorno dell'anno invece di ripetere sempre
+// la stessa, che è esattamente la varietà chiesta.
+const SWIM_VELOCITA_VARIANTS = [
+  {
+    label: 'Velocità pura',
+    html: `<strong>~2.500 m</strong>: 400 riscaldamento → 200 drill → 300 progressivi (6×50) → 400 sprint massimali (8×50, rec. 60–75″) → 200 sprint con palette (4×50) → 600 aerobico di scarico → 200 dorso → 200 defaticante.`,
+    link: 'nuoto.html#sessBdom',
+  },
+  {
+    label: 'Sprint & Virate',
+    html: `<strong>~1.850 m</strong>: 400 riscaldamento → 100 drill → 250 virate esplosive (10×25, spinta massimale + breakout) → 200 sprint pieno (8×25) → 600 aerobico di scarico → 200 dorso → 100 defaticante.`,
+    link: 'nuoto.html#sessC',
+  },
+  {
+    label: 'Bracciata & Velocità',
+    html: `<strong>~2.000 m</strong>: 400 riscaldamento → 150 drill → 400 conteggio bracciate progressivo (8×50) → 250 sprint a bracciate controllate (10×25, vincolo di non aumentarle) → 500 aerobico di scarico → 200 dorso → 100 defaticante.`,
+    link: 'nuoto.html#sessD',
+  },
+];
+function pickVelocitaVariant() {
+  const start = new Date(new Date().getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((new Date() - start) / 86400000);
+  return SWIM_VELOCITA_VARIANTS[dayOfYear % SWIM_VELOCITA_VARIANTS.length];
+}
 const GYM_NOTE = 'Se hai tempo, abbina una sessione di forza (Sessione A o B, quella che non fai da più giorni).';
 
 async function fetchJSONSafe(path, fallback) {
@@ -888,7 +908,7 @@ function computeRecommendation(activities, fitness, sleepNights) {
   return {
     preferred, rationale, recoveryMode,
     run: RUN_SESSIONS[runChoice],
-    swim: SWIM_SESSIONS[swimChoice],
+    swim: swimChoice === 'velocita' ? pickVelocitaVariant() : SWIM_SESSIONS[swimChoice],
   };
 }
 

@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nuoto — Schemi</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1c3f56">
+<link rel="icon" href="/icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Piano">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,8 +34,8 @@
 
 <div class="page-hero">
   <h1>🏊 Nuoto</h1>
-  <p>Vasca 50 m  ·  Aerobico: ~1:50/100 m  ·  Soglia: ~1:45/100 m  ·  Veloce: ~1:35/100 m  ·  Sprint: ~1:25/100 m</p>
-  <p style="margin-top:6px;font-size:12px;color:var(--muted)">Due sessioni ripetibili: <strong>Giovedì</strong> tecnica + soglia (~2.000 m), <strong>Domenica</strong> velocità (~2.500 m).</p>
+  <p>Vasca corta 25 m  ·  Aerobico: ~1:50/100 m  ·  Soglia: ~1:45/100 m  ·  Veloce: ~1:35/100 m  ·  Sprint: ~1:25/100 m</p>
+  <p style="margin-top:6px;font-size:12px;color:var(--muted)">Sessioni ripetibili: <strong>Giovedì</strong> tecnica + soglia (~2.000 m) · <strong>Domenica</strong> velocità, a rotazione tra tre varianti (~1.900–2.500 m) — vedi sotto.</p>
 </div>
 
 <!-- Legenda ritmi -->
@@ -136,11 +143,62 @@
   <div class="pool-total"><span>Totale</span><strong>~2.500 m</strong></div>
 </div>
 
+<!-- VARIANTE VELOCITÀ 2 — SPRINT & VIRATE -->
+<div class="sec">Variante velocità — Sprint &amp; Virate  <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(vasca corta 25 m)</span></div>
+<div id="sessC" class="pool-card">
+  <div class="pool-hdr">
+    <h3>Sprint &amp; Virate</h3>
+    <div class="pool-sub">~1.850 m  ·  Focus: partenza dal muro esplosiva e breakout — in vasca corta le virate valgono quanto lo sprint</div>
+  </div>
+  <table class="pool-table">
+    <thead><tr><th>Fase</th><th>Descrizione</th><th>Ritmo</th><th>Rec.</th><th>Vol.</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td class="fase">Riscaldamento</td><td>300m crawl + 100m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td>Sciogli bene: oggi il lavoro è tutto esplosivo</td></tr>
+      <tr><td class="fase">Drill</td><td>4×25m dalla libreria<br><span style="font-size:11px;color:var(--blue)">▸ catch-up, pugno chiuso</span></td><td class="ritmo">Facile</td><td>20"</td><td class="vol">100m</td><td>Attivazione rapida: in vasca corta c'è poco spazio per "sistemarsi"</td></tr>
+      <tr><td class="fase">Virate</td><td>10×25m: spinta massimale dal muro + 2–3 ondulazioni subacquee + breakout</td><td class="ritmo">Sprint</td><td>45–60"</td><td class="vol">250m</td><td>Conta le bracciate dal breakout al muro successivo: obiettivo ridurle a parità di tempo</td></tr>
+      <tr><td class="fase">Sprint pieno</td><td>8×25m tutto fuori</td><td class="ritmo">Sprint</td><td>60"</td><td class="vol">200m</td><td>~1:25/100m equivalente. Recupero pieno: deve restare qualità, non soglia mascherata</td></tr>
+      <tr><td class="fase">Aerobico</td><td>6×100m crawl</td><td class="ritmo">Aerobico</td><td>20"</td><td class="vol">600m</td><td>Passo ~1:50, scarico tra i blocchi esplosivi</td></tr>
+      <tr><td class="fase">Stile alt.</td><td>4×50m dorso</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">200m</td><td>Recupero spalle</td></tr>
+      <tr><td class="fase">Defaticante</td><td>100m misto libero</td><td class="ritmo">Facile</td><td>—</td><td class="vol">100m</td><td>Chiudi senza fretta</td></tr>
+    </tbody>
+  </table>
+  <div class="pool-total"><span>Totale</span><strong>~1.850 m</strong></div>
+  <div style="font-size:11px;color:var(--muted);margin-top:8px;padding:0 4px">
+    💡 In vasca da 25 m ogni 25 m c'è un muro: la virata e il breakout pesano di più sul tempo totale che in vasca lunga. Questa sessione allena proprio quella parte, non solo il nuoto in mezzo alla vasca.
+  </div>
+</div>
+
+<!-- VARIANTE VELOCITÀ 3 — BRACCIATA & VELOCITÀ -->
+<div class="sec">Variante velocità — Bracciata &amp; Velocità  <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(vasca corta 25 m)</span></div>
+<div id="sessD" class="pool-card">
+  <div class="pool-hdr">
+    <h3>Bracciata &amp; Velocità</h3>
+    <div class="pool-sub">~2.000 m  ·  Focus: andare veloce senza aumentare le bracciate — nuotata potente, non affannata</div>
+  </div>
+  <table class="pool-table">
+    <thead><tr><th>Fase</th><th>Descrizione</th><th>Ritmo</th><th>Rec.</th><th>Vol.</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td class="fase">Riscaldamento</td><td>300m crawl + 100m dorso</td><td class="ritmo">Facile</td><td>—</td><td class="vol">400m</td><td>Rotazione ampia, respiro ogni 3</td></tr>
+      <tr><td class="fase">Drill</td><td>4×25m catch-up + 2×25m pugno chiuso</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">150m</td><td>Senti l'appoggio dell'avambraccio: è la presa che poi devi ritrovare veloce</td></tr>
+      <tr><td class="fase">Conteggio bracciate</td><td>8×50m ritmo crescente (aerobico → soglia)</td><td class="ritmo">→ Soglia</td><td>20"</td><td class="vol">400m</td><td>Conta le bracciate ogni 25m: oggi sei sulle 10–11, cerca di scendere a 9–10 senza perdere ritmo</td></tr>
+      <tr><td class="fase">Velocità a bracciate controllate</td><td>10×25m veloce/sprint</td><td class="ritmo">Sprint</td><td>45"</td><td class="vol">250m</td><td>Vincolo: non superare di +1 le bracciate del blocco precedente. Veloce ma potente, non affannato</td></tr>
+      <tr><td class="fase">Aerobico</td><td>5×100m crawl</td><td class="ritmo">Aerobico</td><td>20"</td><td class="vol">500m</td><td>Passo ~1:50, ritrova la tecnica dei drill</td></tr>
+      <tr><td class="fase">Stile alt.</td><td>4×50m dorso</td><td class="ritmo">Facile</td><td>20"</td><td class="vol">200m</td><td>Recupero spalle</td></tr>
+      <tr><td class="fase">Defaticante</td><td>100m misto libero</td><td class="ritmo">Facile</td><td>—</td><td class="vol">100m</td><td>Chiudi senza fretta</td></tr>
+    </tbody>
+  </table>
+  <div class="pool-total"><span>Totale</span><strong>~2.000 m</strong></div>
+  <div style="font-size:11px;color:var(--muted);margin-top:8px;padding:0 4px">
+    💡 Il modo sbagliato di andare veloce è aumentare la cadenza fino ad affannarti. Il modo giusto, qui allenato, è tenere la bracciata lunga e potente e spingere di più ad ogni trazione: stesse bracciate, più velocità.
+  </div>
+</div>
+
 <div class="sec" style="margin-top:32px">Note</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:16px">
   <div class="hstat" style="border-color:rgba(63,114,160,.25)"><span style="font-size:11px;font-weight:600;color:var(--blue);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🎯 Gambe nel respiro</span><span style="font-size:12px;color:var(--muted)">Il filo conduttore: le gambe non si fermano quando respiri. Se cadono, il braccio opposto entra in anticipo.</span></div>
   <div class="hstat" style="border-color:rgba(166,124,36,.25)"><span style="font-size:11px;font-weight:600;color:var(--yellow);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🟡 Pullbuoy = contrasto</span><span style="font-size:12px;color:var(--muted)">Usalo per sentire il bacino alto, poi togli e replica la sensazione. Non costruirci sopra le sessioni.</span></div>
-  <div class="hstat" style="border-color:rgba(185,74,58,.2)"><span style="font-size:11px;font-weight:600;color:var(--red);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">⚡ Sprint veri</span><span style="font-size:12px;color:var(--muted)">Negli 8×50 della domenica recupera davvero: lo stimolo veloce funziona solo se ogni ripetuta è massimale.</span></div>
+  <div class="hstat" style="border-color:rgba(185,74,58,.2)"><span style="font-size:11px;font-weight:600;color:var(--red);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">⚡ Sprint veri</span><span style="font-size:12px;color:var(--muted)">Negli sprint recupera davvero: lo stimolo veloce funziona solo se ogni ripetuta è massimale.</span></div>
+  <div class="hstat" style="border-color:rgba(122,90,150,.25)"><span style="font-size:11px;font-weight:600;color:var(--purple);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">🔄 Tre varianti, stesso obiettivo</span><span style="font-size:12px;color:var(--muted)">Velocità pura, Sprint &amp; Virate, Bracciata &amp; Velocità: ruotale la domenica invece di ripetere sempre la stessa — lo stimolo resta lo stesso (fibre veloci), cambia l'angolo di lavoro.</span></div>
 </div>
 
 </main>
