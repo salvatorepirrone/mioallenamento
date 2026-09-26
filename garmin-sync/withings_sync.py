@@ -228,12 +228,16 @@ def sync_sleep(access_token: str) -> list[dict]:
     if data.get("status") != 0:
         raise RuntimeError(f"Errore lettura sonno Withings: {data}")
 
+    MIN_MAIN_SLEEP_MIN = 180  # sotto le 3 ore e' quasi certamente un pisolino, non la notte
+
     entries = []
     for s in data["body"].get("series", []):
         ts = s.get("startdate")
         if not ts:
             continue
         d = s.get("data", {}) or {}
+        if (d.get("total_timeinbed") or 0) / 60 < MIN_MAIN_SLEEP_MIN:
+            continue  # pisolino diurno: escluso per non falsare "la notte scorsa" lato sito
         entries.append({
             "date": date.fromtimestamp(ts).isoformat(),
             "sleep_score": d.get("sleep_score"),
@@ -249,6 +253,17 @@ def sync_sleep(access_token: str) -> list[dict]:
             "rr_average": d.get("rr_average"),
             "snoring_min": round((d.get("snoring") or 0) / 60),
         })
+
+    # Una nottata con un risveglio prolungato puo' arrivare come due "series"
+    # separate sulla stessa data (es. dormito, sveglio a lungo, riaddormentato):
+    # si tiene solo il segmento piu' lungo per data, cosi' ogni notte resta
+    # una riga sola per chi consuma questi dati (sito e consiglio del giorno).
+    by_date: dict[str, dict] = {}
+    for e in entries:
+        prev = by_date.get(e["date"])
+        if prev is None or e["total_timeinbed_min"] > prev["total_timeinbed_min"]:
+            by_date[e["date"]] = e
+    entries = list(by_date.values())
 
     entries.sort(key=lambda e: e["date"], reverse=True)
     return entries

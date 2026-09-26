@@ -109,7 +109,7 @@
 </div>
 
 <!-- CONSIGLIO DEL GIORNO -->
-<div class="sec">Consiglio del giorno · basato sui dati Garmin delle ultime settimane</div>
+<div class="sec">Consiglio del giorno · basato sui dati Garmin delle ultime settimane <span id="reco-refresh-status" style="text-transform:none;letter-spacing:normal;color:var(--muted)"></span></div>
 <div class="reco-box" id="reco-box">
   <div class="reco-icon">—</div>
   <div>
@@ -983,8 +983,43 @@ async function loadRecommendation() {
   }
 }
 
+// Il consiglio del giorno deve ragionare su dati freschi, non su quelli
+// dell'ultimo sync schedulato (15:00/mezzanotte): prima di mostrarlo si prova
+// un refresh in background. Un cooldown evita di martellare Garmin/Withings
+// se la pagina viene ricaricata piu' volte nella stessa mezz'ora.
+const AUTO_REFRESH_COOLDOWN_MS = 20 * 60 * 1000;
+
+async function maybeAutoRefreshData() {
+  let last = 0;
+  try { last = Number(localStorage.getItem('lastAutoRefresh') || 0); } catch (err) { /* storage non disponibile */ }
+  if (Date.now() - last < AUTO_REFRESH_COOLDOWN_MS) return false;
+  try { localStorage.setItem('lastAutoRefresh', String(Date.now())); } catch (err) { /* storage non disponibile */ }
+
+  const status = document.getElementById('reco-refresh-status');
+  if (status) status.textContent = '🔄 aggiornamento dati…';
+  try {
+    const res = await fetch('/refresh-sync.php', { method: 'POST' });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'refresh fallito');
+    return true;
+  } catch (err) {
+    console.warn('Auto-refresh dati non riuscito:', err);
+    return false;
+  } finally {
+    if (status) status.textContent = '';
+  }
+}
+
 loadHeroFitness();
 loadRecommendation();
+
+maybeAutoRefreshData().then((refreshed) => {
+  if (!refreshed) return;
+  loadHeroWeight();
+  loadHeroFitness();
+  loadRecommendation();
+  loadActivities();
+});
 </script>
 <script src="nav.js"></script>
 </body>
