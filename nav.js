@@ -1,3 +1,11 @@
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/service-worker.js').catch(function (err) {
+      console.warn('Service worker non registrato:', err);
+    });
+  });
+}
+
 (function () {
   function setOpen(open) {
     document.body.classList.toggle('nav-open', open);
