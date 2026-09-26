@@ -728,6 +728,7 @@ const SWIM_TYPES = ['lap_swimming', 'open_water_swimming', 'swimming'];
 const GYM_TYPE = 'strength_training';
 const RECOVERY_TYPES = [...SWIM_TYPES, GYM_TYPE];
 const FATIGUE_CATEGORIES = ['OVERREACHING', 'STRAINED', 'UNPRODUCTIVE'];
+const LAYOFF_DAYS = 6; // il piano alterna corsa e nuoto/palestra ogni 3-4 giorni: oltre 6 senza quel tipo di uscita è già un salto di ciclo, si rientra piano
 
 // Contenuto e link presi dalle stesse zone FC/passo calibrate in corsa.html e
 // nuoto.html per questo utente — qui non si inventano nuovi ritmi, si sceglie
@@ -885,11 +886,19 @@ function computeRecommendation(activities, fitness, sleepNights) {
     rationale = 'La frequenza di corsa e nuoto/palestra delle ultime settimane è equilibrata: via libera a entrambe, scegli in base a come ti senti.';
   }
 
-  // Corsa: se serve recupero è sempre facile; altrimenti si copre prima il
-  // vuoto più vecchio (lungo assente da troppo) poi si alterna velocità/soglia.
+  // Oltre una settimana buona senza una data attività, la forma di quel tipo
+  // di uscita è calata: non ha senso ripartire dalla sessione più esigente
+  // solo perché "è quella che manca da più tempo". Questo vale a prescindere
+  // dal resto della logica sotto (velocità/soglia/lungo, tecnica/sprint).
+  const runLayoff = daysSinceRun >= LAYOFF_DAYS;
+  const swimLayoff = daysSinceRecovery >= LAYOFF_DAYS;
+
+  // Corsa: se serve recupero o si rientra da una pausa lunga è sempre facile;
+  // altrimenti si copre prima il vuoto più vecchio (lungo assente da troppo)
+  // poi si alterna velocità/soglia.
   const runGaps = daysSinceByClass(activities, RUN_TYPES, classifyRun);
   let runChoice;
-  if (recoveryMode) {
+  if (recoveryMode || runLayoff) {
     runChoice = 'facile';
   } else if ((runGaps.lungo ?? Infinity) >= 6) {
     runChoice = 'lungo';
@@ -901,14 +910,22 @@ function computeRecommendation(activities, fitness, sleepNights) {
   }
 
   const swimGaps = daysSinceByClass(activities, SWIM_TYPES, classifySwim);
-  const swimChoice = recoveryMode
-    ? 'leggero'
+  const swimChoice = (recoveryMode || swimLayoff)
+    ? (swimLayoff && !recoveryMode ? 'tecnica' : 'leggero')
     : ((swimGaps.velocita ?? Infinity) > (swimGaps.tecnica ?? Infinity) ? 'velocita' : 'tecnica');
+
+  const runNote = runLayoff
+    ? `Rientro dopo una pausa di ${fmtDays(daysSinceRun)}: oggi si riparte facile, non con lunga o qualità.`
+    : '';
+  const swimNote = swimLayoff && !recoveryMode
+    ? `Rientro dopo una pausa di ${fmtDays(daysSinceRecovery)}: oggi tecnica, non sprint.`
+    : (recoveryMode ? '' : GYM_NOTE);
 
   return {
     preferred, rationale, recoveryMode,
     run: RUN_SESSIONS[runChoice],
     swim: swimChoice === 'velocita' ? pickVelocitaVariant() : SWIM_SESSIONS[swimChoice],
+    runNote, swimNote,
   };
 }
 
@@ -928,12 +945,13 @@ function renderRecommendation(model) {
       <div class="reco-opt${model.preferred === 'corsa' ? ' reco-opt-pref' : ''}">
         <div class="reco-opt-hdr">🏃 Se opti per la corsa <span class="reco-opt-tag">${model.run.label}</span></div>
         <div class="reco-opt-body">${model.run.html}</div>
+        ${model.runNote ? `<div class="reco-opt-note">${model.runNote}</div>` : ''}
         <a class="reco-link" href="${model.run.link}">Dettaglio scheda →</a>
       </div>
       <div class="reco-opt${model.preferred === 'nuoto' ? ' reco-opt-pref' : ''}">
         <div class="reco-opt-hdr">🏊 Se opti per nuoto/palestra <span class="reco-opt-tag">${model.swim.label}</span></div>
         <div class="reco-opt-body">${model.swim.html}</div>
-        ${model.recoveryMode ? '' : `<div class="reco-opt-note">${GYM_NOTE}</div>`}
+        ${model.swimNote ? `<div class="reco-opt-note">${model.swimNote}</div>` : ''}
         <a class="reco-link" href="${model.swim.link}">Dettaglio scheda →</a>
       </div>
     </div>`;
