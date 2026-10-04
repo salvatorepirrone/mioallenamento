@@ -1,7 +1,8 @@
 # Accesso con utenti (login + cambio password)
 
-Gli utenti stanno in `/volume2/web/auth-data/users.json` (nel repo NO, nella
-cartella pubblica; override con la variabile `AUTH_USERS_FILE`): solo hash bcrypt.
+Gli utenti stanno in `/volume2/web/auth-data/users.json` sul NAS (non nel repo;
+override con la variabile `AUTH_USERS_FILE`): solo hash bcrypt. La cartella è
+scrivibile dall'utente `http` (ACL) e chiusa al web da nginx (`deny all`).
 
 ## Creare un utente (sul NAS)
 
