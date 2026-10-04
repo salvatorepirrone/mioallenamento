@@ -125,6 +125,10 @@
   </div>
 </div>
 
+<!-- ALLENAMENTO DEL COACH -->
+<div class="sec hidden" id="coach-sec">Allenamento del coach · <a href="libreria.php" style="text-transform:none;letter-spacing:normal">libreria allenamenti</a></div>
+<div class="eval-box hidden" id="coach-box"></div>
+
 <!-- VALUTAZIONE ULTIMA SESSIONE DI FORZA -->
 <div class="sec hidden" id="eval-sec">Valutazione allenamento ·<span id="eval-date-label"></span></div>
 <div class="eval-box hidden" id="eval-box"></div>
@@ -1066,6 +1070,67 @@ function renderStrengthEvaluation(dayActivities, activities) {
   box.classList.remove('hidden');
 }
 
+// ── ALLENAMENTO DEL COACH (assegnato da coach-api.php, inviabile all'orologio) ──
+async function loadCoachWorkouts() {
+  const sec = document.getElementById('coach-sec');
+  const box = document.getElementById('coach-box');
+  const hide = () => { sec.classList.add('hidden'); box.classList.add('hidden'); };
+  try {
+    const res = await fetch('/coach-api.php?action=mine', { cache: 'no-store', credentials: 'same-origin' });
+    if (!res.ok) return hide();
+    const data = await res.json();
+    if (!data.workouts || !data.workouts.length) return hide();
+
+    const today = new Date();
+    const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const tomorrow = new Date(today.getTime() + 86400000);
+    const dayLabel = d => d === iso(today) ? 'Oggi' : (d === iso(tomorrow) ? 'Domani' : actDateLabel(d));
+
+    box.innerHTML = '';
+    data.workouts.forEach(w => {
+      const div = document.createElement('div');
+      div.className = 'eval-session';
+      div.style.marginBottom = '12px';
+      const sent = w.sent_for_date;
+      div.innerHTML =
+        '<div class="eval-session-hdr">' + CoachRender.esc(dayLabel(w.date)) +
+        ' <span class="eval-session-tag">da ' + CoachRender.esc(w.created_by) + '</span></div>' +
+        CoachRender.html(w.parsed) +
+        '<div style="margin-top:10px">' +
+        (sent
+          ? '<span class="eval-progress">✅ Inviato all\'orologio e messo in calendario</span>'
+          : '<button type="button" class="cw-btn">Invia all\'orologio</button> <span class="cw-msg eval-progress"></span>') +
+        '</div>';
+      const btn = div.querySelector('.cw-btn');
+      if (btn) {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          const msg = div.querySelector('.cw-msg');
+          msg.textContent = 'Invio a Garmin in corso…';
+          try {
+            const r = await fetch('/coach-api.php?action=send', {
+              method: 'POST', credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json', 'X-CSRF': data.csrf },
+              body: JSON.stringify({ id: w.id, date: w.date }),
+            });
+            const out = await r.json();
+            if (!r.ok) throw new Error(out.error || 'Errore ' + r.status);
+            loadCoachWorkouts();
+          } catch (e) {
+            msg.textContent = e.message;
+            btn.disabled = false;
+          }
+        });
+      }
+      box.appendChild(div);
+    });
+    sec.classList.remove('hidden');
+    box.classList.remove('hidden');
+  } catch (err) {
+    hide();
+  }
+}
+
 async function loadStrengthEvaluation() {
   try {
     const activities = await fetchJSONSafe('/data/garmin-activities.json', []);
@@ -1400,6 +1465,7 @@ async function maybeAutoRefreshData() {
 loadHeroFitness();
 loadRecommendation();
 loadStrengthEvaluation();
+loadCoachWorkouts();
 
 maybeAutoRefreshData().then((refreshed) => {
   if (!refreshed) return;
@@ -1411,5 +1477,6 @@ maybeAutoRefreshData().then((refreshed) => {
 });
 </script>
 <script src="nav.js"></script>
+<script src="coach-render.js"></script>
 </body>
 </html>

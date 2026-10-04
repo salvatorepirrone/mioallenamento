@@ -17,6 +17,17 @@ La password temporanea resta salvata in chiaro in `users.json` (campo `temp_pw`)
 finché l'utente non ne sceglie una propria, così la pagina `/accessi.php` può mostrarla
 agli amministratori; al cambio password il campo viene cancellato.
 
+## Coach: allenamenti in linguaggio naturale
+
+Un utente con il ruolo "coach" (pulsante "Rendi coach" in `/accessi.php`, o casella alla creazione
+dell'utente) scrive su `/libreria.php` un allenamento di nuoto in italiano; `auth/coach-lib.php` lo fa
+strutturare a Claude (API Anthropic, modello `COACH_MODEL`), valida il risultato e calcola i totali, e il
+programma entra nella libreria (data di assegnazione facoltativa). Solo i coach inseriscono, assegnano ed
+eliminano programmi; tutti vedono la libreria. L'atleta (`COACH_DEFAULT_ATHLETE`, titolare della sessione
+Garmin) li invia all'orologio: `garmin-sync/send_workout.py` li crea su Garmin Connect e, con una data, li
+mette in calendario. La chiave API sta in `auth-data/anthropic.key` (mai nel repo); i programmi in
+`auth-data/coach.json`.
+
 ## Come protegge il sito
 
 Il nginx del NAS non ha il modulo `auth_request`, quindi ogni richiesta passa da

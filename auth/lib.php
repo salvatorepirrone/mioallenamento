@@ -61,6 +61,7 @@ function auth_create_user(string $name, bool $overwrite = false): ?string {
         if (isset($users[$name]) && !$overwrite) return $users;
         $record = ['hash' => password_hash($temp, PASSWORD_DEFAULT), 'must_change' => true, 'fails' => 0, 'locked_until' => 0, 'temp_pw' => $temp];
         if (!empty($users[$name]['admin'])) $record['admin'] = true;
+        if (!empty($users[$name]['coach'])) $record['coach'] = true;
         if (!empty($users[$name]['disabled'])) $record['disabled'] = true;
         $users[$name] = $record;
         $created = true;

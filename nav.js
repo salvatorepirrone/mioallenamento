@@ -76,6 +76,12 @@ if ('serviceWorker' in navigator) {
   }
 
   var links = document.querySelector('.nav-links');
+  if (links && !links.querySelector('a[href="libreria.php"]')) {
+    var lib = document.createElement('a');
+    lib.href = 'libreria.php';
+    lib.innerHTML = '<span class="dot" style="background:#5ac8f5"></span>Libreria 📚';
+    links.appendChild(lib);
+  }
   fetch('/whoami.php', { cache: 'no-store', credentials: 'same-origin' })
     .then(function (res) { return res.ok ? res.json() : null; })
     .then(function (data) {

@@ -6,4 +6,4 @@ require_once __DIR__ . '/auth/lib.php';
 header('Content-Type: application/json');
 header('Cache-Control: no-store');
 $name = auth_current_user();
-echo json_encode(['user' => $name, 'admin' => auth_is_admin($name)]);
+echo json_encode(['user' => $name, 'admin' => auth_is_admin($name), 'coach' => !empty(auth_get_user((string)$name)['coach'])]);
