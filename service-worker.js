@@ -37,6 +37,8 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  // Pagine dinamiche per-utente: mai dalla cache (potrebbero mostrare dati di un altro utente).
+  if (url.pathname === '/whoami.php' || url.pathname === '/accessi.php') return;
 
   if (url.pathname.startsWith('/data/')) {
     event.respondWith(

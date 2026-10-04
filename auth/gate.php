@@ -2,7 +2,7 @@
 // Portinaio del sito: nginx gli inoltra ogni richiesta (vedi auth/README.md).
 // Senza sessione valida rimanda al login; con sessione valida serve il file
 // richiesto (statici tramite X-Accel-Redirect, .php eseguiti qui).
-require __DIR__ . '/lib.php';
+require_once __DIR__ . '/lib.php';
 
 $name = auth_current_user();
 $valid = $name && empty($_SESSION['must_change']);

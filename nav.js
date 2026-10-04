@@ -29,6 +29,21 @@ if ('serviceWorker' in navigator) {
     });
   });
 
+  // ── Voce "Accessi": solo per gli amministratori (il server decide, non il browser) ──
+  var links = document.querySelector('.nav-links');
+  if (links && !links.querySelector('a[href="accessi.php"]')) {
+    fetch('/whoami.php', { cache: 'no-store', credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        if (!data || !data.admin) return;
+        var a = document.createElement('a');
+        a.href = 'accessi.php';
+        a.innerHTML = '<span class="dot" style="background:#9aa5ad"></span>Accessi 🔐';
+        links.appendChild(a);
+      })
+      .catch(function () {});
+  }
+
   // ── Tasto "Aggiorna dati" (forza subito il sync Garmin/Withings) ──
   var nav = document.querySelector('nav');
   if (nav) {

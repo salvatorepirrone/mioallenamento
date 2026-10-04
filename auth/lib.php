@@ -37,11 +37,61 @@ function auth_update_users(callable $fn): void {
     fclose($lock);
 }
 
+function auth_valid_username(string $name): bool {
+    return (bool)preg_match('/^[a-z0-9._-]{2,32}$/', $name);
+}
+
+function auth_all_users(): array {
+    $file = auth_users_file();
+    $users = is_file($file) ? (json_decode(file_get_contents($file), true) ?: []) : [];
+    ksort($users);
+    return $users;
+}
+
+// Crea l'utente con una password temporanea casuale (da cambiare al primo accesso) e la
+// restituisce. Se l'utente esiste gia': null, a meno di $overwrite (azzera la password e
+// mantiene il ruolo admin).
+function auth_create_user(string $name, bool $overwrite = false): ?string {
+    $alphabet = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    $temp = '';
+    for ($i = 0; $i < 14; $i++) $temp .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+
+    $created = false;
+    auth_update_users(function ($users) use ($name, $temp, $overwrite, &$created) {
+        if (isset($users[$name]) && !$overwrite) return $users;
+        $record = ['hash' => password_hash($temp, PASSWORD_DEFAULT), 'must_change' => true, 'fails' => 0, 'locked_until' => 0];
+        if (!empty($users[$name]['admin'])) $record['admin'] = true;
+        $users[$name] = $record;
+        $created = true;
+        return $users;
+    });
+    return $created ? $temp : null;
+}
+
 function auth_get_user(string $name): ?array {
     $file = auth_users_file();
     if (!is_file($file)) return null;
     $users = json_decode(file_get_contents($file), true) ?: [];
     return $users[strtolower($name)] ?? null;
+}
+
+// Registro degli accessi: una riga JSON per evento, accanto a users.json (chiuso al web).
+function auth_log_file(): string {
+    return dirname(auth_users_file()) . '/access.log';
+}
+
+function auth_log(string $event, string $user = '', string $detail = ''): void {
+    $row = [
+        't' => (new DateTime('now', new DateTimeZone('Europe/Rome')))->format('Y-m-d H:i:s'),
+        'e' => $event, 'u' => $user, 'ip' => $_SERVER['REMOTE_ADDR'] ?? '?',
+        'ua' => substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 120), 'd' => $detail,
+    ];
+    @file_put_contents(auth_log_file(), json_encode($row, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
+}
+
+function auth_is_admin(?string $name): bool {
+    $user = $name ? auth_get_user($name) : null;
+    return !empty($user['admin']);
 }
 
 function auth_current_user(): ?string {

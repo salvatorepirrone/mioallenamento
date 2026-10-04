@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/lib.php';
+require_once __DIR__ . '/lib.php';
 
 $name = auth_current_user();
 if (!$name) {
@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $users[$name]['must_change'] = false;
                 return $users;
             });
+            auth_log('password_changed', $name, $forced ? 'primo accesso' : 'volontario');
             $_SESSION['must_change'] = false;
             session_regenerate_id(true);
             $done = true;
