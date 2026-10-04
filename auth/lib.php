@@ -51,7 +51,8 @@ function auth_current_user(): ?string {
 
 function auth_csrf_token(): string {
     auth_start();
-    return $_SESSION['csrf'] ??= bin2hex(random_bytes(16));
+    if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(16));
+    return $_SESSION['csrf'];
 }
 
 function auth_csrf_check(): void {
