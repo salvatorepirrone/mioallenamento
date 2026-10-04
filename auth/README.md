@@ -1,6 +1,6 @@
 # Accesso con utenti (login + cambio password)
 
-Gli utenti stanno in `/volume2/homes/Claude/auth/users.json` (fuori dal repo e dalla
+Gli utenti stanno in `/volume2/web/auth-data/users.json` (nel repo NO, nella
 cartella pubblica; override con la variabile `AUTH_USERS_FILE`): solo hash bcrypt.
 
 ## Creare un utente (sul NAS)

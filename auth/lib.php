@@ -2,7 +2,7 @@
 // Utenti del sito: file JSON FUORI dalla cartella pubblica (e dal repo), con
 // solo hash bcrypt delle password. Si gestisce con auth/create-user.php.
 
-const AUTH_USERS_FILE_DEFAULT = '/volume2/homes/Claude/auth/users.json';
+const AUTH_USERS_FILE_DEFAULT = '/volume2/web/auth-data/users.json';
 const AUTH_MIN_PASSWORD_LEN = 10;
 const AUTH_MAX_FAILS = 5;
 const AUTH_LOCK_SECONDS = 300;
@@ -31,7 +31,6 @@ function auth_update_users(callable $fn): void {
     $users = $fn($users);
     $tmp = $file . '.tmp';
     file_put_contents($tmp, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    chmod($tmp, 0600);
     rename($tmp, $file);
     flock($lock, LOCK_UN);
     fclose($lock);
