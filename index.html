@@ -625,7 +625,8 @@ const ACT_TYPE_LABELS = {
   hiking: 'Escursionismo',
   road_biking: 'Ciclismo', cycling: 'Ciclismo', mountain_biking: 'MTB',
 };
-const ACT_SWIM_TYPES = ['lap_swimming', 'open_water_swimming', 'swimming'];
+const SWIM_STYLE_LABELS = { freestyle: 'Crawl', backstroke: 'Dorso', breaststroke: 'Rana', butterfly: 'Farfalla', drill: 'Drill', mixed: 'Misto', im: 'Misti' };
+const ACT_SWIM_TYPES =['lap_swimming', 'open_water_swimming', 'swimming'];
 const MESI_IT = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 
 function actTypeLabel(t) { return ACT_TYPE_LABELS[t] || t || '—'; }
@@ -679,9 +680,9 @@ function renderActivityRow(a, i) {
 
   const lapRows = a.laps.map(l => `
     <tr>
-      <td colspan="2" style="padding-left:24px;color:var(--muted)">Lap ${l.lap}</td>
+      <td colspan="2" style="padding-left:24px;color:var(--muted)">Lap ${l.lap}${l.style ? ' · ' + (SWIM_STYLE_LABELS[l.style] || l.style) : ''}</td>
       <td>${l.distance_m != null ? Math.round(l.distance_m) + ' m' : '—'}</td>
-      <td>${fmtPace(l.avg_pace_min_per_km)}</td>
+      <td>${ACT_SWIM_TYPES.includes(a.type) ? fmtSwimPace100(l.avg_pace_min_per_km) : fmtPace(l.avg_pace_min_per_km)}</td>
       <td>${l.avg_hr ?? '—'}/${l.max_hr ?? '—'}</td>
       <td></td>
     </tr>`).join('');
@@ -832,6 +833,7 @@ function findEvalDay(activities) {
 const SIMPLE_STATUS_CLS = { ok: 'eval-ok', partial: 'eval-partial', miss: 'eval-miss' };
 
 function fmtSwimPace100(minPerKm) {
+  if (minPerKm == null) return '—';
   const sec = Math.round(minPerKm * 6); // min/km -> sec/100m
   return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}/100m`;
 }
