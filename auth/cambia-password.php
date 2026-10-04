@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             auth_update_users(function ($users) use ($name, $new) {
                 $users[$name]['hash'] = password_hash($new, PASSWORD_DEFAULT);
                 $users[$name]['must_change'] = false;
+                unset($users[$name]['temp_pw']);
                 return $users;
             });
             auth_log('password_changed', $name, $forced ? 'primo accesso' : 'volontario');

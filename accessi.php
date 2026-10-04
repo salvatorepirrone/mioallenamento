@@ -206,7 +206,12 @@ function user_btn(string $action, string $user, string $label, string $confirm =
 <td><?php
     if ($isOff) echo '<span class="bad">Disattivato</span>';
     elseif ($isLocked) echo '<span class="bad">Bloccato (troppi tentativi)</span>';
-    elseif (!empty($uu['must_change'])) echo 'Deve ancora scegliere la password';
+    elseif (!empty($uu['must_change'])) {
+        echo 'Deve ancora scegliere la password';
+        echo !empty($uu['temp_pw'])
+            ? '<div class="muted">Password temporanea: <b style="font-family:monospace;user-select:all">' . e($uu['temp_pw']) . '</b></div>'
+            : '<div class="muted">Password temporanea non disponibile: usa "Azzera password"</div>';
+    }
     else echo 'Attivo';
 ?></td>
 <td><?php

@@ -13,6 +13,10 @@ Stampa una password temporanea. Al primo accesso l'utente viene portato a
 password (almeno 10 caratteri, con controlli di robustezza).
 Per resettare la password di un utente basta rilanciare lo stesso comando.
 
+La password temporanea resta salvata in chiaro in `users.json` (campo `temp_pw`) solo
+finché l'utente non ne sceglie una propria, così la pagina `/accessi.php` può mostrarla
+agli amministratori; al cambio password il campo viene cancellato.
+
 ## Come protegge il sito
 
 Il nginx del NAS non ha il modulo `auth_request`, quindi ogni richiesta passa da
