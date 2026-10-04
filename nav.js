@@ -79,7 +79,7 @@ if ('serviceWorker' in navigator) {
   if (links && !links.querySelector('a[href="libreria.php"]')) {
     var lib = document.createElement('a');
     lib.href = 'libreria.php';
-    lib.innerHTML = '<span class="dot" style="background:#5ac8f5"></span>Libreria 📚';
+    lib.innerHTML = '<span class="dot" style="background:#5ac8f5"></span>Libreria allenamenti 📚';
     links.appendChild(lib);
   }
   fetch('/whoami.php', { cache: 'no-store', credentials: 'same-origin' })

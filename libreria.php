@@ -47,7 +47,7 @@ input[type=date] { padding: 9px 10px; border: 1px solid var(--border); border-ra
     <a href="peso.html"><span class="dot" style="background:#f5c85a"></span>Peso ⚖️</a>
     <a href="callback.html"><span class="dot" style="background:#5af5c8"></span>Sonno 😴</a>
     <a href="editor.html"><span class="dot" style="background:#f55ac8"></span>Editor FIT</a>
-    <a href="libreria.php" class="active"><span class="dot" style="background:#5ac8f5"></span>Libreria 📚</a>
+    <a href="libreria.php" class="active"><span class="dot" style="background:#5ac8f5"></span>Libreria allenamenti 📚</a>
   </div>
 </nav>
 <div class="nav-backdrop"></div>
