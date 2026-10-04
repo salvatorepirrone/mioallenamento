@@ -126,7 +126,7 @@
 </div>
 
 <!-- VALUTAZIONE ULTIMA SESSIONE DI FORZA -->
-<div class="sec hidden" id="eval-sec">Valutazione allenamento forza · <span id="eval-date-label"></span></div>
+<div class="sec hidden" id="eval-sec">Valutazione allenamento ·<span id="eval-date-label"></span></div>
 <div class="eval-box hidden" id="eval-box"></div>
 
 <!-- CONSIGLIO DEL GIORNO -->
@@ -822,11 +822,117 @@ function evaluateActivity(activity) {
   return { activity, sessionType, plan, results };
 }
 
-function findStrengthEvalDay(activities) {
+function findEvalDay(activities) {
   // activities e' gia' ordinato dal piu' recente (garmin-sync scrive cosi').
-  const first = activities.find(a => a.type === 'strength_training');
-  if (!first) return null;
-  return activities.filter(a => a.type === 'strength_training' && a.date === first.date);
+  if (!activities.length) return null;
+  return activities.filter(a => a.date === activities[0].date);
+}
+
+// ── Valutazione corsa e nuoto: confronto con le zone/ritmi di corsa.html e nuoto.html ──
+const SIMPLE_STATUS_CLS = { ok: 'eval-ok', partial: 'eval-partial', miss: 'eval-miss' };
+
+function fmtSwimPace100(minPerKm) {
+  const sec = Math.round(minPerKm * 6); // min/km -> sec/100m
+  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}/100m`;
+}
+
+function median(nums) {
+  const s = nums.slice().sort((x, y) => x - y);
+  return s.length ? (s[Math.floor((s.length - 1) / 2)] + s[Math.ceil((s.length - 1) / 2)]) / 2 : null;
+}
+
+function paceDeltaLine(label, curPace, prevPace, prevDate, fmt, extra) {
+  const d = Math.round((prevPace - curPace) * 60 * (fmt === 'swim' ? 0.1 : 1)); // secondi (positivo = piu' veloce)
+  const unit = fmt === 'swim' ? 's/100m' : 's/km';
+  const tail = extra ? ` · ${extra}` : '';
+  if (Math.abs(d) < 3) return `<b>${label}</b>: invariato rispetto al ${actDateLabel(prevDate)}${tail}`;
+  return d > 0
+    ? `<b>${label}</b>: <span class="eval-up">▲ ${d} ${unit} più veloce</span> del ${actDateLabel(prevDate)}${tail}`
+    : `<b>${label}</b>: <span class="eval-down">▼ ${-d} ${unit} più lento</span> del ${actDateLabel(prevDate)}${tail}`;
+}
+
+function runWorkPace(a, cls) {
+  const laps = (a.laps || []).filter(l => l.avg_pace_min_per_km != null && l.distance_m >= 150); // esclude gli strides da 80 m
+  const work = cls === 'velocita'
+    ? laps.filter(l => l.avg_pace_min_per_km <= 5.0)
+    : (cls === 'soglia' ? laps.filter(l => l.avg_pace_min_per_km > 5.0 && l.avg_pace_min_per_km <= 5.75) : []);
+  if (!work.length) return { pace: a.avg_pace_min_per_km, reps: 0 };
+  const dist = work.reduce((s, l) => s + l.distance_m, 0);
+  return { pace: work.reduce((s, l) => s + l.avg_pace_min_per_km * l.distance_m, 0) / dist, reps: work.length };
+}
+
+function evaluateRun(a, activities) {
+  const cls = classifyRun(a);
+  const names = { facile: 'Corsa facile · Z2', lungo: 'Corsa lunga · Z2', soglia: 'Soglia', velocita: 'Ripetute · velocità' };
+  const items = [];
+  const { pace, reps } = runWorkPace(a, cls);
+
+  if (cls === 'velocita') {
+    const ok = pace <= 4.84;
+    items.push({ status: ok ? 'ok' : 'partial', text: `<b>${reps} ripetute</b> a ${fmtPace(pace)} (target 4:30–4:50/km)` });
+    if (a.max_hr != null) items.push({ status: a.max_hr >= 162 ? 'ok' : 'partial', text: `FC max <b>${a.max_hr}</b> (target 162–172 sulle ripetute)` });
+  } else if (cls === 'soglia') {
+    const ok = pace >= 5.33 && pace <= 5.75;
+    items.push({ status: ok ? 'ok' : 'partial', text: `Blocco soglia a <b>${fmtPace(pace)}</b> (target 5:20–5:45/km)` });
+  } else {
+    if (a.avg_hr != null) {
+      const st = a.avg_hr <= 148 ? 'ok' : (a.avg_hr <= 155 ? 'partial' : 'miss');
+      const hint = st === 'ok' ? 'rimasto in Z2' : 'sei scivolato in Z3: rallenta, la FC è la guida';
+      items.push({ status: st, text: `FC media <b>${a.avg_hr}</b> (target Z2 ≤ 148): ${hint}` });
+    }
+    items.push({ status: pace <= 6.5 && pace >= 5.6 ? 'ok' : 'partial', text: `Passo medio <b>${fmtPace(a.avg_pace_min_per_km)}</b> (Z2: 5:45–6:10/km, in caldo fino a 6:30)` });
+    if (cls === 'lungo') items.push({ status: a.distance_km >= 8 ? 'ok' : 'partial', text: `Distanza <b>${a.distance_km} km</b> (lungo: 8–10 km)` });
+  }
+
+  const prev = activities.find(p => RUN_TYPES.includes(p.type) && p.date < a.date && classifyRun(p) === cls);
+  const progress = [];
+  if (prev) {
+    const prevPace = runWorkPace(prev, cls).pace;
+    const hrNote = a.avg_hr != null && prev.avg_hr != null
+      ? `FC media ${a.avg_hr} vs ${prev.avg_hr} bpm` : '';
+    progress.push(paceDeltaLine(cls === 'velocita' || cls === 'soglia' ? 'Passo sul lavoro' : 'Passo medio', pace, prevPace, prev.date, 'run', hrNote));
+  }
+  return { activity: a, tag: names[cls], items, progress };
+}
+
+function swimLapStats(a) {
+  const laps = (a.laps || []).filter(l => l.avg_pace_min_per_km != null && l.distance_m >= 20);
+  if (!laps.length) return null;
+  const paces = laps.map(l => l.avg_pace_min_per_km);
+  return { median: median(paces), best: Math.min(...paces) };
+}
+
+function evaluateSwim(a, activities) {
+  const cls = classifySwim(a);
+  const stats = swimLapStats(a);
+  const items = [];
+  const km = a.distance_km;
+  if (km != null) items.push({ status: km >= 1.8 ? 'ok' : (km >= 1.5 ? 'partial' : 'miss'), text: `Volume <b>${Math.round(km * 1000)} m</b> (programma: ~1.800–2.000 m)` });
+  if (stats) {
+    const m = stats.median; // min/km: 1:50/100m = 18.33, 1:58 = 19.67
+    items.push({ status: m <= 18.4 ? 'ok' : (m <= 19.7 ? 'partial' : 'miss'), text: `Ritmo mediano <b>${fmtSwimPace100(m)}</b> (target aerobico ~1:50, soglia ~1:45)` });
+    if (cls === 'velocita') {
+      const b = stats.best;
+      items.push({ status: b <= 15 ? 'ok' : (b <= 16.7 ? 'partial' : 'miss'), text: `Picco <b>${fmtSwimPace100(b)}</b> (sprint: ~1:25, veloce: ~1:35)` });
+    }
+  }
+
+  const prev = activities.find(p => SWIM_TYPES.includes(p.type) && p.date < a.date && (p.distance_km || 0) >= 0.5 && classifySwim(p) === cls);
+  const progress = [];
+  if (prev) {
+    const prevStats = swimLapStats(prev);
+    if (stats && prevStats) {
+      const dist = km != null && prev.distance_km != null ? `volume ${Math.round(km * 1000)} vs ${Math.round(prev.distance_km * 1000)} m` : '';
+      progress.push(paceDeltaLine('Ritmo mediano', stats.median, prevStats.median, prev.date, 'swim', dist));
+    }
+  }
+  return { activity: a, tag: cls === 'velocita' ? 'Nuoto · velocità' : 'Nuoto · tecnica', items, progress };
+}
+
+function evaluateSimple(a, activities) {
+  if (RUN_TYPES.includes(a.type)) return evaluateRun(a, activities);
+  if (SWIM_TYPES.includes(a.type)) return evaluateSwim(a, activities);
+  return { activity: a, tag: actTypeLabel(a.type), items: [], progress: [] };
 }
 
 function findPreviousSameSession(activities, sessionType, beforeDate) {
@@ -867,9 +973,25 @@ function renderExerciseLine(r) {
 
 function renderSessionBlock(evalResult, activities) {
   const a = evalResult.activity;
-  const tag = evalResult.sessionType ? `Sessione ${evalResult.sessionType}` : (a.name || 'Forza');
   const durationTxt = fmtDuration(a.duration_min);
   const caloriesTxt = a.calories != null ? `${Math.round(a.calories)} kcal` : '—';
+
+  if (evalResult.items) {
+    const list = evalResult.items.map(i => `<li class="${SIMPLE_STATUS_CLS[i.status]}"><span>${i.text}</span></li>`).join('');
+    const progressHtml = evalResult.progress.length
+      ? `<div class="eval-progress">${evalResult.progress.join('<br>')}</div>`
+      : `<div class="eval-progress">Nessuna sessione precedente comparabile per valutare i progressi.</div>`;
+    const body = evalResult.items.length
+      ? `<ul class="eval-list">${list}</ul>${progressHtml}`
+      : `<div class="eval-progress">Attività extra, senza programma di riferimento.</div>`;
+    return `
+      <div class="eval-session">
+        <div class="eval-session-hdr">${evalResult.tag} <span class="eval-session-tag">${durationTxt} · ${caloriesTxt}</span></div>
+        ${body}
+      </div>`;
+  }
+
+  const tag = evalResult.sessionType ? `Sessione ${evalResult.sessionType}` : (a.name || 'Forza');
 
   if (!evalResult.results) {
     return `
@@ -916,23 +1038,22 @@ function renderStrengthEvaluation(dayActivities, activities) {
 
   document.getElementById('eval-date-label').textContent = actDateLabel(dayActivities[0].date);
 
-  const evals = dayActivities.map(evaluateActivity);
-  const withResults = evals.filter(e => e.results);
+  const evals = dayActivities.map(a => a.type === 'strength_training' ? evaluateActivity(a) : evaluateSimple(a, activities));
+  const statuses = [];
+  evals.forEach(e => (e.results || e.items || []).forEach(r => statuses.push(r.status)));
 
-  let verdictHtml = '';
-  if (withResults.length) {
-    let ok = 0, partial = 0, miss = 0;
-    withResults.forEach(e => e.results.forEach(r => {
-      if (r.status === 'ok') ok++; else if (r.status === 'partial') partial++; else miss++;
-    }));
-    const total = ok + partial + miss;
+  let verdictHtml;
+  if (statuses.length) {
+    const ok = statuses.filter(s => s === 'ok').length;
+    const partial = statuses.filter(s => s === 'partial').length;
+    const miss = statuses.filter(s => s === 'miss').length;
     const judgement = miss === 0 && partial === 0
-      ? 'aderenza piena al programma'
-      : (miss === 0 ? 'aderenza buona, con qualche serie incompleta' : 'aderenza parziale, alcuni esercizi saltati');
-    verdictHtml = `<div class="eval-verdict"><b>Giudizio complessivo:</b> ${judgement} — ${ok}/${total} esercizi completati come da programma` +
-      (partial ? `, ${partial} solo in parte` : '') + (miss ? `, ${miss} non svolti` : '') + `.</div>`;
+      ? 'in linea con il programma'
+      : (miss === 0 ? 'buona, con qualche indicatore sotto target' : 'parziale, diversi indicatori fuori target');
+    verdictHtml = `<div class="eval-verdict"><b>Giudizio complessivo:</b> ${judgement} — ${ok}/${statuses.length} indicatori nel target` +
+      (partial ? `, ${partial} quasi` : '') + (miss ? `, ${miss} fuori` : '') + `.</div>`;
   } else {
-    verdictHtml = `<div class="eval-verdict">Attività di forza svolta, ma senza un nome sessione riconosciuto ("Sessione A/B") o senza serie sincronizzate: solo durata e calorie disponibili.</div>`;
+    verdictHtml = `<div class="eval-verdict">Attività svolta, ma senza dettaglio sufficiente per confrontarla con il programma: solo durata e calorie disponibili.</div>`;
   }
 
   box.innerHTML = verdictHtml + `<div class="eval-sessions">${evals.map(e => renderSessionBlock(e, activities)).join('')}</div>`;
@@ -943,10 +1064,10 @@ function renderStrengthEvaluation(dayActivities, activities) {
 async function loadStrengthEvaluation() {
   try {
     const activities = await fetchJSONSafe('/data/garmin-activities.json', []);
-    const dayActivities = findStrengthEvalDay(activities);
+    const dayActivities = findEvalDay(activities);
     renderStrengthEvaluation(dayActivities, activities);
   } catch (err) {
-    console.warn('Valutazione forza non disponibile:', err);
+    console.warn('Valutazione allenamento non disponibile:', err);
   }
 }
 
@@ -1084,9 +1205,12 @@ function mostRecentOfType(activities, types) {
 // Classifica una corsa in base a cosa e' successo davvero nella seduta
 // (distanza e passo dei lap), non a un'etichetta prestabilita.
 function classifyRun(a) {
-  if (a.distance_km != null && a.distance_km >= 7) return 'lungo';
+  const name = (a.name || '').toLowerCase();
+  if (name.includes('ripetut')) return 'velocita';
+  if (name.includes('soglia')) return 'soglia';
   const laps = a.laps || [];
-  if (laps.length >= 4 && laps.some(l => l.avg_pace_min_per_km != null && l.avg_pace_min_per_km <= 5.0)) return 'velocita';
+  if (laps.length >= 4 && laps.some(l => l.avg_pace_min_per_km != null && l.avg_pace_min_per_km <= 5.0 && l.distance_m >= 70)) return 'velocita';
+  if (a.distance_km != null && a.distance_km >= 7) return 'lungo';
   if (laps.length >= 2 && laps.some(l => l.avg_pace_min_per_km != null && l.avg_pace_min_per_km > 5.0 && l.avg_pace_min_per_km <= 5.75)) return 'soglia';
   return 'facile';
 }
