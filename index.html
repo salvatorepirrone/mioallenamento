@@ -733,7 +733,7 @@ const PIANO_FORZA = {
   A: [
     { label: 'Plank centrale',        category: 'plank',        name: 'plank',                   sets: 3, targetSeconds: 60 },
     { label: 'Plank laterale',        category: 'plank',        name: 'sidePlank',                sets: 3, targetSeconds: 40 },
-    { label: 'Hollow Body Hold',      category: 'hipStability', name: 'weightedDeadBug',          sets: 3, targetSeconds: 40 },
+    { label: 'Hollow Body Hold',      category: 'hipStability', name: 'deadBug',          sets: 3, targetSeconds: 40 },
     { label: 'Piegamenti',            category: 'pushUp',       name: 'pushUp',                   sets: 3, targetReps: 20 },
     { label: 'Trazioni alla sbarra',  category: 'pullUp',       name: 'pullUp',                   sets: 3, targetReps: 6 },
     { label: 'Lat Pulldown',          category: 'pullUp',       name: 'reverseGripPulldown',       sets: 3, targetReps: 10, targetWeight: 50 },
@@ -744,7 +744,7 @@ const PIANO_FORZA = {
   B: [
     { label: 'Plank centrale',        category: 'plank',        name: 'plank',                   sets: 3, targetSeconds: 75 },
     { label: 'Plank laterale',        category: 'plank',        name: 'sidePlank',                sets: 3, targetSeconds: 55 },
-    { label: 'Hollow Body Hold',      category: 'hipStability', name: 'weightedDeadBug',          sets: 3, targetSeconds: 45 },
+    { label: 'Hollow Body Hold',      category: 'hipStability', name: 'deadBug',          sets: 3, targetSeconds: 45 },
     { label: 'Plank con rotazione',   category: 'plank',        name: 'plankWithObliqueCrunch',   sets: 3, targetReps: 8 },
     { label: 'Piegamenti Decline',    category: 'pushUp',       name: 'pushUp',                   sets: 3, targetReps: 20 },
     { label: 'Pectoral machine',      category: 'benchPress',   name: 'singleArmCableChestPress', sets: 2, targetReps: 10, targetWeight: 45 },
@@ -784,7 +784,7 @@ function setMatchesPlan(set, planEntry) {
 function setWeightKg(set) {
   const w = set.weight ?? set.weightValue ?? null;
   if (w == null) return null;
-  return w > 500 ? Math.round(w / 100) / 10 : Math.round(w * 10) / 10; // ipotesi grammi vs kg, vedi nota sopra
+  return w > 500 ? Math.round(w / 100) / 10 : Math.round(w * 10) / 10; // Garmin li dà in grammi (40000 = 40 kg)
 }
 
 function setReps(set) {
@@ -812,12 +812,15 @@ function evaluateActivity(activity) {
 
   const results = plan.map(entry => {
     const matched = activeSets.filter(s => setMatchesPlan(s, entry));
-    const status = matched.length === 0 ? 'miss' : (matched.length < entry.sets ? 'partial' : 'ok');
+    const avgReps = avg(matched.map(setReps));
+    const avgSeconds = avg(matched.map(setSeconds));
+    let status = matched.length === 0 ? 'miss' : (matched.length < entry.sets ? 'partial' : 'ok');
+    // Serie complete ma risultato sotto il 90% del target: conta come "quasi".
+    if (status === 'ok' && entry.targetReps != null && avgReps != null && avgReps < entry.targetReps * 0.9) status = 'partial';
+    if (status === 'ok' && entry.targetSeconds != null && avgSeconds != null && avgSeconds < entry.targetSeconds * 0.9) status = 'partial';
     return {
-      entry, doneSets: matched.length, status,
-      avgReps: avg(matched.map(setReps)),
+      entry, doneSets: matched.length, status, avgReps, avgSeconds,
       avgWeight: avg(matched.map(setWeightKg)),
-      avgSeconds: avg(matched.map(setSeconds)),
     };
   });
   return { activity, sessionType, plan, results };

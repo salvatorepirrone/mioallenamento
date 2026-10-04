@@ -152,8 +152,11 @@ def get_exercise_sets_cached(client: Garmin, activity_id: str) -> list[dict] | N
         return None
 
     sets = (raw or {}).get("exerciseSets", [])
-    EXERCISE_SETS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache_file.write_text(json.dumps(sets, ensure_ascii=False, indent=2), encoding="utf-8")
+    try:
+        EXERCISE_SETS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        cache_file.write_text(json.dumps(sets, ensure_ascii=False, indent=2), encoding="utf-8")
+    except OSError as exc:
+        print(f"  Cache serie esercizi non scrivibile ({exc}): si continua senza.")
     return sets
 
 
