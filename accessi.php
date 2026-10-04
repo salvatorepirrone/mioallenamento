@@ -10,23 +10,77 @@ if (!auth_is_admin($name)) {
     exit;
 }
 
-// Creazione di un nuovo utente (solo admin, con CSRF): la password temporanea si vede una volta sola.
+// Azioni sugli utenti (solo admin, con CSRF). Le password temporanee si vedono una volta sola.
 $created = null;
+$notice = '';
 $formError = '';
+
+function active_admins(): array {
+    return array_keys(array_filter(auth_all_users(), function ($u) { return !empty($u['admin']) && empty($u['disabled']); }));
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     auth_csrf_check();
-    $newName = strtolower(trim((string)($_POST['new_user'] ?? '')));
-    if (!auth_valid_username($newName)) {
-        $formError = 'Nome non valido: da 2 a 32 caratteri tra lettere minuscole, numeri, punto, trattino e underscore.';
-    } elseif (auth_get_user($newName)) {
-        $formError = 'Esiste già un utente con questo nome.';
-    } else {
-        $temp = auth_create_user($newName);
-        if ($temp === null) {
-            $formError = 'Impossibile creare l\'utente, riprova.';
+    $action = (string)($_POST['action'] ?? 'create');
+
+    if ($action === 'create') {
+        $newName = strtolower(trim((string)($_POST['new_user'] ?? '')));
+        if (!auth_valid_username($newName)) {
+            $formError = 'Nome non valido: da 2 a 32 caratteri tra lettere minuscole, numeri, punto, trattino e underscore.';
+        } elseif (auth_get_user($newName)) {
+            $formError = 'Esiste già un utente con questo nome.';
         } else {
-            auth_log('user_created', $newName, 'creato da ' . $name);
-            $created = ['user' => $newName, 'pw' => $temp];
+            $temp = auth_create_user($newName);
+            if ($temp === null) {
+                $formError = 'Impossibile creare l\'utente, riprova.';
+            } else {
+                auth_log('user_created', $newName, 'creato da ' . $name);
+                $created = ['user' => $newName, 'pw' => $temp, 'label' => 'Utente creato.'];
+            }
+        }
+    } else {
+        $target = strtolower(trim((string)($_POST['user'] ?? '')));
+        $tu = auth_get_user($target);
+        $soleAdmin = !empty($tu['admin']) && empty($tu['disabled']) && active_admins() === [$target];
+        $self = $target === $name;
+
+        if (!$tu) {
+            $formError = 'Utente non trovato.';
+        } elseif ($action === 'reset') {
+            $temp = auth_create_user($target, true);
+            auth_log('user_reset', $target, 'password azzerata da ' . $name);
+            $created = ['user' => $target, 'pw' => $temp, 'label' => 'Password azzerata.'];
+        } elseif ($action === 'unlock') {
+            auth_update_users(function ($users) use ($target) { $users[$target]['fails'] = 0; $users[$target]['locked_until'] = 0; return $users; });
+            auth_log('user_unlocked', $target, 'sbloccato da ' . $name);
+            $notice = "Utente $target sbloccato.";
+        } elseif ($action === 'disable' || $action === 'delete' || $action === 'revoke_admin') {
+            if ($action !== 'revoke_admin' && $self) {
+                $formError = 'Non puoi disattivare o eliminare il tuo stesso account.';
+            } elseif ($soleAdmin) {
+                $formError = 'Questo è l\'unico amministratore attivo: crea o promuovi prima un altro amministratore.';
+            } else {
+                auth_update_users(function ($users) use ($target, $action) {
+                    if ($action === 'disable') $users[$target]['disabled'] = true;
+                    elseif ($action === 'delete') unset($users[$target]);
+                    else $users[$target]['admin'] = false;
+                    return $users;
+                });
+                $evt = ['disable' => 'user_disabled', 'delete' => 'user_deleted', 'revoke_admin' => 'admin_revoked'][$action];
+                auth_log($evt, $target, 'da ' . $name);
+                $notice = ['disable' => "Utente $target disattivato: le sue sessioni non valgono più.",
+                           'delete' => "Utente $target eliminato.", 'revoke_admin' => "Tolto il ruolo di amministratore a $target."][$action];
+            }
+        } elseif ($action === 'enable' || $action === 'make_admin') {
+            auth_update_users(function ($users) use ($target, $action) {
+                if ($action === 'enable') unset($users[$target]['disabled']);
+                else $users[$target]['admin'] = true;
+                return $users;
+            });
+            auth_log($action === 'enable' ? 'user_enabled' : 'admin_granted', $target, 'da ' . $name);
+            $notice = $action === 'enable' ? "Utente $target riattivato." : "$target ora è amministratore.";
+        } else {
+            $formError = 'Azione non riconosciuta.';
         }
     }
 }
@@ -34,7 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $labels = [
     'login_ok' => 'Accesso', 'login_fail' => 'Tentativo fallito', 'lockout' => 'Account bloccato',
     'login_locked' => 'Tentativo durante il blocco', 'password_changed' => 'Password cambiata', 'logout' => 'Uscita',
-    'user_created' => 'Utente creato',
+    'user_created' => 'Utente creato', 'user_reset' => 'Password azzerata', 'user_disabled' => 'Utente disattivato',
+    'user_enabled' => 'Utente riattivato', 'user_deleted' => 'Utente eliminato', 'user_unlocked' => 'Utente sbloccato',
+    'admin_granted' => 'Admin assegnato', 'admin_revoked' => 'Admin revocato', 'login_disabled' => 'Accesso con account disattivato',
 ];
 $filter = $_GET['e'] ?? '';
 if (!isset($labels[$filter])) $filter = '';
@@ -95,6 +151,8 @@ th{background:var(--s2);color:var(--muted);font-size:11px;text-transform:upperca
 .bad{color:#c0392b;font-weight:600}.muted{color:var(--muted);font-size:12px}
 .filters a{display:inline-block;margin:0 8px 8px 0;padding:4px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;text-decoration:none;color:inherit}
 .filters a.on{background:var(--accent);font-weight:700}
+.ubtn{margin:2px 0;padding:4px 9px;border:1px solid var(--border);border-radius:var(--r);background:var(--s2);font-size:12px;cursor:pointer;font-family:inherit}
+.ubtn:hover{border-color:var(--accent)}.ubtn.danger{color:#c0392b}
 </style>
 </head>
 <body>
@@ -125,19 +183,40 @@ th{background:var(--s2);color:var(--muted);font-size:11px;text-transform:upperca
 <h2>Utenti</h2>
 <?php if ($created): ?>
 <div style="border:2px solid var(--accent);border-radius:var(--r);padding:14px 16px;margin:8px 0 16px">
-  <b>Utente creato.</b> Comunica queste credenziali in modo riservato: la password temporanea <b>non verrà più mostrata</b>
+  <b><?= e($created['label']) ?></b> Comunica queste credenziali in modo riservato: la password temporanea <b>non verrà più mostrata</b>
   e al primo accesso l'utente dovrà sceglierne una nuova.
   <div style="font-size:16px;margin-top:10px">Utente: <b><?= e($created['user']) ?></b><br>Password temporanea: <b style="font-family:monospace;user-select:all"><?= e($created['pw']) ?></b></div>
 </div>
 <?php endif; ?>
+<?php if ($notice): ?><p style="border:1px solid var(--border);background:var(--s2);border-radius:var(--r);padding:10px 14px"><?= e($notice) ?></p><?php endif; ?>
+<?php if ($formError): ?><p class="bad"><?= e($formError) ?></p><?php endif; ?>
+<?php
+function user_btn(string $action, string $user, string $label, string $confirm = '', bool $danger = false): string {
+    return '<form method="post" action="/accessi.php" style="display:inline"' . ($confirm ? ' onsubmit="return confirm(' . e(json_encode($confirm, JSON_UNESCAPED_UNICODE)) . ')"' : '') . '>'
+        . '<input type="hidden" name="csrf" value="' . e(auth_csrf_token()) . '"><input type="hidden" name="action" value="' . e($action) . '">'
+        . '<input type="hidden" name="user" value="' . e($user) . '">'
+        . '<button type="submit" class="ubtn' . ($danger ? ' danger' : '') . '">' . e($label) . '</button></form> ';
+}
+?>
 <table>
-<tr><th>Utente</th><th>Ruolo</th><th>Stato</th></tr>
-<?php foreach (auth_all_users() as $un => $uu): ?>
-<tr><td><?= e($un) ?></td><td><?= !empty($uu['admin']) ? 'Amministratore' : 'Utente' ?></td>
+<tr><th>Utente</th><th>Ruolo</th><th>Stato</th><th>Azioni</th></tr>
+<?php foreach (auth_all_users() as $un => $uu):
+    $isSelf = $un === $name; $isAdm = !empty($uu['admin']); $isOff = !empty($uu['disabled']); $isLocked = ($uu['locked_until'] ?? 0) > time(); ?>
+<tr><td><?= e($un) ?><?= $isSelf ? ' <span class="muted">(tu)</span>' : '' ?></td><td><?= $isAdm ? 'Amministratore' : 'Utente' ?></td>
 <td><?php
-    if (($uu['locked_until'] ?? 0) > time()) echo '<span class="bad">Bloccato</span>';
+    if ($isOff) echo '<span class="bad">Disattivato</span>';
+    elseif ($isLocked) echo '<span class="bad">Bloccato (troppi tentativi)</span>';
     elseif (!empty($uu['must_change'])) echo 'Deve ancora scegliere la password';
     else echo 'Attivo';
+?></td>
+<td><?php
+    echo user_btn('reset', $un, 'Azzera password', "Azzerare la password di $un? Le sue sessioni verranno chiuse e avrà una nuova password temporanea.");
+    if ($isLocked && !$isOff) echo user_btn('unlock', $un, 'Sblocca');
+    if (!$isSelf) {
+        echo $isOff ? user_btn('enable', $un, 'Riattiva') : user_btn('disable', $un, 'Disattiva', "Disattivare $un? Non potrà più entrare e le sue sessioni si chiudono subito.");
+    }
+    echo $isAdm ? user_btn('revoke_admin', $un, 'Togli admin', "Togliere il ruolo di amministratore a $un?") : user_btn('make_admin', $un, 'Rendi admin', "Rendere $un amministratore? Potrà creare ed eliminare utenti e vedere il registro accessi.");
+    if (!$isSelf) echo user_btn('delete', $un, 'Elimina', "Eliminare definitivamente $un? L'operazione non si può annullare.", true);
 ?></td></tr>
 <?php endforeach; ?>
 </table>
@@ -148,7 +227,6 @@ th{background:var(--s2);color:var(--muted);font-size:11px;text-transform:upperca
          style="padding:9px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:14px"></div>
   <button type="submit" style="padding:10px 16px;border:0;border-radius:var(--r);background:var(--accent);font-weight:700;cursor:pointer">Crea utente</button>
 </form>
-<?php if ($formError): ?><p class="bad" style="margin-top:-16px"><?= e($formError) ?></p><?php endif; ?>
 
 <h2>Riepilogo per utente</h2>
 <table>

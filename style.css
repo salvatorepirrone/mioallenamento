@@ -78,6 +78,7 @@ body.nav-open .nav-backdrop { opacity: 1; pointer-events: auto; }
 }
 .nav-refresh-btn:hover:not(:disabled) { background: var(--s1); color: var(--text); border-color: var(--accent); }
 .nav-refresh-btn:disabled { opacity: .6; cursor: default; }
+.nav-logout { margin-top: 8px; display: block; text-decoration: none; }
 
 /* MAIN */
 main { max-width: 860px; margin: 0 auto; padding: 64px 16px 60px; }

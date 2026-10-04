@@ -61,6 +61,7 @@ function auth_create_user(string $name, bool $overwrite = false): ?string {
         if (isset($users[$name]) && !$overwrite) return $users;
         $record = ['hash' => password_hash($temp, PASSWORD_DEFAULT), 'must_change' => true, 'fails' => 0, 'locked_until' => 0];
         if (!empty($users[$name]['admin'])) $record['admin'] = true;
+        if (!empty($users[$name]['disabled'])) $record['disabled'] = true;
         $users[$name] = $record;
         $created = true;
         return $users;
@@ -94,9 +95,25 @@ function auth_is_admin(?string $name): bool {
     return !empty($user['admin']);
 }
 
+// Impronta dell'hash corrente: se la password cambia (o viene azzerata da un admin) le
+// sessioni aperte con la vecchia smettono di valere. Le sessioni senza impronta (create
+// prima di questa funzione) restano valide fino al prossimo accesso.
+function auth_pw_fingerprint(array $user): string {
+    return substr(hash('sha256', (string)($user['hash'] ?? '')), 0, 16);
+}
+
+// Utente della sessione, se esiste ancora, non e' disattivato e la password e' quella della sessione.
 function auth_current_user(): ?string {
     auth_start();
-    return $_SESSION['user'] ?? null;
+    $name = $_SESSION['user'] ?? null;
+    if (!$name) return null;
+    $user = auth_get_user($name);
+    if (!$user || !empty($user['disabled'])
+        || (isset($_SESSION['pwv']) && $_SESSION['pwv'] !== auth_pw_fingerprint($user))) {
+        unset($_SESSION['user'], $_SESSION['pwv'], $_SESSION['must_change']);
+        return null;
+    }
+    return $name;
 }
 
 function auth_csrf_token(): string {

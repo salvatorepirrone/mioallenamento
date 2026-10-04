@@ -14,6 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($user && ($user['locked_until'] ?? 0) > time()) {
         auth_log('login_locked', $name, 'tentativo durante il blocco');
         $error = 'Troppi tentativi: riprova tra qualche minuto.';
+    } elseif ($user && !empty($user['disabled']) && password_verify($pass, $user['hash'])) {
+        auth_log('login_disabled', $name, 'account disattivato');
+        $error = 'Account disattivato: contatta l\'amministratore.';
     } elseif ($user && password_verify($pass, $user['hash'])) {
         auth_update_users(function ($users) use ($name) {
             $users[$name]['fails'] = 0;
@@ -23,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         auth_log('login_ok', $name, !empty($user['must_change']) ? 'password temporanea' : '');
         session_regenerate_id(true);
         $_SESSION['user'] = $name;
+        $_SESSION['pwv'] = auth_pw_fingerprint($user);
         $_SESSION['must_change'] = !empty($user['must_change']);
         header('Location: ' . ($_SESSION['must_change'] ? '/auth/cambia-password.php' : $next));
         exit;

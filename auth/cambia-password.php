@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
             auth_log('password_changed', $name, $forced ? 'primo accesso' : 'volontario');
             $_SESSION['must_change'] = false;
+            $_SESSION['pwv'] = auth_pw_fingerprint(auth_get_user($name));
             session_regenerate_id(true);
             $done = true;
         }

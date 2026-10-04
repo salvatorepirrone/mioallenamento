@@ -29,21 +29,6 @@ if ('serviceWorker' in navigator) {
     });
   });
 
-  // ── Voce "Accessi": solo per gli amministratori (il server decide, non il browser) ──
-  var links = document.querySelector('.nav-links');
-  if (links && !links.querySelector('a[href="accessi.php"]')) {
-    fetch('/whoami.php', { cache: 'no-store', credentials: 'same-origin' })
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (data) {
-        if (!data || !data.admin) return;
-        var a = document.createElement('a');
-        a.href = 'accessi.php';
-        a.innerHTML = '<span class="dot" style="background:#9aa5ad"></span>Accessi 🔐';
-        links.appendChild(a);
-      })
-      .catch(function () {});
-  }
-
   // ── Tasto "Aggiorna dati" (forza subito il sync Garmin/Withings) ──
   var nav = document.querySelector('nav');
   if (nav) {
@@ -73,4 +58,35 @@ if ('serviceWorker' in navigator) {
         });
     });
   }
+
+  // ── Uscita + voce "Accessi" (solo admin: lo decide il server, non il browser) ──
+  var logout = null;
+  if (nav) {
+    var pw = document.createElement('a');
+    pw.href = '/auth/cambia-password.php';
+    pw.className = 'nav-refresh-btn nav-logout';
+    pw.textContent = '🔑 Cambia password';
+    nav.appendChild(pw);
+
+    logout = document.createElement('a');
+    logout.href = '/auth/logout.php';
+    logout.className = 'nav-refresh-btn nav-logout';
+    logout.textContent = '🚪 Esci';
+    nav.appendChild(logout);
+  }
+
+  var links = document.querySelector('.nav-links');
+  fetch('/whoami.php', { cache: 'no-store', credentials: 'same-origin' })
+    .then(function (res) { return res.ok ? res.json() : null; })
+    .then(function (data) {
+      if (!data) return;
+      if (logout && data.user) logout.textContent = '🚪 Esci (' + data.user + ')';
+      if (data.admin && links && !links.querySelector('a[href="accessi.php"]')) {
+        var a = document.createElement('a');
+        a.href = 'accessi.php';
+        a.innerHTML = '<span class="dot" style="background:#9aa5ad"></span>Accessi 🔐';
+        links.appendChild(a);
+      }
+    })
+    .catch(function () {});
 })();
