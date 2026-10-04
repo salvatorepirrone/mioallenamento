@@ -29,6 +29,7 @@ OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "/app/output"))
 DAYS_BACK = int(os.environ.get("DAYS_BACK", "35"))
 
 LAPS_CACHE_DIR = Path(os.environ.get("LAPS_CACHE_DIR", "/app/laps-cache"))
+EXERCISE_SETS_CACHE_DIR = Path(os.environ.get("EXERCISE_SETS_CACHE_DIR", "/app/exercise-sets-cache"))
 FIT_DIR = Path(os.environ.get("FIT_DIR", "/app/fit-files"))
 DOWNLOAD_FIT = os.environ.get("DOWNLOAD_FIT", "true").lower() == "true"
 
@@ -135,6 +136,27 @@ def get_laps_cached(client: Garmin, activity_id: str) -> list[dict] | None:
     return laps
 
 
+def get_exercise_sets_cached(client: Garmin, activity_id: str) -> list[dict] | None:
+    """Serie svolte per esercizio (ripetizioni, peso, durata) delle sessioni di
+    forza, usate dalla home per valutare l'aderenza al programma e i progressi
+    rispetto alla sessione precedente dello stesso tipo. Cache locale come per
+    i lap: un'attivita' gia' scaricata non viene richiesta di nuovo a Garmin."""
+    cache_file = EXERCISE_SETS_CACHE_DIR / f"{activity_id}.json"
+    if cache_file.exists():
+        return json.loads(cache_file.read_text(encoding="utf-8"))
+
+    try:
+        raw = client.get_activity_exercise_sets(activity_id)
+    except Exception as exc:
+        print(f"  Serie esercizi non disponibili per l'attivita' {activity_id}: {exc}")
+        return None
+
+    sets = (raw or {}).get("exerciseSets", [])
+    EXERCISE_SETS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_file.write_text(json.dumps(sets, ensure_ascii=False, indent=2), encoding="utf-8")
+    return sets
+
+
 def download_fit_cached(client: Garmin, activity_id: str) -> None:
     """Salva il file FIT originale in locale (non versionato), utile per l'Editor FIT
     del sito. Non viene ri-scaricato se gia' presente."""
@@ -190,6 +212,10 @@ def sync_activities(client: Garmin) -> list[dict]:
             laps = get_laps_cached(client, activity_id)
             if laps and len(laps) > 1:
                 entry["laps"] = laps
+            if entry["type"] == "strength_training":
+                exercise_sets = get_exercise_sets_cached(client, activity_id)
+                if exercise_sets:
+                    entry["exercise_sets"] = exercise_sets
             download_fit_cached(client, activity_id)
             time.sleep(0.5)  # non martellare l'API Garmin
 

@@ -123,8 +123,8 @@
 
 <div id="uploadCard" class="vl-card">
   <div class="vl-drop" id="dropZone">
-    <div>Trascina qui il file .fit oppure clicca per selezionarlo</div>
-    <input type="file" id="fileInput" accept=".fit">
+    <div>Trascina qui il file .fit (anche compresso: .zip o .gz) oppure clicca per selezionarlo</div>
+    <input type="file" id="fileInput" accept=".fit,.zip,.gz">
   </div>
   <div id="loadMsg"></div>
 </div>
@@ -806,12 +806,54 @@ function repairSwimActivity(state) {
   return { fixed: badLaps.length, orphansRepaired: orphans.length };
 }
 
+async function inflate(bytes, format) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream(format));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+// Accetta .fit, .zip (come l'export originale di Garmin Connect) e .gz.
+async function extractFitBuffer(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+    const out = await inflate(bytes, 'gzip');
+    return out.buffer;
+  }
+  if (bytes[0] === 0x50 && bytes[1] === 0x4b) {
+    const view = new DataView(bytes.buffer);
+    let eocd = -1;
+    for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
+      if (view.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('Archivio ZIP non valido');
+    const count = view.getUint16(eocd + 10, true);
+    let p = view.getUint32(eocd + 16, true);
+    for (let n = 0; n < count; n++) {
+      if (view.getUint32(p, true) !== 0x02014b50) break;
+      const method = view.getUint16(p + 10, true);
+      const compSize = view.getUint32(p + 20, true);
+      const nameLen = view.getUint16(p + 28, true);
+      const extraLen = view.getUint16(p + 30, true);
+      const commentLen = view.getUint16(p + 32, true);
+      const localOff = view.getUint32(p + 42, true);
+      const name = new TextDecoder().decode(bytes.subarray(p + 46, p + 46 + nameLen));
+      p += 46 + nameLen + extraLen + commentLen;
+      if (!/\.fit$/i.test(name)) continue;
+      const dataStart = localOff + 30 + view.getUint16(localOff + 26, true) + view.getUint16(localOff + 28, true);
+      const comp = bytes.subarray(dataStart, dataStart + compSize);
+      if (method === 0) return comp.slice().buffer;
+      if (method === 8) return (await inflate(comp, 'deflate-raw')).buffer;
+      throw new Error('Metodo di compressione ZIP non supportato');
+    }
+    throw new Error('Nessun file .fit trovato nell\'archivio ZIP');
+  }
+  return bytes.buffer;
+}
+
 function handleFile(file) {
-  originalFilename = file.name.replace(/\.fit$/i, '');
-  const reader = new FileReader();
-  reader.onload = () => {
+  originalFilename = file.name.replace(/\.(fit|zip|gz)$/i, '').replace(/\.fit$/i, '');
+  extractFitBuffer(file).then(buffer => {
     try {
-      const parsed = readFit(reader.result);
+      const parsed = readFit(buffer);
       state = loadSwimActivity(parsed);
       const repairResult = repairSwimActivity(state);
       selected.clear();
@@ -826,8 +868,12 @@ function handleFile(file) {
       editorCard.style.display = 'none';
       tableCard.style.display = 'none';
     }
-  };
-  reader.readAsArrayBuffer(file);
+  }).catch(err => {
+    state = null;
+    loadMsg.innerHTML = `<div class="msg error">Errore: ${err.message}</div>`;
+    editorCard.style.display = 'none';
+    tableCard.style.display = 'none';
+  });
 }
 
 function fmtTime(sec) {

@@ -7,5 +7,6 @@ services:
       - ./.garmin-session:/app/.garmin-session
       - ../data:/app/output
       - ./.laps-cache:/app/laps-cache
+      - ./.exercise-sets-cache:/app/exercise-sets-cache
       - ./fit-files:/app/fit-files
       - ./.withings-session:/app/.withings-session

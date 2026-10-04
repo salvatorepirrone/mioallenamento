@@ -72,6 +72,23 @@
 .reco-opt-meta { color: var(--muted); font-size: 11.5px; }
 .reco-link { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); text-decoration: none; }
 .reco-link:hover { text-decoration: underline; }
+
+.eval-box { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; margin-bottom: 24px; }
+.eval-verdict { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.eval-verdict b { color: var(--text); }
+.eval-sessions { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.eval-session { background: var(--s2); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; }
+.eval-session-hdr { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.eval-session-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--s1); padding: 2px 8px; border-radius: 4px; }
+.eval-list { list-style: none; padding: 0; margin: 0 0 10px; font-size: 12.5px; line-height: 1.8; }
+.eval-list li { display: flex; align-items: flex-start; gap: 6px; }
+.eval-ok::before { content: '✅'; flex-shrink: 0; }
+.eval-partial::before { content: '⚠️'; flex-shrink: 0; }
+.eval-miss::before { content: '❌'; flex-shrink: 0; }
+.eval-progress { font-size: 12px; color: var(--muted); line-height: 1.7; }
+.eval-progress b { color: var(--text); }
+.eval-up { color: var(--accent); }
+.eval-down { color: #f55a5a; }
 </style>
 </head>
 <body>
@@ -107,6 +124,10 @@
     <div class="hstat"><span class="v" id="hstat-status-v">—</span><span class="l" id="hstat-status-l">Training status</span></div>
   </div>
 </div>
+
+<!-- VALUTAZIONE ULTIMA SESSIONE DI FORZA -->
+<div class="sec hidden" id="eval-sec">Valutazione allenamento forza · <span id="eval-date-label"></span></div>
+<div class="eval-box hidden" id="eval-box"></div>
 
 <!-- CONSIGLIO DEL GIORNO -->
 <div class="sec">Consiglio del giorno · basato sui dati Garmin delle ultime settimane <span id="reco-refresh-status" style="text-transform:none;letter-spacing:normal;color:var(--muted)"></span></div>
@@ -692,6 +713,243 @@ async function loadActivities() {
 
 loadActivities();
 
+// ── VALUTAZIONE ULTIMA SESSIONE DI FORZA (live da data/garmin-activities.json) ──
+// Confronta le serie effettivamente svolte (garmin-sync scarica exerciseSets per
+// le attivita' strength_training) con il programma di palestra.html, e con la
+// sessione precedente dello stesso tipo per capire se il carico sta salendo.
+//
+// Le coppie categoria/nome esercizio sotto vengono dal profilo ufficiale FIT SDK
+// di Garmin (github.com/garmin/fit-javascript-sdk, src/profile.js) — non da
+// prove dirette sul JSON restituito da Garmin Connect, perche' finche' non
+// viene sincronizzata una sessione reale non è possibile vederne il formato
+// esatto. Il confronto qui sotto normalizza maiuscole/minuscole e punteggiatura
+// apposta per restare valido sia che Garmin usi "weightedDeadBug" sia
+// "WEIGHTED_DEAD_BUG": se dopo la prima sincronizzazione reale gli esercizi
+// non vengono comunque riconosciuti, il problema è quasi certamente il nome
+// campo (es. "reps" invece di "repetitionCount") in readActiveSets() più sotto,
+// da controllare con console.log(activity.exercise_sets) su una sessione vera.
+const PIANO_FORZA = {
+  A: [
+    { label: 'Plank centrale',        category: 'plank',        name: 'plank',                   sets: 3, targetSeconds: 60 },
+    { label: 'Plank laterale',        category: 'plank',        name: 'sidePlank',                sets: 3, targetSeconds: 40 },
+    { label: 'Hollow Body Hold',      category: 'hipStability', name: 'weightedDeadBug',          sets: 3, targetSeconds: 40 },
+    { label: 'Piegamenti',            category: 'pushUp',       name: 'pushUp',                   sets: 3, targetReps: 20 },
+    { label: 'Trazioni alla sbarra',  category: 'pullUp',       name: 'pullUp',                   sets: 3, targetReps: 6 },
+    { label: 'Lat Pulldown',          category: 'pullUp',       name: 'reverseGripPulldown',       sets: 3, targetReps: 10, targetWeight: 50 },
+    { label: 'Rear Delt Row',         category: 'row',          name: 'wideGripSeatedCableRow',    sets: 3, targetReps: 12, targetWeight: 40 },
+    { label: 'Face Pull',             category: 'row',          name: 'facePull',                 sets: 3, targetReps: 15 },
+    { label: 'Squat Goblet',          category: 'squat',        name: 'gobletSquat',              sets: 3, targetReps: 10 },
+  ],
+  B: [
+    { label: 'Plank centrale',        category: 'plank',        name: 'plank',                   sets: 3, targetSeconds: 75 },
+    { label: 'Plank laterale',        category: 'plank',        name: 'sidePlank',                sets: 3, targetSeconds: 55 },
+    { label: 'Hollow Body Hold',      category: 'hipStability', name: 'weightedDeadBug',          sets: 3, targetSeconds: 45 },
+    { label: 'Plank con rotazione',   category: 'plank',        name: 'plankWithObliqueCrunch',   sets: 3, targetReps: 8 },
+    { label: 'Piegamenti Decline',    category: 'pushUp',       name: 'pushUp',                   sets: 3, targetReps: 20 },
+    { label: 'Pectoral machine',      category: 'benchPress',   name: 'singleArmCableChestPress', sets: 2, targetReps: 10, targetWeight: 45 },
+    { label: 'Trazioni alla sbarra',  category: 'pullUp',       name: 'pullUp',                   sets: 3, targetReps: 6 },
+    { label: 'Lat Pulldown',          category: 'pullUp',       name: 'reverseGripPulldown',       sets: 3, targetReps: 10, targetWeight: 52 },
+    { label: 'Rear Delt Row',         category: 'row',          name: 'wideGripSeatedCableRow',    sets: 3, targetReps: 12, targetWeight: 43 },
+    { label: 'Face Pull',             category: 'row',          name: 'facePull',                 sets: 3, targetReps: 15 },
+    { label: 'Squat Goblet',          category: 'squat',        name: 'gobletSquat',              sets: 3, targetReps: 10, targetWeight: 16 },
+    { label: 'Hip Thrust',            category: 'hipRaise',     name: 'weightedHipRaise',          sets: 3, targetReps: 12, targetWeight: 20 },
+  ],
+};
+
+function normKey(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function classifySessionName(name) {
+  const n = (name || '').toLowerCase();
+  if (n.includes('sessione a')) return 'A';
+  if (n.includes('sessione b')) return 'B';
+  return null;
+}
+
+// Un set "attivo" ha almeno un esercizio riconosciuto associato (i set di
+// recupero non hanno "exercises", o lo hanno vuoto) — vale sia che Garmin
+// segnali il riposo con un campo setType sia che lo ometta del tutto.
+function readActiveSets(activity) {
+  return (activity.exercise_sets || []).filter(s => Array.isArray(s.exercises) && s.exercises.length > 0);
+}
+
+function setMatchesPlan(set, planEntry) {
+  return set.exercises.some(e =>
+    normKey(e.category) === normKey(planEntry.category) && normKey(e.name) === normKey(planEntry.name)
+  );
+}
+
+function setWeightKg(set) {
+  const w = set.weight ?? set.weightValue ?? null;
+  if (w == null) return null;
+  return w > 500 ? Math.round(w / 100) / 10 : Math.round(w * 10) / 10; // ipotesi grammi vs kg, vedi nota sopra
+}
+
+function setReps(set) {
+  return set.repetitionCount ?? set.reps ?? null;
+}
+
+function setSeconds(set) {
+  const d = set.duration ?? set.durationInSeconds ?? null;
+  return d == null ? null : Math.round(d);
+}
+
+function avg(nums) {
+  const vals = nums.filter(n => n != null);
+  if (!vals.length) return null;
+  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+}
+
+// Valuta una singola attivita' di forza rispetto al piano (se il nome
+// dell'attivita' corrisponde a "Sessione A/B" e ci sono serie sincronizzate).
+function evaluateActivity(activity) {
+  const sessionType = classifySessionName(activity.name);
+  const plan = sessionType ? PIANO_FORZA[sessionType] : null;
+  const activeSets = readActiveSets(activity);
+  if (!plan || !activeSets.length) return { activity, sessionType, plan, results: null };
+
+  const results = plan.map(entry => {
+    const matched = activeSets.filter(s => setMatchesPlan(s, entry));
+    const status = matched.length === 0 ? 'miss' : (matched.length < entry.sets ? 'partial' : 'ok');
+    return {
+      entry, doneSets: matched.length, status,
+      avgReps: avg(matched.map(setReps)),
+      avgWeight: avg(matched.map(setWeightKg)),
+      avgSeconds: avg(matched.map(setSeconds)),
+    };
+  });
+  return { activity, sessionType, plan, results };
+}
+
+function findStrengthEvalDay(activities) {
+  // activities e' gia' ordinato dal piu' recente (garmin-sync scrive cosi').
+  const first = activities.find(a => a.type === 'strength_training');
+  if (!first) return null;
+  return activities.filter(a => a.type === 'strength_training' && a.date === first.date);
+}
+
+function findPreviousSameSession(activities, sessionType, beforeDate) {
+  const candidate = activities.find(a =>
+    a.type === 'strength_training' && a.date < beforeDate &&
+    classifySessionName(a.name) === sessionType && (a.exercise_sets || []).length
+  );
+  return candidate ? evaluateActivity(candidate) : null;
+}
+
+function progressLine(entry, current, previous) {
+  const label = entry.label;
+  let curVal, prevVal, unit;
+  if (entry.targetWeight != null) { curVal = current.avgWeight; prevVal = previous.avgWeight; unit = 'kg'; }
+  else if (entry.targetSeconds != null) { curVal = current.avgSeconds; prevVal = previous.avgSeconds; unit = 'sec'; }
+  else { curVal = current.avgReps; prevVal = previous.avgReps; unit = 'rip'; }
+  if (curVal == null || prevVal == null) return null;
+
+  if (curVal > prevVal) return `<b>${label}</b>: <span class="eval-up">▲ ${prevVal}→${curVal} ${unit}</span>`;
+  if (curVal < prevVal) return `<b>${label}</b>: <span class="eval-down">▼ ${prevVal}→${curVal} ${unit}</span>`;
+  return `<b>${label}</b>: invariato (${curVal} ${unit})`;
+}
+
+function renderExerciseLine(r) {
+  const cls = r.status === 'ok' ? 'eval-ok' : (r.status === 'partial' ? 'eval-partial' : 'eval-miss');
+  let detail;
+  if (r.status === 'miss') {
+    detail = 'non risulta svolto';
+  } else {
+    const parts = [`${r.doneSets}/${r.entry.sets} serie`];
+    if (r.entry.targetSeconds != null) parts.push(`${r.avgSeconds ?? '—'} sec (target ${r.entry.targetSeconds})`);
+    else if (r.entry.targetReps != null) parts.push(`${r.avgReps ?? '—'} rip (target ${r.entry.targetReps})`);
+    if (r.entry.targetWeight != null) parts.push(`${r.avgWeight ?? '—'} kg (target ${r.entry.targetWeight})`);
+    detail = parts.join(' · ');
+  }
+  return `<li class="${cls}"><span><b>${r.entry.label}</b> — ${detail}</span></li>`;
+}
+
+function renderSessionBlock(evalResult, activities) {
+  const a = evalResult.activity;
+  const tag = evalResult.sessionType ? `Sessione ${evalResult.sessionType}` : (a.name || 'Forza');
+  const durationTxt = fmtDuration(a.duration_min);
+  const caloriesTxt = a.calories != null ? `${Math.round(a.calories)} kcal` : '—';
+
+  if (!evalResult.results) {
+    return `
+      <div class="eval-session">
+        <div class="eval-session-hdr">${tag} <span class="eval-session-tag">${durationTxt} · ${caloriesTxt}</span></div>
+        <div class="eval-progress">Dettaglio esercizi non disponibile per questa attività (nome non riconosciuto o serie non ancora sincronizzate).</div>
+      </div>`;
+  }
+
+  const list = evalResult.results.map(renderExerciseLine).join('');
+
+  let progressHtml = '';
+  const previous = findPreviousSameSession(activities, evalResult.sessionType, a.date);
+  if (previous && previous.results) {
+    const byKey = {};
+    previous.results.forEach(r => { byKey[normKey(r.entry.category) + normKey(r.entry.name)] = r; });
+    const lines = evalResult.results
+      .map(r => {
+        const prev = byKey[normKey(r.entry.category) + normKey(r.entry.name)];
+        return prev && r.status !== 'miss' && prev.status !== 'miss' ? progressLine(r.entry, r, prev) : null;
+      })
+      .filter(Boolean);
+    if (lines.length) {
+      progressHtml = `<div class="eval-progress"><b>Rispetto al ${actDateLabel(previous.activity.date)}:</b><br>${lines.join('<br>')}</div>`;
+    }
+  }
+
+  return `
+    <div class="eval-session">
+      <div class="eval-session-hdr">${tag} <span class="eval-session-tag">${durationTxt} · ${caloriesTxt}</span></div>
+      <ul class="eval-list">${list}</ul>
+      ${progressHtml}
+    </div>`;
+}
+
+function renderStrengthEvaluation(dayActivities, activities) {
+  const sec = document.getElementById('eval-sec');
+  const box = document.getElementById('eval-box');
+  if (!dayActivities || !dayActivities.length) {
+    sec.classList.add('hidden');
+    box.classList.add('hidden');
+    return;
+  }
+
+  document.getElementById('eval-date-label').textContent = actDateLabel(dayActivities[0].date);
+
+  const evals = dayActivities.map(evaluateActivity);
+  const withResults = evals.filter(e => e.results);
+
+  let verdictHtml = '';
+  if (withResults.length) {
+    let ok = 0, partial = 0, miss = 0;
+    withResults.forEach(e => e.results.forEach(r => {
+      if (r.status === 'ok') ok++; else if (r.status === 'partial') partial++; else miss++;
+    }));
+    const total = ok + partial + miss;
+    const judgement = miss === 0 && partial === 0
+      ? 'aderenza piena al programma'
+      : (miss === 0 ? 'aderenza buona, con qualche serie incompleta' : 'aderenza parziale, alcuni esercizi saltati');
+    verdictHtml = `<div class="eval-verdict"><b>Giudizio complessivo:</b> ${judgement} — ${ok}/${total} esercizi completati come da programma` +
+      (partial ? `, ${partial} solo in parte` : '') + (miss ? `, ${miss} non svolti` : '') + `.</div>`;
+  } else {
+    verdictHtml = `<div class="eval-verdict">Attività di forza svolta, ma senza un nome sessione riconosciuto ("Sessione A/B") o senza serie sincronizzate: solo durata e calorie disponibili.</div>`;
+  }
+
+  box.innerHTML = verdictHtml + `<div class="eval-sessions">${evals.map(e => renderSessionBlock(e, activities)).join('')}</div>`;
+  sec.classList.remove('hidden');
+  box.classList.remove('hidden');
+}
+
+async function loadStrengthEvaluation() {
+  try {
+    const activities = await fetchJSONSafe('/data/garmin-activities.json', []);
+    const dayActivities = findStrengthEvalDay(activities);
+    renderStrengthEvaluation(dayActivities, activities);
+  } catch (err) {
+    console.warn('Valutazione forza non disponibile:', err);
+  }
+}
+
 // ── PESO / GRASSO in hero (live da data/withings-weight.json) ──
 async function loadHeroWeight() {
   try {
@@ -1012,6 +1270,7 @@ async function maybeAutoRefreshData() {
 
 loadHeroFitness();
 loadRecommendation();
+loadStrengthEvaluation();
 
 maybeAutoRefreshData().then((refreshed) => {
   if (!refreshed) return;
@@ -1019,6 +1278,7 @@ maybeAutoRefreshData().then((refreshed) => {
   loadHeroFitness();
   loadRecommendation();
   loadActivities();
+  loadStrengthEvaluation();
 });
 </script>
 <script src="nav.js"></script>
