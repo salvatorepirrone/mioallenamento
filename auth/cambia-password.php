@@ -45,7 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($done) {
-    auth_page('Password aggiornata', '<div class="ok">La nuova password è attiva. <a href="/">Vai al sito</a></div>');
+    auth_page('Password aggiornata', '<p style="font-size:15px">✓ La nuova password è attiva.</p>'
+        . '<p>Il cambio è completato: <b>clicca il pulsante per entrare nel sito</b>.</p>'
+        . '<a href="/" style="display:block;margin-top:18px;padding:14px;border-radius:var(--r);background:var(--accent);'
+        . 'font-weight:700;font-size:17px;text-align:center;text-decoration:none;color:inherit">Vai al sito →</a>'
+        . '<p style="font-size:12px;color:var(--muted);margin-top:14px">Verrai portato al sito automaticamente tra <span id="n">8</span> secondi.</p>'
+        . '<script>var n=8,el=document.getElementById("n");setInterval(function(){n--;if(n<=0){location.href="/"}else{el.textContent=n}},1000)</script>');
     exit;
 }
 
