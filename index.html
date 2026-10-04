@@ -680,7 +680,7 @@ function renderActivityRow(a, i) {
 
   const lapRows = a.laps.map(l => `
     <tr>
-      <td colspan="2" style="padding-left:24px;color:var(--muted)">Lap ${l.lap}${l.style ? ' · ' + (SWIM_STYLE_LABELS[l.style] || l.style) : ''}</td>
+      <td colspan="2" style="padding-left:24px;color:var(--muted)">Lap ${l.lap}${l.style ? ' · ' + (SWIM_STYLE_LABELS[l.style] || l.style) + (l.drill ? ' (tecnica)' : '') : ''}</td>
       <td>${l.distance_m != null ? Math.round(l.distance_m) + ' m' : '—'}</td>
       <td>${ACT_SWIM_TYPES.includes(a.type) ? fmtSwimPace100(l.avg_pace_min_per_km) : fmtPace(l.avg_pace_min_per_km)}</td>
       <td>${l.avg_hr ?? '—'}/${l.max_hr ?? '—'}</td>

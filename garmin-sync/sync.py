@@ -101,24 +101,30 @@ def sync_weight(client: Garmin) -> list[dict]:
     return entries
 
 
-def get_laps_cached(client: Garmin, activity_id: str) -> list[dict] | None:
-    """Lap/split per-ripetuta (distanza, passo, FC). Cache locale: un'attivita' gia'
-    scaricata in passato non viene richiesta di nuovo a Garmin (evita rate limiting)."""
+SWIM_TYPES = ("lap_swimming", "open_water_swimming", "swimming")
+
+
+def get_laps_cached(client: Garmin, activity_id: str, is_swim: bool = False) -> list[dict] | None:
+    """Lap/split per-ripetuta (distanza, passo, FC; per il nuoto anche stile e tecnica).
+    Cache locale: un'attivita' gia' scaricata in passato non viene richiesta di nuovo a
+    Garmin (evita rate limiting). Le cache di nuoto scritte prima che si salvasse lo
+    stile vengono rigenerate una volta."""
     cache_file = LAPS_CACHE_DIR / f"{activity_id}.json"
-    if cache_file.exists():
-        return json.loads(cache_file.read_text(encoding="utf-8"))
+    cached = json.loads(cache_file.read_text(encoding="utf-8")) if cache_file.exists() else None
+    if cached is not None and (not is_swim or any("style" in l for l in cached)):
+        return cached
 
     try:
         raw = client.get_activity_splits(activity_id)
     except Exception as exc:
         print(f"  Lap non disponibili per l'attivita' {activity_id}: {exc}")
-        return None
+        return cached
 
     laps = []
     for lap in raw.get("lapDTOs", []) or []:
         distance_m = lap.get("distance")
         duration_s = lap.get("duration")
-        laps.append({
+        entry = {
             "lap": lap.get("lapIndex"),
             "distance_m": round(distance_m, 1) if distance_m is not None else None,
             "duration_s": round(duration_s, 1) if duration_s is not None else None,
@@ -129,7 +135,15 @@ def get_laps_cached(client: Garmin, activity_id: str) -> list[dict] | None:
             ),
             "avg_hr": lap.get("averageHR"),
             "max_hr": lap.get("maxHR"),
-        })
+        }
+        if is_swim:
+            # Stile e flag "tecnica" come li mostra Garmin Connect (includono le correzioni
+            # fatte dopo il caricamento, che nel FIT originale non ci sono).
+            stroke = lap.get("swimStroke")
+            entry["style"] = stroke.lower() if stroke else None
+            if lap.get("swimDrill") == "DRILL":
+                entry["drill"] = True
+        laps.append(entry)
 
     LAPS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache_file.write_text(json.dumps(laps, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -180,83 +194,6 @@ def download_fit_cached(client: Garmin, activity_id: str) -> None:
         print(f"  FIT non disponibile per l'attivita' {activity_id}: {exc}")
 
 
-SWIM_TYPES = ("lap_swimming", "open_water_swimming", "swimming")
-SWIM_STYLES = {0: "freestyle", 1: "backstroke", 2: "breaststroke", 3: "butterfly", 4: "drill", 5: "mixed", 6: "im"}
-
-
-def fit_lap_styles(fit_path: Path) -> list[str | None] | None:
-    """Stile di nuoto di ogni lap (messaggi 'lap' del FIT, campo swim_style = 38), nello
-    stesso ordine dei lap restituiti da Garmin. Lettura minimale del formato FIT, senza
-    dipendenze: None se il file manca o non e' leggibile."""
-    import struct
-
-    if not fit_path.exists():
-        return None
-    try:
-        b = fit_path.read_bytes()
-        off = b[0]
-        end = off + struct.unpack("<I", b[4:8])[0]
-        defs: dict[int, tuple] = {}
-        styles: list[str | None] = []
-        while off < end:
-            h = b[off]
-            off += 1
-            if h & 0x80:  # compressed timestamp: record dati senza definizione propria
-                loc = (h >> 5) & 0x03
-                is_def = False
-            else:
-                loc = h & 0x0F
-                is_def = bool(h & 0x40)
-            if is_def:
-                off += 1
-                little = b[off] == 0
-                off += 1
-                gnum = struct.unpack("<H" if little else ">H", b[off:off + 2])[0]
-                off += 2
-                nfields = b[off]
-                off += 1
-                fields = []
-                for _ in range(nfields):
-                    fields.append((b[off], b[off + 1]))
-                    off += 3
-                dev_size = 0
-                if h & 0x20:
-                    ndev = b[off]
-                    off += 1
-                    for _ in range(ndev):
-                        dev_size += b[off + 1]
-                        off += 3
-                defs[loc] = (gnum, fields, dev_size)
-            else:
-                gnum, fields, dev_size = defs[loc]
-                for num, size in fields:
-                    if gnum == 19 and num == 38 and size == 1:
-                        styles.append(SWIM_STYLES.get(b[off]))
-                    off += size
-                off += dev_size
-        return styles
-    except Exception as exc:
-        print(f"  Stili di nuoto non leggibili da {fit_path.name}: {exc}")
-        return None
-
-
-def attach_swim_styles(activity_id: str, laps: list[dict]) -> None:
-    styles = fit_lap_styles(FIT_DIR / f"{activity_id}.fit")
-    if styles is None:
-        return
-    if len(styles) == len(laps):
-        targets = laps
-    else:
-        # Garmin conta anche le pause come lap, il FIT a volte no: si allineano solo i lap con distanza.
-        targets = [l for l in laps if l.get("distance_m")]
-        styles = [s for s in styles if s]
-        if len(styles) != len(targets):
-            return
-    for lap, style in zip(targets, styles):
-        if style:
-            lap["style"] = style
-
-
 def sync_activities(client: Garmin) -> list[dict]:
     raw = client.get_activities(0, 60)  # ultime 60 attivita'
 
@@ -290,10 +227,8 @@ def sync_activities(client: Garmin) -> list[dict]:
 
         if activity_id:
             download_fit_cached(client, activity_id)
-            laps = get_laps_cached(client, activity_id)
+            laps = get_laps_cached(client, activity_id, entry["type"] in SWIM_TYPES)
             if laps and len(laps) > 1:
-                if entry["type"] in SWIM_TYPES:
-                    attach_swim_styles(activity_id, laps)
                 entry["laps"] = laps
             if entry["type"] == "strength_training":
                 exercise_sets = get_exercise_sets_cached(client, activity_id)
