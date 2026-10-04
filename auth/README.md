@@ -8,26 +8,19 @@ scrivibile dall'utente `http` (ACL) e chiusa al web da nginx (`deny all`).
 
     php auth/create-user.php matteo
 
-Stampa una password temporanea. Al primo accesso Matteo viene portato a
-`/auth/cambia-password.php` e non può usare il sito finché non la cambia
-(minimo 10 caratteri). Può cambiarla di nuovo in qualsiasi momento dalla stessa pagina.
+Stampa una password temporanea. Al primo accesso l'utente viene portato a
+`/auth/cambia-password.php` e non può usare il sito finché non sceglie una nuova
+password (almeno 10 caratteri, con controlli di robustezza).
 Per resettare la password di un utente basta rilanciare lo stesso comando.
 
-## Proteggere il sito (nginx)
+## Come protegge il sito
 
-Le pagine HTML sono servite direttamente da nginx, quindi il login va agganciato lì
-con `auth_request` al posto di `auth_basic` (adatta i percorsi/socket PHP al NAS):
+Il nginx del NAS non ha il modulo `auth_request`, quindi ogni richiesta passa da
+`auth/gate.php`: senza sessione valida rimanda a `/auth/login.php`, con sessione valida
+serve il file (statici via `X-Accel-Redirect` verso `/_protected/`, `.php` eseguiti dal gate).
 
-    location = /auth/check.php { internal; fastcgi_pass ...; include fastcgi_params;
-                                 fastcgi_param SCRIPT_FILENAME $document_root/auth/check.php;
-                                 fastcgi_pass_request_body off; fastcgi_param CONTENT_LENGTH ""; }
-    location /auth/ { auth_basic off; auth_request off; }   # login/cambio password raggiungibili
-    location / {
-        auth_request /auth/check.php;
-        error_page 401 = @login;
-    }
-    location @login { return 302 /auth/login.php?next=$request_uri; }
-
-Finché `auth_basic` resta attivo sull'intero sito, Matteo dovrà anche inserire la
-password HTTP condivisa: va tolto (anche da `refresh-sync.php`, che ora sarebbe protetto
-dal login di sessione) solo dopo aver verificato che `auth_request` funzioni.
+La configurazione nginx (file incluso da Web Station come
+`/usr/local/etc/nginx/conf.d/.webstation.error_page.default.conf.protect`) sta in
+`nginx-auth/protect-gate.conf` nella home dell'utente `Claude` sul NAS: contiene
+`deny` su `/auth-data/`, le pagine di login esenti, `/style.css` esente, la location
+interna `/_protected/` e i `rewrite` verso `gate.php`.

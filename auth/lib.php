@@ -4,6 +4,7 @@
 
 const AUTH_USERS_FILE_DEFAULT = '/volume2/web/auth-data/users.json';
 const AUTH_MIN_PASSWORD_LEN = 10;
+const AUTH_WEAK_WORDS = ['password', 'passw0rd', 'qwerty', 'asdfgh', 'letmein', 'welcome', 'admin', 'allenamento', 'pirrone', 'garmin', 'abc123'];
 const AUTH_MAX_FAILS = 5;
 const AUTH_LOCK_SECONDS = 300;
 
@@ -61,6 +62,30 @@ function auth_csrf_check(): void {
         http_response_code(400);
         exit('Richiesta non valida, ricarica la pagina.');
     }
+}
+
+// Elenco dei motivi per cui una nuova password e' troppo debole (vuoto = ok).
+// Le stesse regole sono replicate in cambia-password.php per il controllo in diretta.
+function auth_password_problems(string $pw, string $username): array {
+    $problems = [];
+    if (strlen($pw) < AUTH_MIN_PASSWORD_LEN) $problems[] = 'almeno ' . AUTH_MIN_PASSWORD_LEN . ' caratteri';
+    $classes = (preg_match('/[a-z]/', $pw) ? 1 : 0) + (preg_match('/[A-Z]/', $pw) ? 1 : 0)
+             + (preg_match('/\d/', $pw) ? 1 : 0) + (preg_match('/[^a-zA-Z\d]/', $pw) ? 1 : 0);
+    if ($classes < 3) $problems[] = 'almeno tre tra minuscole, maiuscole, numeri e simboli';
+    $low = strtolower($pw);
+    if ($username !== '' && strpos($low, strtolower($username)) !== false) $problems[] = 'non deve contenere il tuo nome utente';
+    foreach (AUTH_WEAK_WORDS as $w) {
+        if (strpos($low, $w) !== false) { $problems[] = 'non deve contenere parole comuni ("' . $w . '")'; break; }
+    }
+    if (preg_match('/(.)\1{3,}/', $pw)) $problems[] = 'non più di 3 caratteri uguali di fila';
+    for ($i = 0; $i + 3 < strlen($low); $i++) {
+        $d = ord($low[$i + 1]) - ord($low[$i]);
+        if (abs($d) === 1 && ord($low[$i + 2]) - ord($low[$i + 1]) === $d && ord($low[$i + 3]) - ord($low[$i + 2]) === $d) {
+            $problems[] = 'niente sequenze come "1234" o "abcd"';
+            break;
+        }
+    }
+    return $problems;
 }
 
 function auth_h(string $s): string {
