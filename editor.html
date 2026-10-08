@@ -118,7 +118,7 @@
 
 <div class="page-hero">
   <h1>Editor FIT</h1>
-  <p>Correggi i length di una nuotata in vasca: dividi, unisci, cambia stile — poi scarica un .fit corretto per Garmin Connect.</p>
+  <p>Correggi i length di una nuotata in vasca: dividi, unisci, cambia stile e lunghezza della vasca — poi scarica un .fit corretto per Garmin Connect.</p>
 </div>
 
 <div id="uploadCard" class="vl-card">
@@ -131,6 +131,19 @@
 
 <div id="editorCard" class="vl-card" style="display:none">
   <div class="summary" id="summary"></div>
+  <div class="toolbar" style="margin:16px 0 0">
+    <span class="hint" style="margin-top:0"><b>Lunghezza vasca</b></span>
+    <select id="poolSelect">
+      <option value="25">25 m</option>
+      <option value="33.3333333333">33⅓ m</option>
+      <option value="50">50 m</option>
+      <option value="custom">Altra…</option>
+    </select>
+    <input type="text" id="poolCustom" inputmode="decimal" placeholder="es. 33,33" style="display:none;width:90px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:4px 7px;font-family:inherit;font-size:0.82rem">
+    <button class="small" id="poolApplyBtn" type="button">Applica</button>
+    <span class="hint" id="poolMsg" style="margin-top:0"></span>
+  </div>
+  <div class="hint">Se la vasca registrata dall'orologio è sbagliata, correggila qui: distanze, ritmi e velocità di tutto il file si ricalcolano; tempi e bracciate restano uguali.</div>
 </div>
 
 <div id="tableCard" class="vl-card" style="display:none">
@@ -157,7 +170,7 @@
   </div>
   <div class="guide-step">
     <div class="gnum">3</div>
-    <div class="gtxt"><b>Seleziona e modifica</b>Un clic seleziona una vasca e mostra le azioni per quella singola vasca (Dividi, cambia stile/tipo). Ctrl+clic (⌘+clic su Mac) aggiunge altre vasche <i>adiacenti</i> alla selezione, per unirle.</div>
+    <div class="gtxt"><b>Seleziona e modifica</b>Un clic seleziona una vasca e mostra le azioni per quella singola vasca (Dividi, cambia stile/tipo). Ctrl+clic (⌘+clic su Mac) aggiunge altre vasche <i>adiacenti</i> alla selezione, per unirle. Se l'orologio aveva la vasca sbagliata (25, 33⅓ o 50 m), correggila dal riquadro "Lunghezza vasca".</div>
   </div>
   <div class="guide-step">
     <div class="gnum">4</div>
@@ -402,8 +415,11 @@ const SWIM_STROKE_LABEL = { freestyle: 'Stile libero', backstroke: 'Dorso', brea
 const SWIM_STROKE_REV = Object.fromEntries(Object.entries(SWIM_STROKE).map(([k, v]) => [v, Number(k)]));
 const LENGTH_TYPE_REV = { idle: 0, active: 1 };
 const L = { start_time: 2, elapsed: 3, timer: 4, strokes: 5, avg_speed: 6, swim_stroke: 7, cadence: 9, length_type: 12, message_index: 254 };
-const P = { start_time: 2, elapsed: 7, timer: 8, distance: 9, calories: 11, avg_speed: 13, avg_hr: 15, max_hr: 16, num_lengths: 32, first_length_index: 35, swim_stroke: 38, num_active_lengths: 40, stroke_count: 75, min_hr: 63, message_index: 254 };
-const S = { distance: 9, avg_speed: 14, pool_length: 44, num_active_lengths: 47, num_laps: 26 };
+const P = { start_time: 2, elapsed: 7, timer: 8, distance: 9, calories: 11, avg_speed: 13, max_speed: 14, avg_stroke_distance: 37, enhanced_avg_speed: 110, enhanced_max_speed: 111, avg_hr: 15, max_hr: 16, num_lengths: 32, first_length_index: 35, swim_stroke: 38, num_active_lengths: 40, stroke_count: 75, min_hr: 63, message_index: 254 };
+const S = { distance: 9, avg_speed: 14, max_speed: 15, pool_length: 44, pool_length_unit: 46, avg_stroke_distance: 82, enhanced_avg_speed: 124, enhanced_max_speed: 125, num_active_lengths: 47, num_laps: 26 };
+// Messaggio non documentato (13), presente nelle nuotate Garmin: il campo 22 ripete la lunghezza vasca x100.
+const SPORT_SETTINGS = { mesg: 13, pool_length: 22 };
+const REC = { distance: 5, speed: 6, enhanced_speed: 73 };
 const R = { heart_rate: 3, timestamp: 253 };
 
 function getField(msg, defNum) {
@@ -463,7 +479,8 @@ function loadSwimActivity(parsed) {
   const lengthMsgsAll = messages.filter(m => m.mesgNum === 101);
   if (!sessionMsg) throw new Error('Nessun messaggio "session" trovato: non sembra un file di attività valido.');
   if (lengthMsgsAll.length === 0) throw new Error('Nessun messaggio "length" trovato: questo file non è una nuotata in vasca (pool swim).');
-  const poolLength = getScaled(sessionMsg, S.pool_length, 100, 0) ?? 50;
+  let poolLength = getScaled(sessionMsg, S.pool_length, 100, 0) ?? 50;
+  if (Math.abs(poolLength - 100 / 3) < 0.005) poolLength = 100 / 3; // vasche da 33 1/3 m: 3 vasche = 100 m esatti
 
   // map each length message -> its owning lap MESSAGE OBJECT (not an index, so it stays
   // correct even after new laps get inserted later)
@@ -605,7 +622,10 @@ function recompute(state) {
     setScaled(lap, P.timer, sumTimer, 1000, 0);
     setScaled(lap, P.distance, newDistance, 100, 0);
     setField(lap, P.num_active_lengths, activeCount);
-    if (sumTimer > 0) setScaled(lap, P.avg_speed, newDistance / sumTimer, 1000, 0);
+    if (sumTimer > 0) {
+      setScaled(lap, P.avg_speed, newDistance / sumTimer, 1000, 0);
+      if (getField(lap, P.enhanced_avg_speed) !== undefined) setScaled(lap, P.enhanced_avg_speed, newDistance / sumTimer, 1000, 0);
+    }
     setField(lap, P.stroke_count, sumStrokes);
   });
 
@@ -624,6 +644,64 @@ function recompute(state) {
   state.lapMsgsAll = lapMsgsAll;
 
   return { totalActive, sessionDistance };
+}
+
+// Cambia la lunghezza della vasca di tutto il file. Tempi e bracciate restano uguali: cambiano le
+// distanze (lunghezze attive x vasca) e tutto cio' che e' proporzionale alla distanza (velocita',
+// distanza per bracciata), che viene riscalato col rapporto nuova/vecchia vasca.
+function changePoolLength(state, newLength) {
+  if (!(newLength >= 10 && newLength <= 100)) throw new Error('La vasca deve essere tra 10 e 100 metri');
+  if (Math.abs(newLength - 33.33) < 0.005) newLength = 100 / 3; // 33,33 m e' la vasca da 33 1/3 m
+  const old = state.poolLength;
+  if (Math.abs(newLength - old) < 1e-9) return false;
+  const ratio = newLength / old;
+  const rescale = (msg, defNum) => {
+    const raw = getField(msg, defNum);
+    if (raw === null || raw === undefined) return;
+    setField(msg, defNum, Math.round(raw * ratio));
+  };
+
+  const oldRaw = Math.round(old * 100);
+  const newRaw = Math.round(newLength * 100);
+  state.poolLength = newLength;
+  setField(state.sessionMsg, S.pool_length, newRaw);
+  setField(state.sessionMsg, S.pool_length_unit, 0); // metri
+  for (const m of state.messages) {
+    if (m.mesgNum === SPORT_SETTINGS.mesg && getField(m, SPORT_SETTINGS.pool_length) === oldRaw) setField(m, SPORT_SETTINGS.pool_length, newRaw);
+  }
+
+  for (const d of [S.max_speed, S.enhanced_avg_speed, S.enhanced_max_speed, S.avg_stroke_distance]) rescale(state.sessionMsg, d);
+  for (const lap of state.messages.filter(m => m.mesgNum === 19)) {
+    for (const d of [P.max_speed, P.enhanced_avg_speed, P.enhanced_max_speed, P.avg_stroke_distance]) rescale(lap, d);
+  }
+  for (const len of state.messages.filter(m => m.mesgNum === 101)) {
+    const timer = getScaled(len, L.timer, 1000, 0);
+    const speed = getField(len, L.avg_speed);
+    if (getField(len, L.length_type) === 1 && timer > 0 && speed) setScaled(len, L.avg_speed, newLength / timer, 1000, 0); // stessa formula di dividi/unisci
+    else rescale(len, L.avg_speed);
+  }
+  for (const rec of state.messages.filter(m => m.mesgNum === 20)) {
+    for (const d of [REC.distance, REC.speed, REC.enhanced_speed]) rescale(rec, d);
+  }
+
+  recompute(state); // distanze di lap e sessione, velocita' medie
+  return true;
+}
+
+// Accetta 25, 33,33, 33 1/3, 33,1/3, 100/3, con o senza "m" finale.
+function parsePoolInput(text) {
+  const t = String(text).trim().toLowerCase().replace(/\s*m$/, '');
+  let m = t.match(/^(\d+)[ ,]\s*(\d+)\s*\/\s*(\d+)$/);
+  if (m) return Number(m[1]) + Number(m[2]) / Number(m[3]);
+  m = t.match(/^(\d+)\s*\/\s*(\d+)$/);
+  if (m) return Number(m[1]) / Number(m[2]);
+  const v = Number(t.replace(',', '.'));
+  return Number.isFinite(v) ? v : NaN;
+}
+
+function fmtMeters(x) {
+  if (Math.abs(x - 100 / 3) < 1e-6) return '33⅓';
+  return Number(x.toFixed(2)).toLocaleString('it-IT');
 }
 
 function splitLength(state, idx, splitSeconds, strokeA, strokeB) {
@@ -755,6 +833,33 @@ const summaryEl = document.getElementById('summary');
 const actionPanel = document.getElementById('actionPanel');
 const timelineEl = document.getElementById('timeline');
 const legendEl = document.getElementById('legend');
+const poolSelect = document.getElementById('poolSelect');
+const poolCustom = document.getElementById('poolCustom');
+const poolApplyBtn = document.getElementById('poolApplyBtn');
+const poolMsg = document.getElementById('poolMsg');
+
+function syncPoolControl() {
+  const known = [25, 100 / 3, 50].find(v => Math.abs(v - state.poolLength) < 0.005);
+  poolSelect.value = known === undefined ? 'custom' : String(known === 100 / 3 ? '33.3333333333' : known);
+  poolCustom.style.display = poolSelect.value === 'custom' ? '' : 'none';
+  if (known === undefined) poolCustom.value = String(state.poolLength).replace('.', ',');
+}
+poolSelect.addEventListener('change', () => {
+  poolCustom.style.display = poolSelect.value === 'custom' ? '' : 'none';
+  if (poolSelect.value === 'custom') poolCustom.focus();
+});
+poolApplyBtn.addEventListener('click', () => {
+  if (!state) return;
+  const value = poolSelect.value === 'custom' ? parsePoolInput(poolCustom.value) : Number(poolSelect.value);
+  try {
+    if (!Number.isFinite(value)) throw new Error('Scrivi la vasca in metri (per esempio 25, 33,33 oppure 33 1/3)');
+    const changed = changePoolLength(state, value);
+    render();
+    poolMsg.textContent = changed ? 'Vasca impostata a ' + fmtMeters(state.poolLength) + ' m: distanze e velocità ricalcolate.' : 'La vasca era già a ' + fmtMeters(state.poolLength) + ' m.';
+  } catch (err) {
+    poolMsg.textContent = err.message;
+  }
+});
 
 dropZone.addEventListener('click', () => fileInput.click());
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
@@ -907,11 +1012,12 @@ function render() {
   summaryEl.innerHTML = `
     <div class="vl-stat"><div class="n">${state.lengths.length}</div><div class="l">Length totali</div></div>
     <div class="vl-stat"><div class="n">${activeCount}</div><div class="l">Length attivi</div></div>
-    <div class="vl-stat"><div class="n">${totalDistance}m</div><div class="l">Distanza</div></div>
+    <div class="vl-stat"><div class="n">${fmtMeters(totalDistance)}m</div><div class="l">Distanza</div></div>
     <div class="vl-stat"><div class="n">${fmtTime(totalTime)}</div><div class="l">Durata totale</div></div>
-    <div class="vl-stat"><div class="n">${state.poolLength}m</div><div class="l">Vasca</div></div>
+    <div class="vl-stat"><div class="n">${fmtMeters(state.poolLength)}m</div><div class="l">Vasca</div></div>
   `;
 
+  syncPoolControl();
   renderTimeline();
   renderActionPanel();
   renderLegend();
