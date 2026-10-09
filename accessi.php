@@ -103,6 +103,7 @@ $labels = [
     'user_enabled' => 'Utente riattivato', 'user_deleted' => 'Utente eliminato', 'user_unlocked' => 'Utente sbloccato',
     'coach_granted' => 'Coach assegnato', 'coach_revoked' => 'Coach revocato', 'coach_assigned' => 'Allenamento assegnato',
     'coach_library_add' => 'Programma inserito in libreria',
+    'plan_sent' => 'Consiglio inviato a Garmin',
     'coach_parse' => 'Testo analizzato (coach)', 'coach_deleted' => 'Allenamento eliminato', 'coach_sent' => 'Allenamento inviato a Garmin',
     'admin_granted' => 'Admin assegnato', 'admin_revoked' => 'Admin revocato', 'login_disabled' => 'Accesso con account disattivato',
 ];

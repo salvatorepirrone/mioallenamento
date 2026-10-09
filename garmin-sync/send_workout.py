@@ -138,17 +138,107 @@ def build_steps(blocks: list) -> tuple[list, float]:
     return steps, total
 
 
-def _repeat(order: int, iterations: int, children: list) -> dict:
+def _repeat(order: int, iterations: int, children: list, skip_last_rest: bool | None = None) -> dict:
     return {
         "type": "RepeatGroupDTO", "stepOrder": order, "stepType": _typed("step", STEP_TYPES, "repeat", "repeat"),
         "childStepId": 1, "numberOfIterations": iterations, "workoutSteps": children,
         "endConditionValue": float(iterations), "preferredEndConditionUnit": None, "endConditionCompare": None,
         "endCondition": {"conditionTypeId": 7, "conditionTypeKey": "iterations", "displayOrder": 7, "displayable": False},
-        "skipLastRestStep": None, "smartRepeat": False,
+        "skipLastRestStep": skip_last_rest, "smartRepeat": False,
+    }
+
+
+RUN = {"sportTypeId": 1, "sportTypeKey": "running", "displayOrder": 1}
+KM_UNIT = {"unitId": 2, "unitKey": "kilometer", "factor": 100000.0}
+RUN_TARGETS = {"none": (1, "no.target"), "hr": (4, "heart.rate.zone"), "pace": (6, "pace.zone")}
+RUN_KINDS = {"warmup": (1, "warmup"), "cooldown": (2, "cooldown"), "interval": (3, "interval"), "recovery": (4, "recovery")}
+DEFAULT_RUN_SPEED = 2.8  # m/s (~5:57/km) per stimare la durata dei passi a distanza senza ritmo
+
+
+def _run_executable(order: int, st: dict) -> dict:
+    kind = st.get("kind") or "interval"
+    ident, key = RUN_KINDS.get(kind, RUN_KINDS["interval"])
+    if st.get("distance_m"):
+        end = {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayOrder": 3, "displayable": True}
+        value, unit = float(st["distance_m"]), KM_UNIT
+    elif st.get("time_s"):
+        end = {"conditionTypeId": 2, "conditionTypeKey": "time", "displayOrder": 2, "displayable": True}
+        value, unit = float(st["time_s"]), None
+    else:
+        end = {"conditionTypeId": 1, "conditionTypeKey": "lap.button", "displayOrder": 1, "displayable": True}
+        value, unit = 0.0, None
+
+    target, one, two, zone = RUN_TARGETS["none"], None, None, None
+    pace = st.get("pace")
+    if pace:  # [piu' veloce, piu' lento] in secondi al km -> velocita' in m/s
+        target, one, two = RUN_TARGETS["pace"], 1000.0 / float(pace[0]), 1000.0 / float(pace[1])
+    elif st.get("hr_zone"):
+        target, zone = RUN_TARGETS["hr"], int(st["hr_zone"])
+    return {
+        "type": "ExecutableStepDTO", "stepOrder": order, "stepType": {"stepTypeId": ident, "stepTypeKey": key, "displayOrder": ident},
+        "childStepId": None, "description": (st.get("note") or "")[:500] or None,
+        "endCondition": end, "endConditionValue": value, "preferredEndConditionUnit": unit, "endConditionCompare": None,
+        "targetType": {"workoutTargetTypeId": target[0], "workoutTargetTypeKey": target[1], "displayOrder": target[0]},
+        "targetValueOne": one, "targetValueTwo": two, "targetValueUnit": None, "zoneNumber": zone,
+        "secondaryTargetType": None, "secondaryTargetValueOne": None, "secondaryTargetValueTwo": None,
+        "secondaryTargetValueUnit": None, "secondaryZoneNumber": None, "endConditionZone": None,
+        "strokeType": {"strokeTypeId": 0, "strokeTypeKey": None, "displayOrder": 0},
+        "equipmentType": {"equipmentTypeId": 0, "equipmentTypeKey": None, "displayOrder": 0},
+        "category": None, "exerciseName": None, "workoutProvider": None, "providerExerciseSourceId": None,
+        "weightValue": None, "weightUnit": None,
+    }
+
+
+def build_run_steps(steps: list) -> tuple[list, float, float]:
+    """Passi Garmin della corsa (con gruppi di ripetizioni) e stima di distanza e durata."""
+    order = 0
+    dist_total = 0.0
+    secs_total = 0.0
+
+    def nxt() -> int:
+        nonlocal order
+        order += 1
+        return order
+
+    def estimate(st: dict, times: int) -> None:
+        nonlocal dist_total, secs_total
+        pace = st.get("pace")
+        speed = (1000.0 / ((float(pace[0]) + float(pace[1])) / 2)) if pace else DEFAULT_RUN_SPEED
+        if st.get("distance_m"):
+            dist_total += float(st["distance_m"]) * times
+            secs_total += float(st["distance_m"]) / speed * times
+        elif st.get("time_s"):
+            dist_total += float(st["time_s"]) * speed * times
+            secs_total += float(st["time_s"]) * times
+
+    def build(items: list, times: int) -> list:
+        out = []
+        for st in items:
+            if st.get("kind") == "repeat":
+                group_order = nxt()
+                reps = int(st["reps"])
+                children = build(st["steps"], times * reps)
+                out.append(_repeat(group_order, reps, children, bool(st.get("skip_last_rest", True))))
+            else:
+                estimate(st, times)
+                out.append(_run_executable(nxt(), st))
+        return out
+
+    return build(steps, 1), dist_total, secs_total
+
+
+def build_run_workout(spec: dict) -> dict:
+    steps, dist, secs = build_run_steps(spec["steps"])
+    return {
+        "workoutName": spec["name"][:80], "description": (spec.get("description") or None),
+        "sportType": RUN, "estimatedDistanceInMeters": round(dist, 1), "estimatedDurationInSecs": int(secs),
+        "workoutSegments": [{"segmentOrder": 1, "sportType": RUN, "workoutSteps": steps}],
     }
 
 
 def build_workout(spec: dict) -> dict:
+    if spec.get("sport") == "running":
+        return build_run_workout(spec)
     steps, total = build_steps(spec["blocks"])
     pool = float(spec.get("pool_length_m") or 25)
     return {

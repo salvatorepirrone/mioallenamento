@@ -7,6 +7,7 @@
 //   POST action=assign       (coach)   {id, date|null}               -> assegna o toglie la data
 //   POST action=delete       (coach)   {id}
 //   POST action=send         (atleta)  {id, date?}                   -> crea l'allenamento su Garmin (e lo pianifica)
+//   POST action=send_plan    (atleta)  {plan, date?}                 -> invia a Garmin il consiglio del giorno (corsa o nuoto)
 // Solo i coach inseriscono, assegnano ed eliminano programmi. L'invio all'orologio e' riservato a chi
 // possiede la sessione Garmin del sito (COACH_DEFAULT_ATHLETE). Le POST portano il token nell'intestazione X-CSRF.
 require_once __DIR__ . '/auth/coach-lib.php';
@@ -64,7 +65,7 @@ try {
             return !empty($w['date']) && ($w['assigned_to'] ?? COACH_DEFAULT_ATHLETE) === $name && $w['date'] >= $from;
         });
         usort($mine, function ($a, $b) { return strcmp($a['date'], $b['date']); });
-        reply(['csrf' => auth_csrf_token(), 'workouts' => array_map('publicView', array_values($mine))]);
+        reply(['csrf' => auth_csrf_token(), 'can_send' => $canSend, 'workouts' => array_map('publicView', array_values($mine))]);
     }
 
     if ($method === 'POST' && $action === 'parse') {
@@ -163,6 +164,25 @@ try {
             return $all;
         });
         auth_log('coach_sent', $name, $id . ' -> Garmin ' . $res['garmin_id'] . ($date ? ' (calendario ' . $date . ')' : ' (solo libreria Garmin)'));
+        reply(['ok' => true, 'garmin_id' => $res['garmin_id'], 'scheduled' => !empty($res['scheduled'])]);
+    }
+
+    if ($method === 'POST' && $action === 'send_plan') {
+        if (!$canSend) reply(['error' => 'L\'invio all\'orologio è riservato al titolare dell\'account Garmin.'], 403);
+        set_time_limit(120);
+        $date = $body['date'] ?? null;
+        if ($date === '' || $date === null) $date = null;
+        elseif (!valid_date($date)) reply(['error' => 'Data non valida.'], 400);
+        $plan = is_array($body['plan'] ?? null) ? $body['plan'] : [];
+        // Stesso piano e stessa data entro un minuto: probabile doppio clic, non si duplica su Garmin.
+        $fingerprint = sha1(json_encode([$plan, $date]));
+        if (($_SESSION['last_plan'] ?? '') === $fingerprint && time() - (int)($_SESSION['last_plan_at'] ?? 0) < 60) {
+            reply(['error' => 'Questo allenamento è già stato inviato un momento fa.'], 409);
+        }
+        $res = coach_send_plan($plan, $date);
+        $_SESSION['last_plan'] = $fingerprint;
+        $_SESSION['last_plan_at'] = time();
+        auth_log('plan_sent', $name, ($plan['sport'] ?? '?') . ' -> Garmin ' . $res['garmin_id'] . ($date ? ' (calendario ' . $date . ')' : ''));
         reply(['ok' => true, 'garmin_id' => $res['garmin_id'], 'scheduled' => !empty($res['scheduled'])]);
     }
 

@@ -248,6 +248,101 @@ TRAINING_STATUS_CATEGORIES = (
 )
 
 
+def _safe_connectapi(client: Garmin, path: str, params: dict | None = None):
+    """Chiamata diretta all'API di Garmin Connect: se un dato non c'e' (dispositivo, giorno,
+    versione della libreria) si prosegue senza, cosi' un campo mancante non blocca il sync."""
+    try:
+        return client.connectapi(path, params=params) if params else client.connectapi(path)
+    except Exception as exc:
+        print(f"  Dato non disponibile ({path.split('/')[-2] if path.count('/') > 1 else path}): {str(exc)[:80]}")
+        return None
+
+
+def sync_trends(client: Garmin, today: date) -> dict:
+    """Prontezza all'allenamento e andamento delle prestazioni nel tempo (VO2max, previsioni
+    di gara, FC a riposo), usati dal consiglio del giorno per valutare quanto spingere."""
+    out: dict = {}
+
+    # Prontezza (Training Readiness): l'ultimo valore di oggi, altrimenti di ieri.
+    for days_back in (0, 1):
+        d = (today - timedelta(days=days_back)).isoformat()
+        raw = _safe_connectapi(client, f"/metrics-service/metrics/trainingreadiness/{d}")
+        entries = [e for e in (raw or []) if isinstance(e, dict) and e.get("score") is not None]
+        if entries:
+            e = sorted(entries, key=lambda x: x.get("timestamp") or "")[-1]
+            out["training_readiness"] = {
+                "date": e.get("calendarDate") or d,
+                "score": e.get("score"),
+                "level": e.get("level"),
+                "feedback": e.get("feedbackShort"),
+                "recovery_time_min": e.get("recoveryTime"),  # minuti (4320 = 72 h)
+                "acute_load": e.get("acuteLoad"),
+                "acwr_feedback": e.get("acwrFactorFeedback"),
+                "recovery_feedback": e.get("recoveryTimeFactorFeedback"),
+                "hrv_weekly_avg": e.get("hrvWeeklyAverage"),
+            }
+            break
+
+    # Storico del VO2max (corsa), fino a un anno.
+    raw = None
+    for span in (365, 120):
+        raw = _safe_connectapi(client, f"/metrics-service/metrics/maxmet/daily/{(today - timedelta(days=span)).isoformat()}/{today.isoformat()}")
+        if raw:
+            break
+    history = {}
+    for item in raw or []:
+        generic = (item or {}).get("generic") or {}
+        v = generic.get("vo2MaxPreciseValue") or generic.get("vo2MaxValue")
+        if v and generic.get("calendarDate"):
+            history[generic["calendarDate"]] = round(v, 1)
+    if history:
+        out["vo2max_history"] = [{"date": k, "value": history[k]} for k in sorted(history)]
+
+    # Previsioni di gara di Garmin: ultima e serie (un punto a settimana).
+    display = getattr(client, "display_name", None)
+    if display:
+        latest = _safe_connectapi(client, f"/metrics-service/metrics/racepredictions/latest/{display}")
+        if isinstance(latest, dict) and latest.get("time5K"):
+            out["race_predictions"] = {
+                "date": latest.get("calendarDate"), "time_5k_s": latest.get("time5K"), "time_10k_s": latest.get("time10K"),
+                "time_half_s": latest.get("timeHalfMarathon"), "time_marathon_s": latest.get("timeMarathon"),
+            }
+        series = _safe_connectapi(client, f"/metrics-service/metrics/racepredictions/daily/{display}", {
+            "fromCalendarDate": (today - timedelta(days=120)).isoformat(), "toCalendarDate": today.isoformat()})
+        rows = [r for r in (series or []) if isinstance(r, dict) and r.get("time5K")]
+        if rows:
+            picked = rows[::7]
+            if picked[-1] is not rows[-1]:
+                picked.append(rows[-1])
+            out["race_predictions_history"] = [
+                {"date": r.get("calendarDate"), "time_5k_s": r.get("time5K"), "time_10k_s": r.get("time10K")} for r in picked]
+
+        # FC a riposo, ultimi 14 giorni.
+        rhr = _safe_connectapi(client, f"/userstats-service/wellness/daily/{display}", {
+            "fromDate": (today - timedelta(days=14)).isoformat(), "untilDate": today.isoformat(), "metricId": 60})
+        values = (((rhr or {}).get("allMetrics") or {}).get("metricsMap") or {}).get("WELLNESS_RESTING_HEART_RATE") or []
+        if values:
+            out["resting_hr"] = [{"date": v.get("calendarDate"), "value": v.get("value")} for v in values if v.get("value")]
+
+
+    # Record personali dalla sezione "Record personali" di Connect (tempi in secondi).
+    if display:
+        prs = _safe_connectapi(client, f"/personalrecord-service/personalrecord/prs/{display}")
+        keys = {1: "run_1k_s", 2: "run_mile_s", 3: "run_5k_s", 4: "run_10k_s", 18: "swim_50m_s", 20: "swim_400m_s", 22: "swim_800m_s", 25: "swim_1500m_s"}
+        records: dict = {}
+        for p in prs or []:
+            key = keys.get(p.get("typeId"))
+            value = p.get("value")
+            if not key or not value or p.get("status") not in (None, "ACCEPTED"):
+                continue
+            if key not in records or value < records[key]["value"]:
+                records[key] = {"value": round(value, 1), "date": (p.get("actStartDateTimeInGMTFormatted") or "")[:10]}
+        if records:
+            out["personal_records"] = records
+
+    return out
+
+
 def sync_fitness(client: Garmin) -> dict:
     """VO2max e training status, usati dalla home per il consiglio di allenamento
     del giorno. Garmin non li ricalcola tutti i giorni: si cerca a ritroso finche'
@@ -297,7 +392,7 @@ def sync_fitness(client: Garmin) -> dict:
             if device_data.get("primaryTrainingDevice"):
                 break
 
-    return {
+    result = {
         "vo2max_running": vo2max_running,
         "vo2max_date": vo2max_date,
         "training_status_label": training_status_label,
@@ -306,6 +401,8 @@ def sync_fitness(client: Garmin) -> dict:
         "acwr_ratio": acwr_ratio,
         "acwr_status": acwr_status,
     }
+    result.update(sync_trends(client, today))
+    return result
 
 
 def write_json(name: str, payload) -> None:

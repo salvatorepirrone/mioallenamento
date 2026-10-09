@@ -72,6 +72,14 @@
 .reco-opt-meta { color: var(--muted); font-size: 11.5px; }
 .reco-link { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); text-decoration: none; }
 .reco-link:hover { text-decoration: underline; }
+.reco-signals { background: var(--s2); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; margin: 0 0 14px; font-size: 12.5px; line-height: 1.6; }
+.reco-sig + .reco-sig { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+.reco-sig b { color: var(--text); }
+.reco-sig-detail { color: var(--muted); font-size: 12px; }
+.reco-send { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.reco-send:empty { display: none; }
+.reco-date { padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--r); font: inherit; font-size: 12.5px; }
+.reco-send-msg { font-size: 12px; color: var(--muted); }
 
 .eval-box { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; margin-bottom: 24px; }
 .eval-verdict { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
@@ -1182,6 +1190,43 @@ const LAYOFF_DAYS = 6; // il piano alterna corsa e nuoto/palestra ogni 3-4 giorn
 // Contenuto e link presi dalle stesse zone FC/passo calibrate in corsa.html e
 // nuoto.html per questo utente — qui non si inventano nuovi ritmi, si sceglie
 // quale sessione già nota è la più indicata oggi.
+// Struttura delle sedute di nuoto suggerite, la stessa che si invia a Garmin (blocchi: ripetizioni x metri).
+const SB = (label, kind, reps, dist, extra) => ({ label, kind, reps, distance_m: dist, stroke: 'free', equipment: [], ...(extra || {}) });
+const SWIM_SPECS = {
+  tecnica: { sport: 'swimming', title: 'Tecnica + Soglia', blocks: [
+    SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }), SB('Riscaldamento dorso', 'warmup', 1, 100, { stroke: 'back' }),
+    SB('Drill', 'interval', 6, 50, { stroke: 'drill', rest_s: 20, note: 'catch-up + pausa, battuta laterale, 6-1-6' }),
+    SB('Soglia', 'interval', 6, 100, { rest_s: 20, intensity: 'threshold', note: '~1:45/100 m uniforme' }),
+    SB('Pullbuoy contrasto', 'interval', 4, 100, { equipment: ['pull_buoy'], rest_s: 25, intensity: 'aerobic' }),
+    SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
+  leggero: { sport: 'swimming', title: 'Tecnica leggera', blocks: [
+    SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }),
+    SB('Drill', 'interval', 6, 50, { stroke: 'drill', rest_s: 20, note: 'solo tecnica' }),
+    SB('Aerobico facile', 'interval', 4, 100, { rest_s: 20, intensity: 'easy' }),
+    SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
+  velocitaPura: { sport: 'swimming', title: 'Velocità pura', blocks: [
+    SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }), SB('Riscaldamento dorso', 'warmup', 1, 100, { stroke: 'back' }),
+    SB('Drill', 'interval', 4, 50, { stroke: 'drill', rest_s: 20 }),
+    SB('Progressivi', 'interval', 6, 50, { rest_s: 20, note: 'da aerobico a veloce dentro ogni 50 m' }),
+    SB('Sprint', 'interval', 8, 50, { rest_s: 70, intensity: 'sprint', note: 'massimali, recupero completo' }),
+    SB('Sprint con palette', 'interval', 4, 50, { equipment: ['paddles'], rest_s: 60, intensity: 'sprint' }),
+    SB('Aerobico di scarico', 'interval', 6, 100, { rest_s: 25, intensity: 'aerobic' }),
+    SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Defaticante', 'cooldown', 1, 200, { stroke: 'any' })] },
+  sprintVirate: { sport: 'swimming', title: 'Sprint & Virate', blocks: [
+    SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }), SB('Riscaldamento dorso', 'warmup', 1, 100, { stroke: 'back' }),
+    SB('Drill', 'interval', 4, 25, { stroke: 'drill', rest_s: 20 }),
+    SB('Virate esplosive', 'interval', 10, 25, { rest_s: 50, intensity: 'sprint', note: 'spinta massimale dal muro + breakout' }),
+    SB('Sprint pieno', 'interval', 8, 25, { rest_s: 60, intensity: 'sprint' }),
+    SB('Aerobico di scarico', 'interval', 6, 100, { rest_s: 25, intensity: 'aerobic' }),
+    SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
+  bracciataVelocita: { sport: 'swimming', title: 'Bracciata & Velocità', blocks: [
+    SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }), SB('Riscaldamento dorso', 'warmup', 1, 100, { stroke: 'back' }),
+    SB('Drill', 'interval', 6, 25, { stroke: 'drill', rest_s: 20, note: 'catch-up e pugno chiuso' }),
+    SB('Conteggio bracciate', 'interval', 8, 50, { rest_s: 20, intensity: 'aerobic', note: 'da aerobico a soglia, conta le bracciate ogni 25 m' }),
+    SB('Velocità a bracciate controllate', 'interval', 10, 25, { rest_s: 45, intensity: 'sprint', note: 'non superare di +1 le bracciate del blocco precedente' }),
+    SB('Aerobico', 'interval', 5, 100, { rest_s: 20, intensity: 'aerobic' }),
+    SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
+};
 const RUN_SESSIONS = {
   velocita: {
     label: 'Velocità · 6×400 m',
@@ -1202,6 +1247,7 @@ const RUN_SESSIONS = {
     label: 'Facile rigenerante',
     html: `<strong>20–30 min</strong> di corsa lenta in Z1 (FC&nbsp;&lt;123, passo &gt;6:15/km), solo per sciogliere le gambe — oggi è recupero attivo, niente ritmo.`,
     link: 'corsa.html',
+    spec: { sport: 'running', title: 'Corsa facile rigenerante', steps: [{ kind: 'interval', time_s: 1500, hr_zone: 1, note: 'Z1, FC sotto 123' }] },
   },
 };
 const SWIM_SESSIONS = {
@@ -1209,11 +1255,13 @@ const SWIM_SESSIONS = {
     label: 'Tecnica + Soglia',
     html: `<strong>~2.000 m</strong>: 400 riscaldamento (300 crawl + 100 dorso) → 300 drill (6×50) → 600 soglia (6×100 a ~1:45/100m) → 400 pullbuoy contrasto (4×100) → 200 dorso → 100 defaticante.`,
     link: 'nuoto.html#sessA',
+    spec: SWIM_SPECS.tecnica,
   },
   leggero: {
     label: 'Tecnica leggera (recupero attivo)',
     html: `<strong>1.200–1.500 m</strong> a ritmo facile/aerobico, solo drill e tecnica. Niente sprint né pullbuoy pesante: oggi l'acqua serve a scaricare, non a costruire.`,
     link: 'nuoto.html',
+    spec: SWIM_SPECS.leggero,
   },
 };
 // Tre varianti di velocità (vasca corta 25 m), stesso obiettivo (fibre veloci)
@@ -1224,16 +1272,19 @@ const SWIM_VELOCITA_VARIANTS = [
     label: 'Velocità pura',
     html: `<strong>~2.500 m</strong>: 400 riscaldamento → 200 drill → 300 progressivi (6×50) → 400 sprint massimali (8×50, rec. 60–75″) → 200 sprint con palette (4×50) → 600 aerobico di scarico → 200 dorso → 200 defaticante.`,
     link: 'nuoto.html#sessBdom',
+    spec: SWIM_SPECS.velocitaPura,
   },
   {
     label: 'Sprint & Virate',
     html: `<strong>~1.850 m</strong>: 400 riscaldamento → 100 drill → 250 virate esplosive (10×25, spinta massimale + breakout) → 200 sprint pieno (8×25) → 600 aerobico di scarico → 200 dorso → 100 defaticante.`,
     link: 'nuoto.html#sessC',
+    spec: SWIM_SPECS.sprintVirate,
   },
   {
     label: 'Bracciata & Velocità',
     html: `<strong>~2.000 m</strong>: 400 riscaldamento → 150 drill → 400 conteggio bracciate progressivo (8×50) → 250 sprint a bracciate controllate (10×25, vincolo di non aumentarle) → 500 aerobico di scarico → 200 dorso → 100 defaticante.`,
     link: 'nuoto.html#sessD',
+    spec: SWIM_SPECS.bracciataVelocita,
   },
 ];
 function pickVelocitaVariant() {
@@ -1303,31 +1354,341 @@ function daysSinceByClass(activities, types, classify) {
   return result;
 }
 
-function computeRecommendation(activities, fitness, sleepNights) {
+// ── Tempi e obiettivi ──
+function parseTimeToSec(text) {
+  if (text == null) return null;
+  const parts = String(text).trim().split(':').map(Number);
+  if (parts.some(n => !Number.isFinite(n))) return null;
+  return parts.reduce((acc, n) => acc * 60 + n, 0);
+}
+
+function fmtClock(sec) {
+  const s = Math.round(sec);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const r = s % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}` : `${m}:${String(r).padStart(2, '0')}`;
+}
+
+// Passo in min/km (numero) -> "4:36"
+function paceText(minPerKm) {
+  const t = Math.round(minPerKm * 60);
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+}
+
+// Obiettivi: di default ricavati da Garmin Connect (record personali, massimo di VO2max dell'ultimo
+// anno, previsioni di gara). Un eventuale data/goals.json li sostituisce campo per campo, per esempio:
+// {"race_5k":"23:30","race_10k":"50:00","vo2max":50,"repeat_pace":"4:15","swim_100":"1:35","deadline":"2026-12-02"}
+const PLAN_END = '2026-12-02'; // fine del piano di allenamento mostrato nella home
+
+async function loadGoals(fitness) {
+  const file = await fetchJSONSafe('/data/goals.json', null);
+  return buildGoals(fitness, file);
+}
+
+function buildGoals(fitness, file) {
+  const pr = (fitness && fitness.personal_records) || {};
+  const pred = (fitness && fitness.race_predictions) || {};
+  const goals = { deadline: PLAN_END, sources: {} };
+  const year = v => (v && v.date ? ` (${v.date.slice(0, 4)})` : '');
+
+  // 10 e 5 km: tornare al proprio record se oggi si e' piu' lenti; altrimenti migliorare del 1,5% il livello attuale.
+  for (const [key, recKey, predKey, label] of [['race10k', 'run_10k_s', 'time_10k_s', '10 km'], ['race5k', 'run_5k_s', 'time_5k_s', '5 km']]) {
+    const rec = pr[recKey], now = pred[predKey];
+    if (rec && now && rec.value < now) { goals[key] = rec.value; goals.sources[key] = `tuo record sui ${label}${year(rec)}`; }
+    else if (now) { goals[key] = Math.round(Math.min(now, rec ? rec.value : now) * 0.985); goals.sources[key] = `-1,5% sul tuo livello attuale`; }
+  }
+  // Ripetute: il ritmo del tuo record sul chilometro.
+  if (pr.run_1k_s) { goals.repeatPace = pr.run_1k_s.value / 60; goals.sources.repeatPace = `ritmo del tuo record sul km${year(pr.run_1k_s)}`; }
+  // VO2max: il massimo degli ultimi 12 mesi.
+  const h = (fitness && fitness.vo2max_history) || [];
+  if (h.length) {
+    const peak = h.reduce((m, x) => (x.value > m.value ? x : m), h[0]);
+    const now = fitness.vo2max_running || h[h.length - 1].value;
+    goals.vo2max = peak.value > now ? peak.value : now + 1;
+    goals.sources.vo2max = peak.value > now ? `tuo massimo degli ultimi 12 mesi (${actDateLabel(peak.date)})` : 'un punto sopra il livello attuale';
+  }
+  // Nuoto: il ritmo del tuo record sui 400 m.
+  if (pr.swim_400m_s) { goals.swim100 = pr.swim_400m_s.value / 4; goals.sources.swim100 = `ritmo del tuo record sui 400 m${year(pr.swim_400m_s)}`; }
+
+  if (file) {
+    const t = x => parseTimeToSec(x);
+    if (t(file.race_5k)) { goals.race5k = t(file.race_5k); goals.sources.race5k = 'obiettivo scelto da te'; }
+    if (t(file.race_10k)) { goals.race10k = t(file.race_10k); goals.sources.race10k = 'obiettivo scelto da te'; }
+    if (Number(file.vo2max)) { goals.vo2max = Number(file.vo2max); goals.sources.vo2max = 'obiettivo scelto da te'; }
+    if (t(file.repeat_pace)) { goals.repeatPace = t(file.repeat_pace) / 60; goals.sources.repeatPace = 'obiettivo scelto da te'; }
+    if (t(file.swim_100)) { goals.swim100 = t(file.swim_100); goals.sources.swim100 = 'obiettivo scelto da te'; }
+    if (file.deadline) goals.deadline = file.deadline;
+  }
+  return goals;
+}
+
+// VO2max: andamento recente (ultimi ~4 mesi) e distanza dal massimo dell'ultimo anno.
+function vo2Trend(fitness) {
+  const h = fitness && fitness.vo2max_history;
+  if (!h || h.length < 3) return null;
+  const last = h[h.length - 1];
+  const cutoff = new Date(last.date);
+  cutoff.setDate(cutoff.getDate() - 120);
+  const start = h.find(x => new Date(x.date) >= cutoff) || h[0];
+  const peak = h.reduce((m, x) => (x.value > m.value ? x : m), h[0]);
+  return { last, start, peak, deltaRecent: last.value - start.value, daysRecent: Math.round((new Date(last.date) - new Date(start.date)) / 86400000) };
+}
+
+// ── Prontezza ──
+// Parte dal punteggio di Training Readiness di Garmin (recupero, carico, FC); se manca, da una
+// stima di 70. Garmin non vede il sonno misurato da Withings, quindi quello si somma a parte, con
+// pesi moderati: un solo segnale negativo abbassa la prontezza, non la azzera.
+function computeReadiness(fitness, sleepNights, hardRunDaysAgo) {
+  const factors = [];
+  let score;
+  let source;
+  const tr = fitness && fitness.training_readiness;
+  if (tr && tr.score != null && daysSinceDate(tr.date) <= 1) {
+    score = tr.score;
+    source = 'Garmin';
+    const fb = { WELL_RECOVERED: 'ben recuperato', PRIME: 'in forma ottima', RECOVERED: 'recuperato', LOW_RECOVERY: 'recupero basso', LET_YOUR_BODY_RECOVER: 'lascia recuperare il corpo' }[tr.feedback] || String(tr.feedback || '').toLowerCase().replace(/_/g, ' ');
+    const recHours = tr.recovery_time_min != null ? Math.round(tr.recovery_time_min / 60) : null;
+    const acwrFb = { GOOD: 'carico ottimale', MODERATE: 'carico moderato', HIGH: 'carico alto', POOR: 'carico eccessivo' }[tr.acwr_feedback];
+    const bits = [fb, recHours != null && recHours >= 1 ? `recupero ${recHours} h` : null, tr.acute_load != null ? `carico acuto ${tr.acute_load}` : null, acwrFb].filter(Boolean);
+    factors.push({ label: bits.length ? `Garmin (${bits.join(', ')})` : 'Garmin', value: tr.score });
+  } else {
+    score = 70;
+    source = 'stima';
+    factors.push({ label: 'base', value: 70 });
+    const r = fitness && fitness.acwr_ratio;
+    if (r != null) {
+      const d = r > 1.5 ? -20 : (r > 1.3 ? -10 : (r < 0.8 ? 5 : 0));
+      if (d) { score += d; factors.push({ label: `carico ${r.toFixed(2)}`, delta: d }); }
+    }
+  }
+
+  const night = (sleepNights || [])[0];
+  if (night && night.sleep_score != null && daysSinceDate(night.date) <= 2) {
+    const s = night.sleep_score;
+    let d = s >= 80 ? 3 : (s >= 65 ? 0 : (s >= 55 ? -4 : (s >= 40 ? -9 : -15)));
+    if (night.total_sleep_time_min != null && night.total_sleep_time_min < 330 && d > -9) d -= 3;
+    const prev = sleepNights[1];
+    if (prev && prev.sleep_score != null && prev.sleep_score < 55 && s < 55 && daysSinceDate(prev.date) <= 4) d -= 4;
+    if (d) { score += d; factors.push({ label: `sonno ${s}/100`, delta: d }); }
+  }
+
+  const rhr = fitness && fitness.resting_hr;
+  if (rhr && rhr.length >= 6) {
+    const latest = rhr[rhr.length - 1];
+    const baseline = median(rhr.slice(0, -1).slice(-7).map(x => x.value));
+    const diff = latest.value - baseline;
+    const d = diff >= 10 ? -8 : (diff >= 6 ? -4 : (diff <= -3 ? 2 : 0));
+    if (d) { score += d; factors.push({ label: `FC a riposo ${latest.value} (media ${Math.round(baseline)})`, delta: d }); }
+  }
+
+  if (hardRunDaysAgo === 1) { score -= 6; factors.push({ label: 'corsa di qualità ieri', delta: -6 }); }
+  else if (hardRunDaysAgo === 2) { score -= 2; factors.push({ label: 'corsa di qualità 2 giorni fa', delta: -2 }); }
+
+  const cat = fitness && fitness.training_status_category;
+  if (cat === 'OVERREACHING' || cat === 'STRAINED') {
+    if (score > 35) { factors.push({ label: `stato "${TRAINING_STATUS_LABELS_IT[cat]}"`, delta: 35 - score }); score = 35; }
+  } else if (cat === 'UNPRODUCTIVE') { score -= 4; factors.push({ label: 'stato "Improduttivo"', delta: -4 }); }
+  else if (cat === 'PEAKING') { score += 3; factors.push({ label: 'picco di forma', delta: 3 }); }
+
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  const band = score >= 72 ? 'alta' : (score >= 55 ? 'media' : (score >= 40 ? 'bassa' : 'molto bassa'));
+  return { score, band, source, factors };
+}
+
+// ── Seduta di corsa: parametri che salgono gradualmente ──
+function lastRunOfClass(activities, cls) {
+  return activities.find(a => RUN_TYPES.includes(a.type) && classifyRun(a) === cls) || null;
+}
+
+function workReps(a, minDist, maxPace, minPace) {
+  const laps = (a.laps || []).filter(l => l.avg_pace_min_per_km != null && l.distance_m >= minDist
+    && l.avg_pace_min_per_km <= maxPace && l.avg_pace_min_per_km >= minPace);
+  if (!laps.length) return null;
+  const dist = laps.reduce((s, l) => s + l.distance_m, 0);
+  return {
+    reps: laps.length,
+    meters: median(laps.map(l => l.distance_m)),
+    pace: laps.reduce((s, l) => s + l.avg_pace_min_per_km * l.distance_m, 0) / dist,
+  };
+}
+
+function roundTo(x, step) { return Math.round(x / step) * step; }
+
+function planVelocita(activities, band, goals) {
+  const last = lastRunOfClass(activities, 'velocita');
+  const w = last ? workReps(last, 150, 5.0, 3.5) : null;
+  let reps = w ? w.reps : 6;
+  const dist = w ? Math.max(200, roundTo(w.meters, 100)) : 400;
+  let pace = w ? w.pace : 4.67;
+  const baseReps = dist <= 250 ? 8 : 6;
+  const cap = dist <= 250 ? 12 : (dist <= 450 ? 8 : 6);
+  let progress = '';
+  const lastText = w ? `${w.reps}×${dist} m a ${paceText(w.pace)}/km` : null;
+
+  if (band === 'alta') {
+    const paceFirst = goals && goals.repeatPace && pace > goals.repeatPace + 0.01 && reps >= baseReps;
+    if (reps < cap && !paceFirst) { reps += 1; progress = `una ripetizione in più rispetto all'ultima volta (${lastText || 'prima seduta'})`; }
+    else { pace -= 3 / 60; if (reps > baseReps && !paceFirst) reps = Math.max(baseReps, reps - 2); progress = `ritmo più veloce di 3″/km rispetto all'ultima volta (${lastText || 'prima seduta'})`; }
+  } else {
+    const r = Math.max(4, Math.ceil(reps * 0.7));
+    progress = `volume ridotto (${r} invece di ${reps} ripetizioni) per i segnali di recupero non pieni: stesso ritmo`;
+    reps = r;
+  }
+  const rest = dist <= 250 ? 80 : 90;
+  const lo = paceText(pace - 3 / 60);
+  const hi = paceText(pace + 3 / 60);
+  const km = 2.7 + reps * (dist / 1000) * 1.7 + 1.5;
+  const min = Math.round(15 + 2 + reps * ((dist / 1000) * pace + rest / 60) + 10);
+  return {
+    label: `Velocità · ${reps}×${dist} m`,
+    html: `Riscaldamento 15' Z1 (FC&nbsp;&lt;123) + 4×80&nbsp;m progressivi. Poi <strong>${reps}×${dist}&nbsp;m</strong> a ${lo}–${hi}/km (FC 162–172, Z4), recupero ${rest}″ jogging Z1. Defaticamento 10' Z1.<br><span class="reco-opt-meta">~${km.toFixed(1).replace('.', ',')} km · ~${min} min</span>`,
+    progress, link: 'corsa.html#c-mar-vel',
+    spec: { sport: 'running', title: `Velocità ${reps}×${dist} m`, steps: [
+      { kind: 'warmup', time_s: 900, hr_zone: 1 },
+      { kind: 'repeat', reps: 4, steps: [{ kind: 'interval', distance_m: 80, note: 'progressivo' }, { kind: 'recovery', time_s: 40 }] },
+      { kind: 'repeat', reps, steps: [{ kind: 'interval', distance_m: dist, pace: [Math.round(pace * 60) - 3, Math.round(pace * 60) + 3] }, { kind: 'recovery', time_s: rest, note: 'jogging Z1' }] },
+      { kind: 'cooldown', time_s: 600, hr_zone: 1 }] },
+  };
+}
+
+function planSoglia(activities, band) {
+  const last = lastRunOfClass(activities, 'soglia');
+  const w = last ? workReps(last, 700, 5.75, 5.0) : null;
+  let reps = w ? w.reps : 3;
+  const dist = w ? Math.max(800, roundTo(w.meters, 200)) : 1000;
+  let pace = w ? w.pace : 5.5;
+  const lastText = w ? `${w.reps}×${dist} m a ${paceText(w.pace)}/km` : null;
+  let progress;
+  if (band === 'alta') {
+    if (reps < 5) { reps += 1; progress = `una ripetizione in più rispetto all'ultima volta (${lastText || 'prima seduta'})`; }
+    else { pace -= 3 / 60; progress = `ritmo più veloce di 3″/km rispetto all'ultima volta (${lastText || 'prima seduta'})`; }
+  } else {
+    const r = Math.max(2, reps - 1);
+    progress = `volume ridotto (${r} invece di ${reps} ripetizioni): stesso ritmo`;
+    reps = r;
+  }
+  const lo = paceText(pace - 4 / 60);
+  const hi = paceText(pace + 4 / 60);
+  const km = 2.2 + reps * (dist / 1000) * 1.2 + 2.5 + 1.3;
+  const min = Math.round(12 + reps * ((dist / 1000) * pace + 2) + 15 + 8);
+  return {
+    label: `Soglia · ${reps}×${dist} m`,
+    html: `Riscaldamento 12' Z1. Poi <strong>${reps}×${dist}&nbsp;m</strong> a ${lo}–${hi}/km (FC 148–162, Z3), recupero 2' jogging Z1, seguiti da 15' Z2 continuo (5:45–6:00/km). Defaticamento 8' Z1.<br><span class="reco-opt-meta">~${km.toFixed(1).replace('.', ',')} km · ~${min} min</span>`,
+    progress, link: 'corsa.html#c-mar-sog',
+    spec: { sport: 'running', title: `Soglia ${reps}×${dist} m`, steps: [
+      { kind: 'warmup', time_s: 720, hr_zone: 1 },
+      { kind: 'repeat', reps, steps: [{ kind: 'interval', distance_m: dist, pace: [Math.round(pace * 60) - 4, Math.round(pace * 60) + 4] }, { kind: 'recovery', time_s: 120, note: 'jogging Z1' }] },
+      { kind: 'interval', time_s: 900, pace: [345, 360], note: 'Z2 continuo' },
+      { kind: 'cooldown', time_s: 480, hr_zone: 1 }] },
+  };
+}
+
+function planLungo(activities, band) {
+  const last = lastRunOfClass(activities, 'lungo');
+  const lastKm = last ? last.distance_km : null;
+  let km = 9;
+  let progress;
+  if (lastKm) {
+    const hrOk = last.avg_hr == null || last.avg_hr <= 150;
+    if (band === 'alta' && hrOk) { km = Math.min(14, Math.max(8, Math.round((lastKm + 1) * 2) / 2)); progress = `${km > lastKm ? 'un chilometro in più' : 'stessa distanza'} rispetto all'ultima lunga (${lastKm.toFixed(1).replace('.', ',')} km)`; }
+    else { km = Math.max(8, Math.round(lastKm * 2) / 2); progress = hrOk ? `stessa distanza dell'ultima lunga (${lastKm.toFixed(1).replace('.', ',')} km), senza aumentare` : `l'ultima lunga aveva FC media ${last.avg_hr}: stessa distanza, resta davvero in Z2`; }
+  } else {
+    progress = 'prima lunga del ciclo';
+  }
+  const lo = Math.max(8, km - 1);
+  const min = Math.round(km * 6.9);
+  return {
+    label: `Lunga Z2 · ${String(km).replace('.', ',')} km`,
+    html: `<strong>${String(km).replace('.', ',')}&nbsp;km</strong> in Z2 puro, FC&nbsp;&lt;148, passo 5:45–6:10/km (fino a 6:30 se fa caldo). Se superi 148 cammina 1–2' e riprendi.<br><span class="reco-opt-meta">~${min} min · ~${Math.round(km * 70)} kcal</span>`,
+    progress, link: 'corsa.html#c-sab-z2',
+    spec: { sport: 'running', title: `Lunga Z2 ${String(km).replace('.', ',')} km`, steps: [{ kind: 'interval', distance_m: Math.round(km * 1000), pace: [345, 375], note: 'Z2, FC sotto 148' }] },
+  };
+}
+
+// ── Tendenze e obiettivi ──
+function monthsLabel(days) {
+  return days >= 56 ? `${Math.round(days / 7)} settimane` : `${days} giorni`;
+}
+
+function computeTrends(activities, fitness, goals) {
+  const lines = [];
+  const f1 = x => x.toFixed(1).replace('.', ',');
+  const v = vo2Trend(fitness);
+  if (v) {
+    let txt = `VO2max ${f1(v.last.value)}`;
+    if (v.daysRecent >= 14) txt += `: ${v.deltaRecent >= 0 ? '+' : ''}${f1(v.deltaRecent)} in ${monthsLabel(v.daysRecent)} (${f1(v.start.value)} → ${f1(v.last.value)})`;
+    if (v.peak.value - v.last.value >= 1) txt += `, ${f1(v.peak.value - v.last.value)} sotto il tuo massimo di ${f1(v.peak.value)} (${actDateLabel(v.peak.date)})`;
+    lines.push(txt);
+  }
+  const rp = fitness && fitness.race_predictions;
+  const rph = fitness && fitness.race_predictions_history;
+  if (rp && rp.time_10k_s) {
+    let txt = `10 km previsti da Garmin ${fmtClock(rp.time_10k_s)}`;
+    if (rph && rph.length >= 2) {
+      const base = rph[0];
+      const diff = rp.time_10k_s - base.time_10k_s;
+      txt += ` (${diff <= 0 ? '' : '+'}${Math.round(diff)}″ da ${actDateLabel(base.date)})`;
+    }
+    lines.push(txt);
+  }
+  const reps = activities.filter(a => RUN_TYPES.includes(a.type) && classifyRun(a) === 'velocita')
+    .map(a => ({ date: a.date, w: workReps(a, 150, 5.0, 3.5) })).filter(x => x.w && x.w.reps >= 3);
+  if (reps.length >= 2) {
+    const newest = reps[0], oldest = reps[reps.length - 1];
+    lines.push(`ripetute ${paceText(oldest.w.pace)} → ${paceText(newest.w.pace)}/km (${actDateLabel(oldest.date)} → ${actDateLabel(newest.date)})`);
+  }
+
+  const goalLines = [];
+  if (goals) {
+    const src = k => (goals.sources && goals.sources[k] ? ` · ${goals.sources[k]}` : '');
+    const pct = (a, b) => `${(100 * (a - b) / a).toFixed(1).replace('.', ',')}%`;
+    if (goals.race10k && rp && rp.time_10k_s) goalLines.push(`10 km in ${fmtClock(goals.race10k)}${src('race10k')}: oggi ${fmtClock(rp.time_10k_s)}, mancano ${fmtClock(Math.max(0, rp.time_10k_s - goals.race10k))} (${pct(rp.time_10k_s, goals.race10k)})`);
+    if (goals.race5k && rp && rp.time_5k_s) goalLines.push(`5 km in ${fmtClock(goals.race5k)}${src('race5k')}: oggi ${fmtClock(rp.time_5k_s)}, mancano ${fmtClock(Math.max(0, rp.time_5k_s - goals.race5k))}`);
+    if (goals.repeatPace && reps.length) goalLines.push(`ripetute a ${paceText(goals.repeatPace)}/km${src('repeatPace')}: ultime ${paceText(reps[0].w.pace)}/km`);
+    if (goals.vo2max && fitness && fitness.vo2max_running) goalLines.push(`VO2max ${f1(goals.vo2max)}${src('vo2max')}: mancano ${f1(Math.max(0, goals.vo2max - fitness.vo2max_running))}`);
+    if (goals.deadline) goalLines.push(`scadenza: ${actDateLabel(goals.deadline)}`);
+  }
+  return { lines, goalLines };
+}
+
+function swimProgressNote(activities, band) {
+  const swims = activities.filter(a => SWIM_TYPES.includes(a.type) && (a.distance_km || 0) >= 0.8);
+  if (!swims.length) return '';
+  const last = swims[0];
+  const st = swimLapStats(last);
+  const meters = Math.round((last.distance_km || 0) * 1000);
+  if (!st) return `Ultima nuotata: ${meters} m.`;
+  const next = band === 'alta' ? Math.min(3000, Math.round((meters + 100) / 50) * 50) : meters;
+  return `Ultima nuotata: ${meters} m con ritmo mediano ${fmtSwimPace100(st.median)}. ${band === 'alta' ? `Oggi punta a ~${next} m, mantenendo o migliorando di 1″ il ritmo sulle ripetute.` : 'Oggi mantieni volume e ritmo: nessun aumento.'}`;
+}
+
+function computeRecommendation(activities, fitness, sleepNights, goals) {
   const recentRun = mostRecentOfType(activities, RUN_TYPES);
   const recentRecovery = mostRecentOfType(activities, RECOVERY_TYPES);
   const daysSinceRun = recentRun ? daysSinceDate(recentRun.date) : Infinity;
   const daysSinceRecovery = recentRecovery ? daysSinceDate(recentRecovery.date) : Infinity;
-  const lastRunWasHard = !!(recentRun && classifyRun(recentRun) !== 'facile');
+  const lastRunClass = recentRun ? classifyRun(recentRun) : null;
+  const lastRunWasHard = !!(recentRun && lastRunClass !== 'facile');
+  const hardRunDaysAgo = lastRunWasHard ? daysSinceRun : null;
 
-  const lastNight = (sleepNights || [])[0];
-  const poorSleep = !!(lastNight && lastNight.sleep_score != null && lastNight.sleep_score < 55);
-  const fatigueFlag = !!(fitness && FATIGUE_CATEGORIES.includes(fitness.training_status_category));
-  const highLoad = !!(fitness && fitness.acwr_ratio != null && fitness.acwr_ratio > 1.3);
+  const readiness = computeReadiness(fitness, sleepNights, hardRunDaysAgo);
+  const band = readiness.band;
+  const recoveryMode = band === 'molto bassa';
+  const lowMode = band === 'bassa';
   const justRanHard = lastRunWasHard && daysSinceRun <= 1;
-  const recoveryMode = fatigueFlag || highLoad || poorSleep || justRanHard;
 
-  const reasons = [];
-  if (fatigueFlag) reasons.push(`stato allenamento Garmin "${TRAINING_STATUS_LABELS_IT[fitness.training_status_category] || fitness.training_status_category}"`);
-  if (highLoad) reasons.push(`carico acuto/cronico elevato (${fitness.acwr_ratio.toFixed(2)})`);
-  if (poorSleep) reasons.push(`sonno scarso stanotte (${lastNight.sleep_score}/100)`);
-  if (justRanHard) reasons.push(`hai corso con qualità ${daysSinceRun === 0 ? 'oggi' : 'ieri'}`);
+  const runLayoff = daysSinceRun >= LAYOFF_DAYS;
+  const swimLayoff = daysSinceRecovery >= LAYOFF_DAYS;
 
   let preferred;
   let rationale;
   if (recoveryMode) {
     preferred = 'nuoto';
-    rationale = `Meglio non correre oggi: ${reasons.join('; ')}.`;
+    rationale = 'Prontezza molto bassa: oggi niente corsa, solo scarico.';
+  } else if (justRanHard && band !== 'alta') {
+    preferred = 'nuoto';
+    rationale = `Hai corso con qualità ${daysSinceRun === 0 ? 'oggi' : 'ieri'}: dopo uno sforzo duro meglio alternare con acqua o pesi.`;
   } else if (daysSinceRun !== daysSinceRecovery) {
     preferred = daysSinceRun > daysSinceRecovery ? 'corsa' : 'nuoto';
     rationale = preferred === 'corsa'
@@ -1338,53 +1699,57 @@ function computeRecommendation(activities, fitness, sleepNights) {
     rationale = 'La frequenza di corsa e nuoto/palestra delle ultime settimane è equilibrata: via libera a entrambe, scegli in base a come ti senti.';
   }
 
-  // Oltre una settimana buona senza una data attività, la forma di quel tipo
-  // di uscita è calata: non ha senso ripartire dalla sessione più esigente
-  // solo perché "è quella che manca da più tempo". Questo vale a prescindere
-  // dal resto della logica sotto (velocità/soglia/lungo, tecnica/sprint).
-  const runLayoff = daysSinceRun >= LAYOFF_DAYS;
-  const swimLayoff = daysSinceRecovery >= LAYOFF_DAYS;
-
-  // Corsa: se serve recupero o si rientra da una pausa lunga è sempre facile;
-  // altrimenti si copre prima il vuoto più vecchio (lungo assente da troppo)
-  // poi si alterna velocità/soglia.
   const runGaps = daysSinceByClass(activities, RUN_TYPES, classifyRun);
+  const v2 = vo2Trend(fitness);
+  const vo2Push = !!(v2 && (v2.peak.value - v2.last.value >= 2 || (v2.daysRecent >= 28 && v2.deltaRecent <= 0.3)));
+  const focusSpeed = !!(goals && (goals.repeatPace || goals.vo2max)) || vo2Push;
   let runChoice;
-  if (recoveryMode || runLayoff) {
-    runChoice = 'facile';
-  } else if ((runGaps.lungo ?? Infinity) >= 6) {
-    runChoice = 'lungo';
-  } else {
-    runChoice = (runGaps.velocita ?? Infinity) > (runGaps.soglia ?? Infinity) ? 'velocita' : 'soglia';
-  }
-  if (fitness && fitness.training_status_category === 'DETRAINING' && runChoice === 'velocita') {
-    runChoice = 'soglia'; // ripresa più graduale dopo un calo di forma rilevato da Garmin
-  }
+  if (recoveryMode || runLayoff) runChoice = 'facile';
+  else if (lowMode || (justRanHard && band !== 'alta')) runChoice = 'base';
+  else if ((runGaps.lungo ?? Infinity) >= 6) runChoice = 'lungo';
+  else if (vo2Push && band === 'alta' && (runGaps.velocita ?? Infinity) >= 3) runChoice = 'velocita';
+  else if ((runGaps.velocita ?? Infinity) === (runGaps.soglia ?? Infinity)) runChoice = focusSpeed ? 'velocita' : 'soglia';
+  else runChoice = (runGaps.velocita ?? Infinity) > (runGaps.soglia ?? Infinity) ? 'velocita' : 'soglia';
+  if (fitness && fitness.training_status_category === 'DETRAINING' && runChoice === 'velocita') runChoice = 'soglia';
+
+  let run;
+  if (runChoice === 'velocita') run = planVelocita(activities, band, goals);
+  else if (runChoice === 'soglia') run = planSoglia(activities, band);
+  else if (runChoice === 'lungo') run = planLungo(activities, band);
+  else if (runChoice === 'base') run = {
+    label: 'Corsa aerobica Z2',
+    html: `<strong>35–45 min</strong> in Z2, FC&nbsp;&lt;148, passo 5:45–6:10/km, senza ritmo né ripetute: oggi si costruisce base senza accumulare fatica.`,
+    link: 'corsa.html#c-sab-z2',
+    spec: { sport: 'running', title: 'Corsa aerobica Z2', steps: [{ kind: 'interval', time_s: 2400, pace: [345, 375], note: 'Z2, FC sotto 148' }] },
+  };
+  else run = RUN_SESSIONS.facile;
 
   const swimGaps = daysSinceByClass(activities, SWIM_TYPES, classifySwim);
-  const swimChoice = (recoveryMode || swimLayoff)
-    ? (swimLayoff && !recoveryMode ? 'tecnica' : 'leggero')
+  const swimChoice = (recoveryMode || lowMode || swimLayoff)
+    ? (swimLayoff && !recoveryMode && !lowMode ? 'tecnica' : 'leggero')
     : ((swimGaps.velocita ?? Infinity) > (swimGaps.tecnica ?? Infinity) ? 'velocita' : 'tecnica');
+  const swim = swimChoice === 'velocita' ? pickVelocitaVariant() : SWIM_SESSIONS[swimChoice];
 
   const runNote = runLayoff
     ? `Rientro dopo una pausa di ${fmtDays(daysSinceRun)}: oggi si riparte facile, non con lunga o qualità.`
-    : '';
+    : ((run.progress ? `Progressione: ${run.progress}.` : '') + (runChoice === 'velocita' && vo2Push ? ' Il VO2max è sotto il tuo massimo: le ripetute sono lo stimolo che lo fa salire.' : '')).trim();
   const swimNote = swimLayoff && !recoveryMode
     ? `Rientro dopo una pausa di ${fmtDays(daysSinceRecovery)}: oggi tecnica, non sprint.`
-    : (recoveryMode ? '' : GYM_NOTE);
+    : ((recoveryMode || lowMode) ? '' : [swimProgressNote(activities, band), GYM_NOTE].filter(Boolean).join(' '));
 
-  return {
-    preferred, rationale, recoveryMode,
-    run: RUN_SESSIONS[runChoice],
-    swim: swimChoice === 'velocita' ? pickVelocitaVariant() : SWIM_SESSIONS[swimChoice],
-    runNote, swimNote,
-  };
+  const trends = computeTrends(activities, fitness, goals);
+  return { preferred, rationale, recoveryMode, readiness, run, swim, runNote, swimNote, trends };
 }
 
 function renderRecommendation(model) {
   const box = document.getElementById('reco-box');
   const prefIcon = model.preferred === 'corsa' ? '🏃' : '🏊';
   const prefLabel = model.preferred === 'corsa' ? 'Corsa' : 'Nuoto / Palestra';
+  const r = model.readiness;
+  const parts = r.factors.map(f => f.value != null ? `${f.label} ${f.value}` : `${f.label} ${f.delta > 0 ? '+' : '−'}${Math.abs(f.delta)}`).join(' · ');
+  const bandText = { alta: 'alta: seduta di qualità con progressione', media: 'media: qualità a volume ridotto', bassa: 'bassa: lavoro aerobico, niente ripetute', 'molto bassa': 'molto bassa: solo scarico' }[r.band];
+  const trendLines = model.trends.lines.length ? `<div class="reco-sig"><b>Andamento</b> ${model.trends.lines.join(' · ')}</div>` : '';
+  const goalLines = model.trends.goalLines.length ? `<div class="reco-sig"><b>Obiettivi</b> ${model.trends.goalLines.join(' · ')}</div>` : '';
   box.innerHTML = `
     <div class="reco-head">
       <div class="reco-icon">${prefIcon}</div>
@@ -1393,20 +1758,69 @@ function renderRecommendation(model) {
         <div class="reco-text">${model.rationale}</div>
       </div>
     </div>
+    <div class="reco-signals">
+      <div class="reco-sig"><b>Prontezza ${r.score}/100</b> (${bandText})<div class="reco-sig-detail">${parts}</div></div>
+      ${trendLines}${goalLines}
+    </div>
     <div class="reco-options">
       <div class="reco-opt${model.preferred === 'corsa' ? ' reco-opt-pref' : ''}">
         <div class="reco-opt-hdr">🏃 Se opti per la corsa <span class="reco-opt-tag">${model.run.label}</span></div>
         <div class="reco-opt-body">${model.run.html}</div>
         ${model.runNote ? `<div class="reco-opt-note">${model.runNote}</div>` : ''}
         <a class="reco-link" href="${model.run.link}">Dettaglio scheda →</a>
+        <div class="reco-send" data-sport="run"></div>
       </div>
       <div class="reco-opt${model.preferred === 'nuoto' ? ' reco-opt-pref' : ''}">
         <div class="reco-opt-hdr">🏊 Se opti per nuoto/palestra <span class="reco-opt-tag">${model.swim.label}</span></div>
         <div class="reco-opt-body">${model.swim.html}</div>
         ${model.swimNote ? `<div class="reco-opt-note">${model.swimNote}</div>` : ''}
         <a class="reco-link" href="${model.swim.link}">Dettaglio scheda →</a>
+        <div class="reco-send" data-sport="swim"></div>
       </div>
     </div>`;
+}
+
+// Pulsante "Invia all'orologio" sotto ogni seduta consigliata: crea l'allenamento su Garmin Connect e lo
+// mette in calendario (poi arriva sull'orologio alla sincronizzazione). Solo per il titolare dell'account Garmin.
+function isoLocal(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+async function attachSendButtons(model) {
+  try {
+    const res = await fetch('/coach-api.php?action=mine', { cache: 'no-store', credentials: 'same-origin' });
+    if (!res.ok) return;
+    const info = await res.json();
+    if (!info.can_send) return;
+    for (const [key, plan] of [['run', model.run], ['swim', model.swim]]) {
+      const slot = document.querySelector(`.reco-send[data-sport="${key}"]`);
+      if (!slot || !plan.spec) continue;
+      slot.innerHTML = '<input type="date" class="reco-date" title="Giorno in calendario"> <button type="button" class="cw-btn">Invia all\'orologio</button> <span class="reco-send-msg"></span>';
+      const dateInput = slot.querySelector('.reco-date');
+      const btn = slot.querySelector('button');
+      const msg = slot.querySelector('.reco-send-msg');
+      dateInput.value = isoLocal(new Date());
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        msg.textContent = 'Invio a Garmin in corso…';
+        try {
+          const r = await fetch('/coach-api.php?action=send_plan', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF': info.csrf },
+            body: JSON.stringify({ plan: plan.spec, date: dateInput.value || null }),
+          });
+          const out = await r.json();
+          if (!r.ok) throw new Error(out.error || 'Errore ' + r.status);
+          msg.textContent = '✅ Inviato' + (out.scheduled ? ' e messo in calendario' : '') + ': sull\'orologio dopo la sincronizzazione.';
+        } catch (e) {
+          msg.textContent = e.message;
+          btn.disabled = false;
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('Pulsante di invio non disponibile:', err);
+  }
 }
 
 async function loadHeroFitness() {
@@ -1428,7 +1842,10 @@ async function loadRecommendation() {
       fetchJSONSafe('/data/garmin-fitness.json', null),
       fetchJSONSafe('/data/withings-sleep.json', []),
     ]);
-    renderRecommendation(computeRecommendation(activities, fitness, sleep));
+    const goals = await loadGoals(fitness);
+    const model = computeRecommendation(activities, fitness, sleep, goals);
+    renderRecommendation(model);
+    attachSendButtons(model);
   } catch (err) {
     console.warn('Consiglio del giorno non disponibile:', err);
     document.getElementById('reco-box').classList.add('hidden');

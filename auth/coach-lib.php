@@ -181,12 +181,8 @@ function coach_call_claude(string $text): array {
     throw new RuntimeException('Risposta del servizio di analisi non utilizzabile.');
 }
 
-// Crea (e mette in calendario) l'allenamento su Garmin Connect con la sessione di sync.py.
-function coach_send_to_garmin(array $w): array {
-    $spec = [
-        'name' => 'Coach · ' . $w['parsed']['title'], 'date' => $w['date'] ?? null,
-        'pool_length_m' => $w['parsed']['pool_length_m'] ?? 25, 'blocks' => $w['parsed']['blocks'],
-    ];
+// Esegue send_workout.py con la specifica data e restituisce l'esito (id Garmin, se messo in calendario).
+function coach_run_python(array $spec): array {
     $tmp = tempnam(sys_get_temp_dir(), 'cw');
     file_put_contents($tmp, json_encode($spec, JSON_UNESCAPED_UNICODE));
     $cmd = 'PYTHONPATH=' . COACH_PYTHONPATH . ' ' . COACH_PYTHON . ' -u ' . COACH_GARMIN_SCRIPT . ' ' . escapeshellarg($tmp) . ' 2>&1';
@@ -199,4 +195,90 @@ function coach_send_to_garmin(array $w): array {
         throw new RuntimeException('Invio a Garmin non riuscito: ' . mb_substr($last ?: 'nessuna risposta', 0, 200));
     }
     return $res;
+}
+
+// Crea (e mette in calendario) un programma della libreria su Garmin Connect.
+function coach_send_to_garmin(array $w): array {
+    return coach_run_python([
+        'name' => 'Coach · ' . $w['parsed']['title'], 'date' => $w['date'] ?? null,
+        'pool_length_m' => $w['parsed']['pool_length_m'] ?? 25, 'blocks' => $w['parsed']['blocks'],
+    ]);
+}
+
+const RUN_STEP_KINDS = ['warmup', 'interval', 'recovery', 'cooldown'];
+
+// Passi di corsa: valori ammessi e limiti numerici (un gruppo di ripetizioni non ne contiene altri).
+function coach_validate_run_steps($steps, bool $nested = false): array {
+    if (!is_array($steps) || !$steps || count($steps) > 40) throw new InvalidArgumentException('Passi di corsa non validi.');
+    $out = [];
+    foreach ($steps as $st) {
+        if (!is_array($st)) throw new InvalidArgumentException('Passo di corsa non valido.');
+        $kind = $st['kind'] ?? '';
+        if ($kind === 'repeat') {
+            if ($nested) throw new InvalidArgumentException('Ripetizioni annidate non ammesse.');
+            $reps = (int)($st['reps'] ?? 0);
+            if ($reps < 1 || $reps > 50) throw new InvalidArgumentException('Numero di ripetizioni non valido.');
+            $out[] = ['kind' => 'repeat', 'reps' => $reps, 'skip_last_rest' => !empty($st['skip_last_rest']),
+                      'steps' => coach_validate_run_steps($st['steps'] ?? null, true)];
+            continue;
+        }
+        if (!in_array($kind, RUN_STEP_KINDS, true)) throw new InvalidArgumentException('Tipo di passo non valido.');
+        $row = ['kind' => $kind];
+        if (!empty($st['distance_m'])) {
+            $d = (int)$st['distance_m'];
+            if ($d < 20 || $d > 50000) throw new InvalidArgumentException('Distanza di un passo non valida.');
+            $row['distance_m'] = $d;
+        } elseif (!empty($st['time_s'])) {
+            $t = (int)$st['time_s'];
+            if ($t < 10 || $t > 14400) throw new InvalidArgumentException('Durata di un passo non valida.');
+            $row['time_s'] = $t;
+        } else {
+            throw new InvalidArgumentException('Ogni passo ha bisogno di una distanza o di una durata.');
+        }
+        if (!empty($st['pace'])) {
+            $p = array_values((array)$st['pace']);
+            if (count($p) !== 2 || (int)$p[0] < 150 || (int)$p[1] > 900 || (int)$p[0] > (int)$p[1]) throw new InvalidArgumentException('Ritmo non valido.');
+            $row['pace'] = [(int)$p[0], (int)$p[1]];
+        } elseif (!empty($st['hr_zone'])) {
+            $z = (int)$st['hr_zone'];
+            if ($z < 1 || $z > 5) throw new InvalidArgumentException('Zona cardiaca non valida.');
+            $row['hr_zone'] = $z;
+        }
+        $note = coach_clean_text($st['note'] ?? '', 120);
+        if ($note !== '') $row['note'] = $note;
+        $out[] = $row;
+    }
+    return $out;
+}
+
+function coach_run_totals(array $steps, int $times = 1): array {
+    $dist = 0; $secs = 0;
+    foreach ($steps as $st) {
+        if ($st['kind'] === 'repeat') {
+            [$d, $s] = coach_run_totals($st['steps'], $times * $st['reps']);
+            $dist += $d; $secs += $s;
+        } else {
+            $dist += ($st['distance_m'] ?? 0) * $times;
+            $secs += ($st['time_s'] ?? 0) * $times;
+        }
+    }
+    return [$dist, $secs];
+}
+
+// Invia a Garmin il piano suggerito dalla home (corsa o nuoto), dopo averlo validato.
+function coach_send_plan(array $plan, ?string $date): array {
+    $sport = $plan['sport'] ?? '';
+    $title = coach_clean_text($plan['title'] ?? '', 60) ?: 'Allenamento';
+    $label = 'Consiglio · ' . $title . ($date ? ' (' . substr($date, 8, 2) . '/' . substr($date, 5, 2) . ')' : '');
+    if ($sport === 'running') {
+        $steps = coach_validate_run_steps($plan['steps'] ?? null);
+        [$dist, $secs] = coach_run_totals($steps);
+        if ($dist > 60000 || $secs > 6 * 3600) throw new InvalidArgumentException('Allenamento troppo lungo per essere plausibile.');
+        return coach_run_python(['sport' => 'running', 'name' => $label, 'date' => $date, 'steps' => $steps]);
+    }
+    if ($sport === 'swimming') {
+        $parsed = coach_validate_parsed(['title' => $title, 'pool_length_m' => 25, 'blocks' => $plan['blocks'] ?? null]);
+        return coach_run_python(['name' => $label, 'date' => $date, 'pool_length_m' => 25, 'blocks' => $parsed['blocks']]);
+    }
+    throw new InvalidArgumentException('Sport non riconosciuto.');
 }
