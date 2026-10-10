@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lodestar · il tuo coach AI per allenamento e nutrizione</title>
+<meta name="theme-color" content="#12263f">
+<link rel="manifest" href="/lodestar/manifest.json">
+<link rel="icon" href="/lodestar/icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/lodestar/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/lodestar/lodestar.css">
+</head>
+<body data-page="home">
+<main>
+
+<div class="hero">
+  <h1>✦ Lodestar</h1>
+  <p>Il tuo coach AI per allenamento e nutrizione · <span id="ld-date"></span></p>
+  <div class="hero-stats" id="ld-stats"></div>
+</div>
+
+<!-- 1 · SALUTE E FORMA -->
+<section>
+  <div class="sec">Salute e forma · <span id="ld-refresh" style="text-transform:none;letter-spacing:normal">Garmin · Withings</span></div>
+  <div class="ld-card"><div class="ld-ready" id="ld-ready"><span class="ld-muted">Caricamento dei dati…</span></div></div>
+</section>
+
+<!-- 2 · ATTIVITA' CONSIGLIATA -->
+<section>
+  <div class="sec">Allenamento consigliato oggi · <span id="ld-x516" style="text-transform:none;letter-spacing:normal"><a class="reco-link" href="/libreria.php">libreria coach</a></span></div>
+  <div class="reco-box" id="reco-box"><div class="reco-text">Analisi in corso…</div></div>
+</section>
+
+<!-- 3 · NUTRIZIONE -->
+<section>
+  <div class="sec">Nutrizione · <span id="ld-x783" style="text-transform:none;letter-spacing:normal">pranzo e cena</span></div>
+  <div class="ld-card" id="ld-meals">
+    <div class="reco-title">🥗 In arrivo: pasti consigliati</div>
+    <div class="reco-text">Qui troverai un pranzo e una cena bilanciati, scelti in base a peso, allenamenti e a cosa hai mangiato prima — con un tasto per cambiarli (carne, pesce, pollo, legumi…). Nel frattempo: <a class="reco-link" href="/nutrizione.html">linee guida nutrizionali</a>.</div>
+  </div>
+</section>
+
+<!-- ULTIME ATTIVITA' -->
+<section>
+  <div class="sec">Ultimi allenamenti · da Garmin Connect</div>
+  <div class="ld-card" style="padding:0;overflow:auto">
+    <table class="ld-table"><thead><tr><th>Data</th><th>Attività</th><th>Distanza</th><th>Durata</th><th>FC med/max</th><th>kcal</th></tr></thead>
+    <tbody id="ld-acts"><tr><td colspan="6" class="ld-muted">Caricamento…</td></tr></tbody></table>
+  </div>
+</section>
+
+</main>
+<script src="/lodestar/app.js"></script>
+<script src="/lodestar/engine.js"></script>
+<script src="/lodestar/home.js"></script>
+</body>
+</html>
