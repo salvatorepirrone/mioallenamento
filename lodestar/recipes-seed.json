@@ -1,0 +1,1350 @@
+[
+ {
+  "id": "s01",
+  "name": "Pollo al limone con riso e zucchine",
+  "category": "pollo",
+  "meal": "entrambi",
+  "time_min": 25,
+  "kcal": 620,
+  "protein": 50,
+  "carbs": 66,
+  "fat": 16,
+  "ingredients": [
+   {
+    "name": "petto di pollo",
+    "grams": 180
+   },
+   {
+    "name": "riso",
+    "grams": 80
+   },
+   {
+    "name": "zucchine",
+    "grams": 200
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Cuoci il riso. Rosola il pollo a fettine con poco olio, aggiungi succo di limone e le zucchine a rondelle; cuoci 8-10 minuti.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s02",
+  "name": "Petto di pollo alla piastra con patate e insalata",
+  "category": "pollo",
+  "meal": "entrambi",
+  "time_min": 30,
+  "kcal": 555,
+  "protein": 49,
+  "carbs": 53,
+  "fat": 15,
+  "ingredients": [
+   {
+    "name": "petto di pollo",
+    "grams": 180
+   },
+   {
+    "name": "patate",
+    "grams": 300
+   },
+   {
+    "name": "insalata mista",
+    "grams": 100
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Patate a cubetti al forno a 200 °C per 25 minuti. Pollo alla piastra 5 minuti per lato. Condisci l'insalata con olio e limone.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s03",
+  "name": "Bowl di pollo, quinoa e avocado",
+  "category": "pollo",
+  "meal": "pranzo",
+  "time_min": 25,
+  "kcal": 673,
+  "protein": 51,
+  "carbs": 58,
+  "fat": 25,
+  "ingredients": [
+   {
+    "name": "petto di pollo",
+    "grams": 160
+   },
+   {
+    "name": "quinoa",
+    "grams": 80
+   },
+   {
+    "name": "avocado",
+    "grams": 60
+   },
+   {
+    "name": "pomodorini",
+    "grams": 120
+   },
+   {
+    "name": "insalata mista",
+    "grams": 60
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 8
+   }
+  ],
+  "steps": "Lessa la quinoa. Griglia il pollo a strisce. Componi la bowl con avocado, pomodorini e insalata.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s04",
+  "name": "Straccetti di pollo con peperoni e couscous",
+  "category": "pollo",
+  "meal": "entrambi",
+  "time_min": 20,
+  "kcal": 639,
+  "protein": 52,
+  "carbs": 68,
+  "fat": 17,
+  "ingredients": [
+   {
+    "name": "petto di pollo",
+    "grams": 170
+   },
+   {
+    "name": "peperoni",
+    "grams": 200
+   },
+   {
+    "name": "couscous",
+    "grams": 80
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Idrata il couscous con acqua calda. Salta il pollo a straccetti con i peperoni a listarelle 10 minuti.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s05",
+  "name": "Pollo al curry leggero con riso e spinaci",
+  "category": "pollo",
+  "meal": "cena",
+  "time_min": 30,
+  "kcal": 636,
+  "protein": 57,
+  "carbs": 67,
+  "fat": 14,
+  "ingredients": [
+   {
+    "name": "petto di pollo",
+    "grams": 170
+   },
+   {
+    "name": "riso",
+    "grams": 80
+   },
+   {
+    "name": "spinaci",
+    "grams": 200
+   },
+   {
+    "name": "yogurt greco 0%",
+    "grams": 60
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 10
+   }
+  ],
+  "steps": "Rosola il pollo a cubetti con curry, aggiungi yogurt e spinaci, cuoci 10 minuti. Servi sul riso.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s06",
+  "name": "Tacchino al forno con patate dolci e fagiolini",
+  "category": "pollo",
+  "meal": "cena",
+  "time_min": 35,
+  "kcal": 582,
+  "protein": 53,
+  "carbs": 60,
+  "fat": 15,
+  "ingredients": [
+   {
+    "name": "fesa di tacchino",
+    "grams": 190
+   },
+   {
+    "name": "patate dolci",
+    "grams": 250
+   },
+   {
+    "name": "fagiolini",
+    "grams": 200
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Patate dolci a spicchi in forno a 200 °C per 25 minuti. Tacchino in padella con rosmarino. Fagiolini lessati.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s07",
+  "name": "Insalata di pollo, ceci e pomodorini",
+  "category": "pollo",
+  "meal": "pranzo",
+  "time_min": 15,
+  "kcal": 647,
+  "protein": 53,
+  "carbs": 59,
+  "fat": 20,
+  "ingredients": [
+   {
+    "name": "petto di pollo",
+    "grams": 150
+   },
+   {
+    "name": "ceci cotti",
+    "grams": 150
+   },
+   {
+    "name": "pomodorini",
+    "grams": 150
+   },
+   {
+    "name": "insalata mista",
+    "grams": 80
+   },
+   {
+    "name": "pane integrale",
+    "grams": 60
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Griglia il pollo e taglialo a pezzi; unisci ceci, pomodorini e insalata. Pane integrale a parte.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s08",
+  "name": "Hamburger di manzo magro con patate al forno",
+  "category": "carne",
+  "meal": "cena",
+  "time_min": 30,
+  "kcal": 591,
+  "protein": 45,
+  "carbs": 53,
+  "fat": 22,
+  "ingredients": [
+   {
+    "name": "manzo magro macinato",
+    "grams": 180
+   },
+   {
+    "name": "patate",
+    "grams": 300
+   },
+   {
+    "name": "insalata mista",
+    "grams": 100
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Forma l'hamburger e cuocilo alla piastra. Patate a spicchi in forno a 200 °C per 25 minuti. Insalata a parte.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s09",
+  "name": "Spaghetti al ragù magro",
+  "category": "carne",
+  "meal": "pranzo",
+  "time_min": 40,
+  "kcal": 636,
+  "protein": 39,
+  "carbs": 79,
+  "fat": 18,
+  "ingredients": [
+   {
+    "name": "pasta",
+    "grams": 90
+   },
+   {
+    "name": "manzo magro macinato",
+    "grams": 120
+   },
+   {
+    "name": "passata di pomodoro",
+    "grams": 150
+   },
+   {
+    "name": "cipolla",
+    "grams": 40
+   },
+   {
+    "name": "carote",
+    "grams": 40
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 10
+   }
+  ],
+  "steps": "Soffriggi cipolla e carota, aggiungi il macinato e la passata, cuoci 25 minuti. Condisci la pasta.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s10",
+  "name": "Straccetti di manzo con rucola e patate",
+  "category": "carne",
+  "meal": "cena",
+  "time_min": 25,
+  "kcal": 571,
+  "protein": 47,
+  "carbs": 53,
+  "fat": 19,
+  "ingredients": [
+   {
+    "name": "fettine di manzo",
+    "grams": 180
+   },
+   {
+    "name": "rucola",
+    "grams": 60
+   },
+   {
+    "name": "patate",
+    "grams": 280
+   },
+   {
+    "name": "pomodorini",
+    "grams": 80
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Patate al forno. Manzo a straccetti scottato 3 minuti in padella calda; servi su rucola e pomodorini.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s11",
+  "name": "Filetto di maiale con farro e broccoli",
+  "category": "carne",
+  "meal": "pranzo",
+  "time_min": 35,
+  "kcal": 663,
+  "protein": 56,
+  "carbs": 64,
+  "fat": 20,
+  "ingredients": [
+   {
+    "name": "filetto di maiale",
+    "grams": 180
+   },
+   {
+    "name": "farro",
+    "grams": 80
+   },
+   {
+    "name": "broccoli",
+    "grams": 250
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Cuoci il farro. Rosola il filetto a medaglioni 4 minuti per lato. Broccoli al vapore.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s12",
+  "name": "Polpette di vitello al sugo con riso",
+  "category": "carne",
+  "meal": "pranzo",
+  "time_min": 40,
+  "kcal": 665,
+  "protein": 49,
+  "carbs": 70,
+  "fat": 20,
+  "ingredients": [
+   {
+    "name": "vitello macinato",
+    "grams": 170
+   },
+   {
+    "name": "riso",
+    "grams": 80
+   },
+   {
+    "name": "passata di pomodoro",
+    "grams": 150
+   },
+   {
+    "name": "uova",
+    "grams": 30
+   },
+   {
+    "name": "parmigiano",
+    "grams": 10
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 8
+   }
+  ],
+  "steps": "Impasta vitello, uovo e parmigiano; forma le polpette e cuocile nel sugo 20 minuti. Servi con il riso.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s13",
+  "name": "Controfiletto con patate e spinaci",
+  "category": "carne",
+  "meal": "cena",
+  "time_min": 25,
+  "kcal": 622,
+  "protein": 51,
+  "carbs": 50,
+  "fat": 23,
+  "ingredients": [
+   {
+    "name": "controfiletto di manzo",
+    "grams": 180
+   },
+   {
+    "name": "patate",
+    "grams": 280
+   },
+   {
+    "name": "spinaci",
+    "grams": 200
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Patate al forno. Controfiletto in padella 3-4 minuti per lato. Spinaci saltati con aglio.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s14",
+  "name": "Chili di manzo e fagioli con riso",
+  "category": "carne",
+  "meal": "pranzo",
+  "time_min": 40,
+  "kcal": 709,
+  "protein": 46,
+  "carbs": 90,
+  "fat": 16,
+  "ingredients": [
+   {
+    "name": "manzo magro macinato",
+    "grams": 130
+   },
+   {
+    "name": "fagioli cotti",
+    "grams": 150
+   },
+   {
+    "name": "passata di pomodoro",
+    "grams": 150
+   },
+   {
+    "name": "riso",
+    "grams": 70
+   },
+   {
+    "name": "peperoni",
+    "grams": 100
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 8
+   }
+  ],
+  "steps": "Rosola il macinato con peperoni, aggiungi passata, fagioli e spezie; cuoci 25 minuti. Servi con il riso.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s15",
+  "name": "Salmone al forno con patate e broccoli",
+  "category": "pesce",
+  "meal": "cena",
+  "time_min": 30,
+  "kcal": 650,
+  "protein": 42,
+  "carbs": 52,
+  "fat": 29,
+  "ingredients": [
+   {
+    "name": "salmone",
+    "grams": 150
+   },
+   {
+    "name": "patate",
+    "grams": 250
+   },
+   {
+    "name": "broccoli",
+    "grams": 250
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 8
+   }
+  ],
+  "steps": "Salmone e patate a cubetti in forno a 200 °C per 20-25 minuti. Broccoli al vapore.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s16",
+  "name": "Merluzzo al pomodoro con couscous",
+  "category": "pesce",
+  "meal": "cena",
+  "time_min": 25,
+  "kcal": 621,
+  "protein": 52,
+  "carbs": 66,
+  "fat": 16,
+  "ingredients": [
+   {
+    "name": "merluzzo",
+    "grams": 220
+   },
+   {
+    "name": "pomodorini",
+    "grams": 200
+   },
+   {
+    "name": "couscous",
+    "grams": 80
+   },
+   {
+    "name": "olive",
+    "grams": 20
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 10
+   }
+  ],
+  "steps": "Cuoci il merluzzo in padella con pomodorini e olive 10 minuti. Servi con il couscous.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s17",
+  "name": "Pasta al tonno e pomodorini",
+  "category": "pesce",
+  "meal": "pranzo",
+  "time_min": 20,
+  "kcal": 595,
+  "protein": 43,
+  "carbs": 72,
+  "fat": 15,
+  "ingredients": [
+   {
+    "name": "pasta",
+    "grams": 90
+   },
+   {
+    "name": "tonno al naturale",
+    "grams": 120
+   },
+   {
+    "name": "pomodorini",
+    "grams": 200
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Cuoci la pasta. Scalda i pomodorini con olio, unisci il tonno sgocciolato e manteca.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s18",
+  "name": "Orata al cartoccio con patate e zucchine",
+  "category": "pesce",
+  "meal": "cena",
+  "time_min": 35,
+  "kcal": 584,
+  "protein": 56,
+  "carbs": 46,
+  "fat": 19,
+  "ingredients": [
+   {
+    "name": "orata",
+    "grams": 250
+   },
+   {
+    "name": "patate",
+    "grams": 250
+   },
+   {
+    "name": "zucchine",
+    "grams": 200
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Cartoccio con orata, patate a fette e zucchine; forno a 190 °C per 30 minuti.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s19",
+  "name": "Gamberi e zucchine con orzo",
+  "category": "pesce",
+  "meal": "pranzo",
+  "time_min": 25,
+  "kcal": 592,
+  "protein": 47,
+  "carbs": 62,
+  "fat": 16,
+  "ingredients": [
+   {
+    "name": "gamberi",
+    "grams": 200
+   },
+   {
+    "name": "zucchine",
+    "grams": 200
+   },
+   {
+    "name": "orzo",
+    "grams": 80
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Cuoci l'orzo. Salta i gamberi con le zucchine, aglio e prezzemolo 6-7 minuti. Unisci.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s20",
+  "name": "Insalata di tonno, fagioli e cipolla",
+  "category": "pesce",
+  "meal": "pranzo",
+  "time_min": 10,
+  "kcal": 662,
+  "protein": 54,
+  "carbs": 69,
+  "fat": 17,
+  "ingredients": [
+   {
+    "name": "tonno al naturale",
+    "grams": 130
+   },
+   {
+    "name": "fagioli cotti",
+    "grams": 200
+   },
+   {
+    "name": "cipolla",
+    "grams": 40
+   },
+   {
+    "name": "pomodorini",
+    "grams": 100
+   },
+   {
+    "name": "pane integrale",
+    "grams": 70
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Mescola tutti gli ingredienti con olio e limone. Pane integrale a parte.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s21",
+  "name": "Branzino con riso e spinaci",
+  "category": "pesce",
+  "meal": "cena",
+  "time_min": 30,
+  "kcal": 658,
+  "protein": 57,
+  "carbs": 64,
+  "fat": 18,
+  "ingredients": [
+   {
+    "name": "branzino",
+    "grams": 250
+   },
+   {
+    "name": "riso",
+    "grams": 80
+   },
+   {
+    "name": "spinaci",
+    "grams": 200
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 10
+   }
+  ],
+  "steps": "Branzino al forno 20 minuti a 190 °C con limone. Riso lessato e spinaci saltati.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s22",
+  "name": "Insalata di polpo e patate con fagiolini",
+  "category": "pesce",
+  "meal": "pranzo",
+  "time_min": 40,
+  "kcal": 528,
+  "protein": 38,
+  "carbs": 54,
+  "fat": 17,
+  "ingredients": [
+   {
+    "name": "polpo",
+    "grams": 200
+   },
+   {
+    "name": "patate",
+    "grams": 250
+   },
+   {
+    "name": "fagiolini",
+    "grams": 150
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 14
+   }
+  ],
+  "steps": "Lessa polpo, patate e fagiolini; taglia tutto a pezzi e condisci con olio, limone e prezzemolo.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s23",
+  "name": "Pasta e ceci",
+  "category": "legumi",
+  "meal": "pranzo",
+  "time_min": 30,
+  "kcal": 629,
+  "protein": 24,
+  "carbs": 91,
+  "fat": 18,
+  "ingredients": [
+   {
+    "name": "pasta",
+    "grams": 70
+   },
+   {
+    "name": "ceci cotti",
+    "grams": 200
+   },
+   {
+    "name": "passata di pomodoro",
+    "grams": 80
+   },
+   {
+    "name": "cipolla",
+    "grams": 30
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Soffriggi cipolla, aggiungi passata e ceci, cuoci 10 minuti. Cuoci la pasta nel sugo.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s24",
+  "name": "Zuppa di lenticchie e verdure con pane",
+  "category": "legumi",
+  "meal": "cena",
+  "time_min": 35,
+  "kcal": 687,
+  "protein": 34,
+  "carbs": 94,
+  "fat": 17,
+  "ingredients": [
+   {
+    "name": "lenticchie cotte",
+    "grams": 250
+   },
+   {
+    "name": "carote",
+    "grams": 80
+   },
+   {
+    "name": "cipolla",
+    "grams": 40
+   },
+   {
+    "name": "spinaci",
+    "grams": 150
+   },
+   {
+    "name": "pane integrale",
+    "grams": 90
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Soffriggi cipolla e carota, aggiungi lenticchie, spinaci e acqua; cuoci 15 minuti. Pane integrale tostato.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s25",
+  "name": "Bowl di ceci, quinoa e hummus",
+  "category": "legumi",
+  "meal": "pranzo",
+  "time_min": 20,
+  "kcal": 641,
+  "protein": 26,
+  "carbs": 83,
+  "fat": 22,
+  "ingredients": [
+   {
+    "name": "ceci cotti",
+    "grams": 150
+   },
+   {
+    "name": "quinoa",
+    "grams": 70
+   },
+   {
+    "name": "hummus",
+    "grams": 50
+   },
+   {
+    "name": "pomodorini",
+    "grams": 120
+   },
+   {
+    "name": "insalata mista",
+    "grams": 60
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 6
+   }
+  ],
+  "steps": "Lessa la quinoa; componi la bowl con ceci, hummus, pomodorini e insalata.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s26",
+  "name": "Lenticchie al curry con riso e spinaci",
+  "category": "legumi",
+  "meal": "cena",
+  "time_min": 30,
+  "kcal": 690,
+  "protein": 31,
+  "carbs": 103,
+  "fat": 15,
+  "ingredients": [
+   {
+    "name": "lenticchie cotte",
+    "grams": 250
+   },
+   {
+    "name": "riso",
+    "grams": 70
+   },
+   {
+    "name": "spinaci",
+    "grams": 200
+   },
+   {
+    "name": "cipolla",
+    "grams": 40
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Soffriggi cipolla con curry, aggiungi lenticchie e spinaci, cuoci 10 minuti. Servi con il riso.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s27",
+  "name": "Pasta e fagioli leggera",
+  "category": "legumi",
+  "meal": "pranzo",
+  "time_min": 30,
+  "kcal": 611,
+  "protein": 25,
+  "carbs": 91,
+  "fat": 14,
+  "ingredients": [
+   {
+    "name": "pasta",
+    "grams": 70
+   },
+   {
+    "name": "fagioli cotti",
+    "grams": 220
+   },
+   {
+    "name": "passata di pomodoro",
+    "grams": 80
+   },
+   {
+    "name": "carote",
+    "grams": 40
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Cuoci i fagioli con soffritto e passata, frullane metà, aggiungi la pasta e finisci la cottura.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s28",
+  "name": "Tofu saltato con verdure e riso",
+  "category": "legumi",
+  "meal": "cena",
+  "time_min": 25,
+  "kcal": 689,
+  "protein": 37,
+  "carbs": 77,
+  "fat": 25,
+  "ingredients": [
+   {
+    "name": "tofu",
+    "grams": 200
+   },
+   {
+    "name": "riso",
+    "grams": 80
+   },
+   {
+    "name": "broccoli",
+    "grams": 150
+   },
+   {
+    "name": "peperoni",
+    "grams": 100
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 10
+   }
+  ],
+  "steps": "Salta il tofu a cubetti con le verdure e un goccio di salsa di soia. Servi con il riso.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s29",
+  "name": "Polpette di ceci e zucchine con insalata",
+  "category": "legumi",
+  "meal": "cena",
+  "time_min": 35,
+  "kcal": 677,
+  "protein": 32,
+  "carbs": 79,
+  "fat": 25,
+  "ingredients": [
+   {
+    "name": "ceci cotti",
+    "grams": 250
+   },
+   {
+    "name": "zucchine",
+    "grams": 120
+   },
+   {
+    "name": "uova",
+    "grams": 40
+   },
+   {
+    "name": "pane integrale",
+    "grams": 70
+   },
+   {
+    "name": "insalata mista",
+    "grams": 100
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 12
+   }
+  ],
+  "steps": "Schiaccia i ceci, unisci zucchine grattugiate e uovo; forma le polpette e cuoci in forno a 200 °C per 20 minuti.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s30",
+  "name": "Insalata di farro, fagioli e verdure",
+  "category": "legumi",
+  "meal": "pranzo",
+  "time_min": 20,
+  "kcal": 636,
+  "protein": 26,
+  "carbs": 91,
+  "fat": 18,
+  "ingredients": [
+   {
+    "name": "farro",
+    "grams": 80
+   },
+   {
+    "name": "fagioli cotti",
+    "grams": 180
+   },
+   {
+    "name": "pomodorini",
+    "grams": 150
+   },
+   {
+    "name": "peperoni",
+    "grams": 100
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 14
+   }
+  ],
+  "steps": "Cuoci il farro, fallo raffreddare e condiscilo con fagioli, pomodorini, peperoni, olio e limone.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s31",
+  "name": "Frittata di zucchine e ricotta con pane",
+  "category": "uova",
+  "meal": "cena",
+  "time_min": 25,
+  "kcal": 636,
+  "protein": 36,
+  "carbs": 44,
+  "fat": 35,
+  "ingredients": [
+   {
+    "name": "uova",
+    "grams": 150
+   },
+   {
+    "name": "zucchine",
+    "grams": 200
+   },
+   {
+    "name": "ricotta",
+    "grams": 80
+   },
+   {
+    "name": "pane integrale",
+    "grams": 80
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 8
+   }
+  ],
+  "steps": "Sbatti le uova con la ricotta, unisci le zucchine saltate e cuoci in padella o al forno 12 minuti.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s32",
+  "name": "Omelette ai funghi e spinaci con patate",
+  "category": "uova",
+  "meal": "cena",
+  "time_min": 25,
+  "kcal": 553,
+  "protein": 31,
+  "carbs": 46,
+  "fat": 26,
+  "ingredients": [
+   {
+    "name": "uova",
+    "grams": 150
+   },
+   {
+    "name": "funghi",
+    "grams": 150
+   },
+   {
+    "name": "spinaci",
+    "grams": 100
+   },
+   {
+    "name": "patate",
+    "grams": 250
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 10
+   }
+  ],
+  "steps": "Patate al forno. Salta funghi e spinaci, versa le uova e cuoci l'omelette.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s33",
+  "name": "Insalata greca con feta e orzo",
+  "category": "uova",
+  "meal": "pranzo",
+  "time_min": 15,
+  "kcal": 626,
+  "protein": 20,
+  "carbs": 70,
+  "fat": 29,
+  "ingredients": [
+   {
+    "name": "feta",
+    "grams": 70
+   },
+   {
+    "name": "orzo",
+    "grams": 80
+   },
+   {
+    "name": "pomodorini",
+    "grams": 150
+   },
+   {
+    "name": "olive",
+    "grams": 25
+   },
+   {
+    "name": "cipolla",
+    "grams": 30
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 10
+   }
+  ],
+  "steps": "Cuoci l'orzo e raffreddalo. Unisci feta a cubetti, pomodorini, olive e cipolla.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s34",
+  "name": "Pasta con ricotta e spinaci",
+  "category": "uova",
+  "meal": "pranzo",
+  "time_min": 20,
+  "kcal": 550,
+  "protein": 29,
+  "carbs": 70,
+  "fat": 16,
+  "ingredients": [
+   {
+    "name": "pasta",
+    "grams": 90
+   },
+   {
+    "name": "ricotta",
+    "grams": 100
+   },
+   {
+    "name": "spinaci",
+    "grams": 200
+   },
+   {
+    "name": "parmigiano",
+    "grams": 10
+   }
+  ],
+  "steps": "Cuoci la pasta; salta gli spinaci, unisci ricotta e un mestolo di acqua di cottura; manteca.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s35",
+  "name": "Uova strapazzate con avocado e pane",
+  "category": "uova",
+  "meal": "pranzo",
+  "time_min": 10,
+  "kcal": 608,
+  "protein": 30,
+  "carbs": 52,
+  "fat": 30,
+  "ingredients": [
+   {
+    "name": "uova",
+    "grams": 150
+   },
+   {
+    "name": "avocado",
+    "grams": 80
+   },
+   {
+    "name": "pane integrale",
+    "grams": 100
+   },
+   {
+    "name": "pomodorini",
+    "grams": 100
+   }
+  ],
+  "steps": "Strapazza le uova in padella antiaderente. Servi con avocado a fette, pane tostato e pomodorini.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s36",
+  "name": "Insalata di fiocchi di latte, uova e patate",
+  "category": "uova",
+  "meal": "cena",
+  "time_min": 20,
+  "kcal": 610,
+  "protein": 38,
+  "carbs": 56,
+  "fat": 27,
+  "ingredients": [
+   {
+    "name": "fiocchi di latte",
+    "grams": 150
+   },
+   {
+    "name": "uova",
+    "grams": 100
+   },
+   {
+    "name": "patate",
+    "grams": 250
+   },
+   {
+    "name": "fagiolini",
+    "grams": 150
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 10
+   }
+  ],
+  "steps": "Lessa patate, fagiolini e uova; taglia e condisci con i fiocchi di latte, olio e limone.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s37",
+  "name": "Caprese proteica con uova sode e pane",
+  "category": "uova",
+  "meal": "cena",
+  "time_min": 10,
+  "kcal": 775,
+  "protein": 50,
+  "carbs": 54,
+  "fat": 38,
+  "ingredients": [
+   {
+    "name": "mozzarella light",
+    "grams": 150
+   },
+   {
+    "name": "pomodorini",
+    "grams": 200
+   },
+   {
+    "name": "uova",
+    "grams": 100
+   },
+   {
+    "name": "pane integrale",
+    "grams": 100
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 10
+   }
+  ],
+  "steps": "Affetta mozzarella e pomodori, aggiungi le uova sode a spicchi, basilico e olio. Pane a parte.",
+  "added_by": "Lodestar",
+  "seed": true
+ },
+ {
+  "id": "s38",
+  "name": "Riso con uovo e piselli",
+  "category": "uova",
+  "meal": "pranzo",
+  "time_min": 20,
+  "kcal": 706,
+  "protein": 32,
+  "carbs": 86,
+  "fat": 23,
+  "ingredients": [
+   {
+    "name": "riso",
+    "grams": 90
+   },
+   {
+    "name": "piselli",
+    "grams": 150
+   },
+   {
+    "name": "uova",
+    "grams": 100
+   },
+   {
+    "name": "parmigiano",
+    "grams": 15
+   },
+   {
+    "name": "olio extravergine",
+    "grams": 8
+   }
+  ],
+  "steps": "Cuoci il riso con i piselli; manteca con parmigiano e completa con uova sode a pezzi.",
+  "added_by": "Lodestar",
+  "seed": true
+ }
+]

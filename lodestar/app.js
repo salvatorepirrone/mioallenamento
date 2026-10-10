@@ -12,7 +12,7 @@
     { id: 'corsa', href: '/pianoallenamento/corsa.html', label: 'Libreria corsa', dot: '#f55a5a' },
     { id: 'nuoto', href: '/pianoallenamento/nuoto.html', label: 'Libreria nuoto', dot: '#7ab8f5' },
     { id: 'palestra', href: '/pianoallenamento/palestra.html', label: 'Libreria palestra', dot: '#c85af5' },
-    { id: 'nutrizione', href: '/pianoallenamento/nutrizione.html', label: 'Nutrizione 🥗', dot: '#f5965a' },
+    { id: 'nutrizione', href: '/lodestar/nutrizione.html', label: 'Libreria ricette 🥗', dot: '#f5965a' },
     { id: 'attivita', href: '/lodestar/attivita.html', label: 'Attività 📈', dot: '#2E6DA4' },
     { id: 'piano', href: '/pianoallenamento/index.html', label: 'Piano', dot: '#2E6DA4' },
   ];

@@ -78,6 +78,7 @@ async function loadAll() {
   loadRecommendation(health);
 }
 
+initNutritionPanel(document.getElementById('ld-meals'));
 document.getElementById('ld-date').textContent = new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 loadAll();
 maybeAutoRefresh().then(ok => { if (ok) loadAll(); });
