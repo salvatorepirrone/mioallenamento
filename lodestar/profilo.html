@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profilo · Lodestar</title>
+<meta name="theme-color" content="#12263f">
+<link rel="manifest" href="/lodestar/manifest.json">
+<link rel="icon" href="/lodestar/icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/lodestar/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/lodestar/lodestar.css">
+</head>
+<body data-page="profilo">
+<main>
+
+<div class="hero">
+  <h1>👤 Il tuo profilo</h1>
+  <p>Poche informazioni per calcolare obiettivi di calorie e macro su misura per te</p>
+</div>
+
+<div id="pf-msg"></div>
+
+<div class="ld-card">
+  <div class="pl-grid">
+    <label>Sesso
+      <select id="p-sex"><option value="">—</option><option value="m">Uomo</option><option value="f">Donna</option></select></label>
+    <label>Anno di nascita
+      <input id="p-birth" type="number" min="1930" max="2020" placeholder="Es. 1985"></label>
+    <label>Altezza (cm)
+      <input id="p-height" type="number" min="120" max="230" step="0.5" placeholder="Es. 175"></label>
+    <label>Obiettivo di peso
+      <select id="p-goal"><option value="lose">Perdere peso</option><option value="maintain">Mantenere il peso</option><option value="gain">Mettere massa</option></select></label>
+    <label>Peso obiettivo (kg, facoltativo)
+      <input id="p-target" type="number" min="35" max="200" step="0.1" placeholder="Es. 72"></label>
+    <label>Vita quotidiana (fuori dagli allenamenti)
+      <select id="p-activity"><option value="low">Sedentaria (ufficio, poco movimento)</option><option value="mid" selected>Moderata (in piedi o in giro ogni tanto)</option><option value="high">Attiva (lavoro fisico o sempre in movimento)</option></select></label>
+    <label>Alimentazione
+      <select id="p-diet"><option value="all">Onnivora</option><option value="pesce">Pescetariana (niente carne)</option><option value="veg">Vegetariana (uova e latticini sì)</option></select></label>
+  </div>
+  <div style="margin-top:12px"><button class="ld-btn gold" id="p-save" type="button">Salva profilo</button> <span id="p-status" class="ld-muted"></span></div>
+  <div class="ld-muted" style="margin-top:10px">Il profilo è privato e serve solo a stimare il tuo fabbisogno (formula di Mifflin-St Jeor più i tuoi allenamenti) e a scegliere i pasti adatti. Sono stime indicative, non un parere medico.</div>
+</div>
+
+</main>
+<script src="/lodestar/app.js"></script>
+<script src="/lodestar/engine.js"></script>
+<script src="/lodestar/profilo.js"></script>
+</body>
+</html>

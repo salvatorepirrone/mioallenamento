@@ -243,7 +243,6 @@ function paceText(minPerKm) {
 // Obiettivi: di default ricavati da Garmin Connect (record personali, massimo di VO2max dell'ultimo
 // anno, previsioni di gara). Un eventuale data/goals.json li sostituisce campo per campo, per esempio:
 // {"race_5k":"23:30","race_10k":"50:00","vo2max":50,"repeat_pace":"4:15","swim_100":"1:35","deadline":"2026-12-02"}
-const PLAN_END = '2026-12-02'; // fine del piano di allenamento mostrato nella home
 
 async function loadGoals(fitness) {
   const file = await fetchJSONSafe('/data/goals.json', null);
@@ -253,7 +252,7 @@ async function loadGoals(fitness) {
 function buildGoals(fitness, file) {
   const pr = (fitness && fitness.personal_records) || {};
   const pred = (fitness && fitness.race_predictions) || {};
-  const goals = { deadline: PLAN_END, sources: {} };
+  const goals = { deadline: null, sources: {} };   // la scadenza arriva dal piano dell'utente (home.js)
   const year = v => (v && v.date ? ` (${v.date.slice(0, 4)})` : '');
 
   // 10 e 5 km: tornare al proprio record se oggi si e' piu' lenti; altrimenti migliorare del 1,5% il livello attuale.

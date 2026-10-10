@@ -21,6 +21,7 @@
     { href: '/pianoallenamento/callback.html', label: 'Sonno 😴', dot: '#5af5c8' },
     { id: 'editor', href: '/lodestar/editor.html', label: 'Editor FIT', dot: '#f55ac8' },
     { id: 'collegamenti', href: '/lodestar/collegamenti.html', label: 'Collegamenti 🔗', dot: '#9aa5ad' },
+    { id: 'profilo', href: '/lodestar/profilo.html', label: 'Profilo 👤', dot: '#9aa5ad' },
   ];
 
   var active = document.body.getAttribute('data-page') || 'home';

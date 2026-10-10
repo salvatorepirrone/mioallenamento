@@ -44,6 +44,10 @@ async function loadRecommendation(health) {
   try {
     const activities = await fetchJSONSafe('/data/garmin-activities.json', []);
     const goals = await loadGoals(health.fitness);
+    try {
+      const pl = (await (await fetch('/lodestar/piano-api.php?action=get', { cache: 'no-store', credentials: 'same-origin' })).json()).plan;
+      if (pl && pl.meta) goals.deadline = pl.meta.eventDate || pl.meta.endDate || goals.deadline;
+    } catch (e) { /* senza piano non c'e' scadenza */ }
     const model = computeRecommendation(activities, health.fitness, health.sleep, goals);
     try { applyLibrary(model, await loadAllLibraries(), activities); } catch (e) { console.warn('Libreria non disponibile per il consiglio:', e); }
     renderStats(readinessTiles(health.fitness));
@@ -114,7 +118,17 @@ async function loadPlanToday() {
 const PHASE_NAMES = { base: 'base', sviluppo: 'sviluppo', picco: 'picco', scarico: 'scarico' };
 function daysBetweenIso(a, b) { return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000); }
 
+// Invito a completare il profilo, se manca.
+async function loadProfileBanner() {
+  try {
+    const d = await (await fetch('/lodestar/profile-api.php?action=get', { cache: 'no-store', credentials: 'same-origin' })).json();
+    if (d.profile) return;
+    document.getElementById('ld-profile-banner').innerHTML = '<div class="ld-adapt" style="margin-top:14px">👤 Completa il tuo <a class="reco-link" href="/lodestar/profilo.html">profilo</a> (sesso, età, altezza, obiettivo): servono per calcolare calorie e pasti su misura per te.</div>';
+  } catch (e) { /* profilo non disponibile */ }
+}
+
 async function loadAll() {
+  loadProfileBanner();
   loadPlanToday();
   loadCoachAssigned();
   const health = await loadHealth();
