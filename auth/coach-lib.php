@@ -29,6 +29,29 @@ function coach_all(): array {
     return array_values($all);
 }
 
+// Assegnazioni di un programma: elenco di {user, date}. I programmi vecchi avevano un solo atleta (date/assigned_to): si convertono al volo.
+function coach_assignments(array $w): array {
+    if (isset($w['assignments']) && is_array($w['assignments'])) return array_values($w['assignments']);
+    if (!empty($w['date'])) return [['user' => $w['assigned_to'] ?? COACH_DEFAULT_ATHLETE, 'date' => $w['date']]];
+    return [];
+}
+
+// Imposta (o toglie, con $date null) l'assegnazione di un atleta; le altre restano.
+function coach_set_assignment(array &$w, string $user, ?string $date): void {
+    $list = array_values(array_filter(coach_assignments($w), function ($a) use ($user) { return $a['user'] !== $user; }));
+    if ($date) $list[] = ['user' => $user, 'date' => $date];
+    $w['assignments'] = $list;
+    unset($w['date'], $w['assigned_to']);
+}
+
+// Utenti attivi a cui un coach puo' assegnare un allenamento.
+function coach_athletes(): array {
+    $out = [];
+    foreach (auth_all_users() as $name => $u) if (empty($u['disabled'])) $out[] = $name;
+    sort($out);
+    return $out;
+}
+
 function coach_update(callable $fn): void {
     $file = coach_file();
     $lock = fopen($file . '.lock', 'c');

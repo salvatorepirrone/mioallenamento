@@ -144,15 +144,15 @@ function scaleSpec(spec, factor) {
 async function loadAllLibraries() {
   let data = { programs: [], csrf: '', me: '', is_coach: false, can_send: false };
   try { data = await LibUI.api('library'); } catch (e) { console.warn('Libreria dei coach non disponibile:', e.message); }
-  const out = { running: [], swimming: [], strength: [], meta: { me: data.me, isCoach: data.is_coach, isAdmin: !!data.is_admin, canSend: data.can_send } };
+  const out = { running: [], swimming: [], strength: [], meta: { me: data.me, isCoach: data.is_coach, isAdmin: !!data.is_admin, canSend: data.can_send, athletes: data.athletes || [] } };
   data.programs.forEach(p => {
     const sport = p.sport || 'swimming';
     if (!out[sport]) return;
     const spec = Object.assign({ sport }, p.parsed);
-    out[sport].push({ id: p.id, source: 'coach', createdBy: p.created_by, sport, title: p.title, spec, cat: (p.parsed && p.parsed.category) || libCategory(sport, spec), catChosen: !!(p.parsed && p.parsed.category), note: '', date: p.date, sends: p.sends || [] });
+    out[sport].push({ id: p.id, source: 'coach', createdBy: p.created_by, sport, title: p.title, spec, cat: (p.parsed && p.parsed.category) || libCategory(sport, spec), catChosen: !!(p.parsed && p.parsed.category), note: '', date: p.date, assignments: p.assignments || [], sends: p.sends || [] });
   });
   [['running', RUN_CATALOG], ['swimming', SWIM_CATALOG], ['strength', GYM_CATALOG]].forEach(([sport, list]) => {
-    list.forEach(c => out[sport].push({ id: c.id, source: 'lodestar', createdBy: 'Lodestar', sport, title: c.title, spec: c.spec, cat: c.cat, note: c.note || '', date: null, sends: [] }));
+    list.forEach(c => out[sport].push({ id: c.id, source: 'lodestar', createdBy: 'Lodestar', sport, title: c.title, spec: c.spec, cat: c.cat, note: c.note || '', date: null, assignments: [], sends: [] }));
   });
   return out;
 }
@@ -171,9 +171,12 @@ async function initLibrary(sport) {
     const mine = coach && e.createdBy === meta.me;
     const sendHtml = LibUI.sendBox(null, canSend, sport);
     const catSelect = coach && meta.isCoach && (mine || meta.isAdmin) ? `<div class="reco-send"><label class="ld-muted">Categoria <select data-cat-select>${Object.entries(LIB_CATS[sport]).map(([k, l]) => `<option value="${k}"${e.cat === k ? ' selected' : ''}>${l}</option>`).join('')}</select></label> <span class="ld-muted">${e.catChosen ? 'scelta da te' : 'dedotta dal sito: confermala o cambiala'}</span></div>` : '';
-    const extra = catSelect + (coach && meta.isCoach ? `<div class="reco-send"><input type="date" class="reco-date" data-assign-date title="Giorno da assegnare all'atleta" value="${e.date || ''}"> <button type="button" class="cw-btn secondary" data-assign>Assegna</button>${mine ? ' <button type="button" class="cw-btn secondary" data-del>Elimina</button>' : ''}</div>` : '');
+    const assigned = coach && meta.isCoach && e.assignments.length
+      ? `<div class="ld-muted">Assegnato a: ${e.assignments.map(a => `<span class="ld-badge alt">${LibUI.e(a.user)} · ${LibUI.e(a.date)} <a href="#" data-unassign="${LibUI.e(a.user)}" title="Togli l'assegnazione">✕</a></span>`).join(' ')}</div>` : '';
+    const athleteOpts = (meta.athletes || []).map(u => `<option value="${LibUI.e(u)}">${LibUI.e(u)}</option>`).join('');
+    const extra = catSelect + assigned + (coach && meta.isCoach ? `<div class="reco-send"><label class="ld-muted">Atleta <select data-assign-user>${athleteOpts}</select></label> <input type="date" class="reco-date" data-assign-date title="Giorno da assegnare all'atleta"> <button type="button" class="cw-btn secondary" data-assign>Assegna</button>${mine ? ' <button type="button" class="cw-btn secondary" data-del>Elimina</button>' : ''}</div>` : '');
     const sends = e.sends.length ? `<div class="ld-muted">✅ inviato ${e.sends.map(s => s.date || 'libreria Garmin').join(' · ')}</div>` : '';
-    const info = [e.note, e.date ? 'assegnato al ' + e.date : ''].filter(Boolean).join(' · ');
+    const info = [e.note, !(coach && meta.isCoach) && e.date ? 'assegnato al ' + e.date : ''].filter(Boolean).join(' · ');
     return `<div ${coach ? 'data-prog' : 'data-base'}="${e.id}" id="e-${e.id}"><div class="ld-recipe ld-wk"><div class="ld-recipe-head"><b>${LibUI.e(e.title)}</b>
       <span class="ld-badge">${LibUI.e(LIB_CATS[sport][e.cat] || e.cat)}</span> <span class="ld-badge alt">${coach ? '📚 Coach · ' + LibUI.e(e.createdBy) : '✦ Lodestar'}</span></div>
       ${info ? `<div class="ld-muted" style="margin-bottom:6px">${LibUI.e(info)}</div>` : ''}${LibUI.html(e.spec)}${sends}${sendHtml}${extra}<div class="cw-msg ld-muted"></div></div></div>`;
@@ -193,6 +196,13 @@ async function initLibrary(sport) {
   box.addEventListener('click', async ev => {
     const chipBtn = ev.target.closest('[data-filter]');
     if (chipBtn) { filter = chipBtn.dataset.filter; draw(); return; }
+    const un = ev.target.closest('[data-unassign]');
+    if (un) {
+      ev.preventDefault();
+      const w = un.closest('[data-prog]');
+      try { await LibUI.api('assign', { id: w.dataset.prog, date: null, user: un.dataset.unassign }); initLibraryRefresh(sport); } catch (err) { w.querySelector('.cw-msg').textContent = err.message; }
+      return;
+    }
     const b = ev.target.closest('button'); if (!b) return;
     const wrap = b.closest('[data-prog],[data-base]');
     if (!wrap) return;
@@ -210,7 +220,9 @@ async function initLibrary(sport) {
       if (wrap.dataset.prog) await run(LibUI.api('send', { id: wrap.dataset.prog, date }), done);
       else await run(LibUI.api('send_plan', { plan: entries.find(x => x.id === wrap.dataset.base).spec, date }), done);
     } else if (b.hasAttribute('data-assign')) {
-      await run(LibUI.api('assign', { id: wrap.dataset.prog, date: wrap.querySelector('[data-assign-date]').value || null }), 'Assegnato.');
+      const date = wrap.querySelector('[data-assign-date]').value || null;
+      if (!date) { msg.textContent = 'Scegli il giorno.'; return; }
+      await run(LibUI.api('assign', { id: wrap.dataset.prog, date, user: wrap.querySelector('[data-assign-user]').value }), 'Assegnato.');
     } else if (b.hasAttribute('data-del')) {
       if (confirm('Eliminare questo allenamento dalla libreria?')) await run(LibUI.api('delete', { id: wrap.dataset.prog }));
     }
@@ -230,6 +242,7 @@ async function initLibrary(sport) {
     let parsed = null;
     const $ = id => document.getElementById(id);
     $('lib-text').placeholder = cfg.placeholder;
+    $('lib-user').innerHTML = (meta.athletes || []).map(u => `<option value="${LibUI.e(u)}">${LibUI.e(u)}</option>`).join('');
     $('lib-parse').onclick = async () => {
       const text = $('lib-text').value.trim(); if (!text) return;
       $('lib-parse').disabled = true; $('lib-msg').textContent = 'Analisi in corso…';
@@ -250,7 +263,7 @@ async function initLibrary(sport) {
       $('lib-save').disabled = true;
       try {
         if ($('lib-cat')) parsed.category = $('lib-cat').value;
-        await LibUI.api('save', { text: $('lib-text').value.trim(), parsed, date: $('lib-date').value || null });
+        await LibUI.api('save', { text: $('lib-text').value.trim(), parsed, date: $('lib-date').value || null, user: $('lib-user').value || undefined });
         $('lib-text').value = ''; $('lib-date').value = ''; $('lib-preview').hidden = true; parsed = null;
         $('lib-msg').innerHTML = '<span class="ld-ok">Inserito in libreria.</span>';
         initLibraryRefresh(sport);

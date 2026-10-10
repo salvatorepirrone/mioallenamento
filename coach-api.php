@@ -41,13 +41,17 @@ if ($method === 'POST') {
     if (!is_array($body)) reply(['error' => 'Dati non validi'], 400);
 }
 
-function publicView(array $w): array {
-    $sends = $w['sends'] ?? [];
-    $date = $w['date'] ?? null;
+// Vista di un programma per chi lo guarda: ognuno vede le proprie assegnazioni e i propri invii; i coach vedono tutte le assegnazioni.
+function publicView(array $w, string $viewer = '', bool $viewerIsCoach = false): array {
+    $assign = coach_assignments($w);
+    $mineA = array_values(array_filter($assign, function ($a) use ($viewer) { return $a['user'] === $viewer; }));
+    $date = $mineA ? $mineA[0]['date'] : ($viewerIsCoach && $assign ? $assign[0]['date'] : null);
+    $sends = array_values(array_filter($w['sends'] ?? [], function ($s) use ($viewer) { return ($s['by'] ?? COACH_DEFAULT_ATHLETE) === $viewer; }));
     $sentForDate = false;
     foreach ($sends as $s) if ($date && ($s['date'] ?? null) === $date) $sentForDate = true;
     return ['id' => $w['id'], 'sport' => $w['parsed']['sport'] ?? 'swimming', 'title' => $w['parsed']['title'], 'parsed' => $w['parsed'], 'text' => $w['text'],
             'created_by' => $w['created_by'], 'created_at' => $w['created_at'] ?? null, 'date' => $date,
+            'assignments' => $viewerIsCoach ? $assign : $mineA,
             'sends' => array_map(function ($s) { return ['date' => $s['date'] ?? null, 'scheduled' => !empty($s['scheduled']), 'at' => $s['at'] ?? null]; }, $sends),
             'sent_for_date' => $sentForDate];
 }
@@ -56,16 +60,25 @@ try {
     if ($method === 'GET' && $action === 'library') {
         $all = coach_all();
         usort($all, function ($a, $b) { return strcmp($b['created_at'] ?? '', $a['created_at'] ?? ''); });
-        reply(['csrf' => auth_csrf_token(), 'me' => $name, 'is_coach' => $isCoach, 'is_admin' => auth_is_admin($name), 'can_send' => $canSend, 'programs' => array_map('publicView', $all)]);
+        reply(['csrf' => auth_csrf_token(), 'me' => $name, 'is_coach' => $isCoach, 'is_admin' => auth_is_admin($name), 'can_send' => $canSend,
+               'athletes' => $isCoach ? coach_athletes() : [],
+               'programs' => array_map(function ($w) use ($name, $isCoach) { return publicView($w, $name, $isCoach); }, $all)]);
     }
 
     if ($method === 'GET' && $action === 'mine') {
         $from = date('Y-m-d', time() - 2 * 86400);
-        $mine = array_filter(coach_all(), function ($w) use ($name, $from) {
-            return !empty($w['date']) && ($w['assigned_to'] ?? COACH_DEFAULT_ATHLETE) === $name && $w['date'] >= $from;
-        });
+        $mine = [];
+        foreach (coach_all() as $w) {
+            foreach (coach_assignments($w) as $a) {
+                if ($a['user'] === $name && $a['date'] >= $from) $mine[] = ['w' => $w, 'date' => $a['date']];
+            }
+        }
         usort($mine, function ($a, $b) { return strcmp($a['date'], $b['date']); });
-        reply(['csrf' => auth_csrf_token(), 'can_send' => $canSend, 'workouts' => array_map('publicView', array_values($mine))]);
+        reply(['csrf' => auth_csrf_token(), 'can_send' => $canSend, 'workouts' => array_map(function ($x) use ($name) {
+            $w = $x['w'];
+            coach_set_assignment($w, $name, $x['date']);   // la vista mostra la data di questo atleta
+            return publicView($w, $name, false);
+        }, $mine)]);
     }
 
     if ($method === 'POST' && $action === 'parse') {
@@ -90,12 +103,14 @@ try {
         if ($text === '' || mb_strlen($text) > 4000) reply(['error' => 'Testo mancante.'], 400);
         $sport = in_array($body['parsed']['sport'] ?? 'swimming', ['swimming', 'running', 'strength'], true) ? ($body['parsed']['sport'] ?? 'swimming') : 'swimming';
         $parsed = coach_validate_entry($sport, $body['parsed'] ?? null);
-        if ($date !== null && !auth_get_user(COACH_DEFAULT_ATHLETE)) reply(['error' => 'Atleta non trovato.'], 400);
+        $athlete = (string)($body['user'] ?? COACH_DEFAULT_ATHLETE);
+        $au = $date !== null ? auth_get_user($athlete) : null;
+        if ($date !== null && (!$au || !empty($au['disabled']))) reply(['error' => 'Atleta non trovato.'], 400);
         $w = ['id' => bin2hex(random_bytes(6)), 'text' => $text, 'parsed' => $parsed, 'created_by' => $name,
-              'created_at' => date('Y-m-d H:i:s'), 'date' => $date, 'assigned_to' => $date ? COACH_DEFAULT_ATHLETE : null, 'sends' => []];
+              'created_at' => date('Y-m-d H:i:s'), 'assignments' => $date ? [['user' => $athlete, 'date' => $date]] : [], 'sends' => []];
         coach_update(function ($all) use ($w) { $all[] = $w; return $all; });
-        auth_log('coach_library_add', '', $parsed['title'] . ' (' . $sport . ') da ' . $name . ($date ? ' per il ' . $date : ''));
-        reply(['ok' => true, 'program' => publicView($w)]);
+        auth_log('coach_library_add', '', $parsed['title'] . ' (' . $sport . ') da ' . $name . ($date ? ' per ' . $athlete . ' il ' . $date : ''));
+        reply(['ok' => true, 'program' => publicView($w, $name, true)]);
     }
 
     if ($method === 'POST' && $action === 'set_category') {
@@ -130,14 +145,17 @@ try {
         $date = $body['date'] ?? null;
         if ($date === '' || $date === null) $date = null;
         elseif (!valid_date($date)) reply(['error' => 'Data non valida.'], 400);
+        $athlete = (string)($body['user'] ?? COACH_DEFAULT_ATHLETE);
+        $au = auth_get_user($athlete);
+        if (!$au || (!empty($au['disabled']) && $date !== null)) reply(['error' => 'Atleta non trovato.'], 400);
         $found = false;
-        coach_update(function ($all) use ($id, $date, &$found) {
-            foreach ($all as &$w) if ($w['id'] === $id) { $w['date'] = $date; $w['assigned_to'] = $date ? COACH_DEFAULT_ATHLETE : null; $found = true; }
+        coach_update(function ($all) use ($id, $date, $athlete, &$found) {
+            foreach ($all as &$w) if ($w['id'] === $id) { coach_set_assignment($w, $athlete, $date); $found = true; }
             unset($w);
             return $all;
         });
         if (!$found) reply(['error' => 'Programma non trovato.'], 404);
-        auth_log('coach_assigned', COACH_DEFAULT_ATHLETE, $id . ' ' . ($date ? 'per il ' . $date : 'assegnazione tolta') . ' da ' . $name);
+        auth_log('coach_assigned', $athlete, $id . ' ' . ($date ? 'per il ' . $date : 'assegnazione tolta') . ' da ' . $name);
         reply(['ok' => true]);
     }
 
@@ -185,10 +203,10 @@ try {
             coach_update(function ($all) use ($id) { foreach ($all as &$w) if ($w['id'] === $id) unset($w['sending_at']); unset($w); return $all; });
             throw $e;
         }
-        coach_update(function ($all) use ($id, $res, $date) {
+        coach_update(function ($all) use ($id, $res, $date, $name) {
             foreach ($all as &$w) if ($w['id'] === $id) {
                 unset($w['sending_at']);
-                $w['sends'][] = ['date' => $date, 'garmin_id' => $res['garmin_id'], 'scheduled' => !empty($res['scheduled']), 'at' => date('Y-m-d H:i:s')];
+                $w['sends'][] = ['by' => $name, 'date' => $date, 'garmin_id' => $res['garmin_id'], 'scheduled' => !empty($res['scheduled']), 'at' => date('Y-m-d H:i:s')];
             }
             unset($w);
             return $all;
