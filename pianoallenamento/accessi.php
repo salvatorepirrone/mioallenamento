@@ -35,6 +35,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             auth_log('user_invited', $em, 'invito da ' . $name . ($r['mailed'] ? ' (email inviata)' : ' (email non inviata)'));
             $invited = ['email' => $em] + $r;
         }
+    } elseif ($action === 'approve_request' || $action === 'reject_request') {
+        $rid = (string)($_POST['rid'] ?? '');
+        $req = null;
+        foreach (req_all() as $r) if ($r['id'] === $rid && $r['status'] === 'pending') $req = $r;
+        if (!$req) {
+            $formError = 'Richiesta non trovata (forse già gestita).';
+        } elseif ($action === 'approve_request') {
+            $r = invite_user($req['email'], [], $name);
+            if (!$r['ok']) {
+                $formError = $r['error'];
+            } else {
+                req_update(function ($all) use ($rid, $name) { foreach ($all as &$x) if ($x['id'] === $rid) { $x['status'] = 'approved'; $x['by'] = $name; } return $all; });
+                auth_log('access_approved', $req['email'], 'da ' . $name . ($r['mailed'] ? ' (email inviata)' : ' (email non inviata)'));
+                $invited = ['email' => $req['email']] + $r;
+            }
+        } else {
+            req_update(function ($all) use ($rid, $name) { foreach ($all as &$x) if ($x['id'] === $rid) { $x['status'] = 'rejected'; $x['by'] = $name; } return $all; });
+            auth_log('access_rejected', $req['email'], 'da ' . $name);
+            $notice = 'Richiesta di ' . $req['email'] . ' rifiutata.';
+        }
     } else {
         $target = strtolower(trim((string)($_POST['user'] ?? '')));
         $tu = auth_get_user($target);
@@ -118,6 +138,8 @@ $labels = [
     'user_enabled' => 'Utente riattivato', 'user_deleted' => 'Utente eliminato', 'user_unlocked' => 'Utente sbloccato',
     'coach_granted' => 'Coach assegnato', 'coach_revoked' => 'Coach revocato', 'coach_assigned' => 'Allenamento assegnato',
     'coach_library_add' => 'Programma inserito in libreria',
+    'access_requested' => 'Richiesta di accesso', 'access_approved' => 'Richiesta approvata', 'access_rejected' => 'Richiesta rifiutata',
+    'user_invited' => 'Invito inviato', 'registered' => 'Registrazione completata', 'reset_requested' => 'Recupero password richiesto', 'password_reset' => 'Password reimpostata via email',
     'nutri_granted' => 'Nutrizionista assegnato', 'nutri_revoked' => 'Nutrizionista revocato',
     'nutri_recipe_add' => 'Ricetta inserita', 'nutri_recipe_delete' => 'Ricetta eliminata', 'nutri_meal_add' => 'Pasto registrato',
     'nutri_parse_recipe' => 'Ricetta analizzata', 'plan_saved' => 'Piano salvato', 'plan_deleted' => 'Piano eliminato',
@@ -212,6 +234,24 @@ th{background:var(--s2);color:var(--muted);font-size:11px;text-transform:upperca
   <h1>Registro accessi</h1>
   <p>Chi è entrato nel sito, tentativi falliti e cambi password · orari di Roma</p>
 </div>
+
+<?php $pendingReqs = req_pending(); ?>
+<h2>Richieste di accesso<?= $pendingReqs ? ' (' . count($pendingReqs) . ')' : '' ?></h2>
+<?php if (!$pendingReqs): ?>
+<p class="muted">Nessuna richiesta in attesa. Chi vuole entrare può farne una da <a href="/auth/richiedi-accesso.php">/auth/richiedi-accesso.php</a>.</p>
+<?php else: ?>
+<table>
+<tr><th>Email</th><th>Nome</th><th>Nota</th><th>Quando</th><th>Azioni</th></tr>
+<?php foreach ($pendingReqs as $rq): ?>
+<tr><td><?= e($rq['email']) ?></td><td><?= e($rq['nome'] ?: '—') ?></td><td><?= e($rq['nota'] ?: '—') ?></td><td><?= e(date('d/m/Y H:i', (int)$rq['created'])) ?></td>
+<td><?php foreach (['approve_request' => 'Approva e invita', 'reject_request' => 'Rifiuta'] as $act => $label): ?>
+<form method="post" action="/pianoallenamento/accessi.php" style="display:inline"<?= $act === 'reject_request' ? ' onsubmit="return confirm(\'Rifiutare la richiesta?\')"' : '' ?>>
+  <input type="hidden" name="csrf" value="<?= e(auth_csrf_token()) ?>"><input type="hidden" name="action" value="<?= $act ?>"><input type="hidden" name="rid" value="<?= e($rq['id']) ?>">
+  <button type="submit" class="ubtn<?= $act === 'reject_request' ? ' danger' : '' ?>"><?= $label ?></button></form>
+<?php endforeach; ?></td></tr>
+<?php endforeach; ?>
+</table>
+<?php endif; ?>
 
 <h2>Utenti</h2>
 <?php if ($invited): ?>

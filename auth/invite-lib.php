@@ -135,3 +135,65 @@ function reset_request(string $input): void {
     mail_send($to, 'Reimposta la password di Lodestar', $text, $html);
     auth_log('reset_requested', $email, '');
 }
+
+
+// ---------- richieste di accesso ----------
+function req_file(): string { return dirname(auth_users_file()) . '/access-requests.json'; }
+
+function req_all(): array {
+    $f = req_file();
+    return is_file($f) ? (json_decode((string)file_get_contents($f), true) ?: []) : [];
+}
+
+function req_update(callable $fn): void {
+    $file = req_file();
+    $lock = fopen($file . '.lock', 'c');
+    flock($lock, LOCK_EX);
+    $all = is_file($file) ? (json_decode((string)file_get_contents($file), true) ?: []) : [];
+    $all = $fn(array_values($all));
+    $tmp = $file . '.tmp';
+    file_put_contents($tmp, json_encode(array_values($all), JSON_UNESCAPED_UNICODE));
+    rename($tmp, $file);
+    flock($lock, LOCK_UN);
+    fclose($lock);
+}
+
+// Registra una richiesta (con limiti: una in attesa per email, poche per indirizzo IP) e avvisa gli admin.
+function req_add(string $email, string $nome, string $nota): void {
+    $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '?');
+    $existing = auth_get_user($email);
+    $added = false;
+    req_update(function ($all) use ($email, $nome, $nota, $ip, $existing, &$added) {
+        $now = time();
+        $all = array_values(array_filter($all, function ($r) use ($now) { return $r['status'] === 'pending' || $r['created'] > $now - 30 * 86400; }));
+        if ($existing) return $all;                                            // gia' registrato o invitato: si ignora in silenzio
+        foreach ($all as $r) if ($r['email'] === $email && $r['status'] === 'pending') return $all;
+        $fromIp = 0;
+        foreach ($all as $r) if (($r['ip'] ?? '') === $ip && $r['created'] > $now - 3600) $fromIp++;
+        if ($fromIp >= 5) return $all;
+        $all[] = ['id' => bin2hex(random_bytes(6)), 'email' => $email, 'nome' => $nome, 'nota' => $nota, 'created' => $now, 'status' => 'pending', 'ip' => $ip];
+        $added = true;
+        return $all;
+    });
+    if ($added) {
+        auth_log('access_requested', $email, '');
+        req_notify_admins($email, $nome, $nota);
+    }
+}
+
+function req_notify_admins(string $email, string $nome, string $nota): void {
+    foreach (auth_all_users() as $key => $u) {
+        if (empty($u['admin']) || !empty($u['disabled'])) continue;
+        $to = !empty($u['email']) ? $u['email'] : (strpos((string)$key, '@') !== false ? $key : '');
+        if ($to === '') continue;
+        $link = UDATA_SITE_URL . '/pianoallenamento/accessi.php';
+        [$text, $html] = mail_layout('Nuova richiesta di accesso',
+            "$email" . ($nome !== '' ? " ($nome)" : '') . " ha chiesto di usare Lodestar." . ($nota !== '' ? "\n\nNota: $nota" : ''),
+            'Vai alle richieste', $link, 'Puoi approvarla (parte l\'invito) o rifiutarla dalla pagina Accessi.');
+        mail_send($to, 'Richiesta di accesso a Lodestar', $text, $html);
+    }
+}
+
+function req_pending(): array {
+    return array_values(array_filter(req_all(), function ($r) { return $r['status'] === 'pending'; }));
+}
