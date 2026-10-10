@@ -9,14 +9,14 @@
   // Pagine non ancora migrate nella nuova app: per ora rimandano alla versione esistente.
   var LINKS = [
     { id: 'home', href: '/lodestar/', label: 'Home', dot: '#e8b64b' },
-    { id: 'libreria', href: '/lodestar/libreria.html', label: 'Libreria allenamenti 📚', dot: '#f55a5a' },
-    { id: 'nutrizione', href: '/lodestar/nutrizione.html', label: 'Libreria ricette 🥗', dot: '#f5965a' },
     { id: 'attivita', href: '/lodestar/attivita.html', label: 'Attività 📈', dot: '#2E6DA4' },
-    { id: 'piano', href: '/lodestar/piano.html', label: 'Piano 🎯', dot: '#2E6DA4' },
-  ];
-  var TOOLS = [
+    { id: 'piano', href: '/lodestar/piano.html', label: 'Programma allenamenti 🎯', dot: '#2E6DA4' },
     { id: 'peso', href: '/lodestar/peso.html', label: 'Peso ⚖️', dot: '#f5c85a' },
     { id: 'sonno', href: '/lodestar/sonno.html', label: 'Sonno 😴', dot: '#5af5c8' },
+    { id: 'libreria', href: '/lodestar/libreria.html', label: 'Libreria allenamenti 📚', dot: '#f55a5a' },
+    { id: 'nutrizione', href: '/lodestar/nutrizione.html', label: 'Libreria ricette 🥗', dot: '#f5965a' },
+  ];
+  var TOOLS = [
     { id: 'editor', href: '/lodestar/editor.html', label: 'Editor FIT', dot: '#f55ac8' },
     { id: 'collegamenti', href: '/lodestar/collegamenti.html', label: 'Collegamenti 🔗', dot: '#9aa5ad' },
     { id: 'profilo', href: '/lodestar/profilo.html', label: 'Profilo 👤', dot: '#9aa5ad' },
