@@ -73,7 +73,26 @@ async function maybeAutoRefresh() {
   }
 }
 
+// Allenamenti assegnati dal coach per oggi o i prossimi giorni.
+async function loadCoachAssigned() {
+  const box = document.getElementById('coach-box');
+  try {
+    const d = await LibUI.api('mine');
+    if (!d.workouts.length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="reco-title" style="margin-bottom:8px">📋 Assegnato dal coach</div>' + d.workouts.map(w =>
+      `<div class="ld-recipe ld-wk" data-prog="${w.id}" style="margin-bottom:12px"><div class="ld-recipe-head"><b>${LibUI.e(w.title)}</b> <span class="ld-badge">${w.date} · ${LibUI.e(w.created_by)}</span></div>${LibUI.html(w.parsed)}${LibUI.sendBox(null, d.can_send, w.sport)}<div class="cw-msg ld-muted"></div></div>`).join('');
+    box.onclick = async ev => {
+      const b = ev.target.closest('[data-send]'); if (!b) return;
+      const wrap = b.closest('[data-prog]'), msg = wrap.querySelector('.cw-msg');
+      b.disabled = true; msg.textContent = 'Un momento…';
+      try { await LibUI.api('send', { id: wrap.dataset.prog, date: wrap.querySelector('.reco-date').value || null }); msg.textContent = "Inviato a Garmin: sull'orologio dopo la sincronizzazione."; }
+      catch (e) { msg.textContent = e.message; b.disabled = false; }
+    };
+  } catch (e) { box.innerHTML = ''; }
+}
+
 async function loadAll() {
+  loadCoachAssigned();
   const health = await loadHealth();
   loadRecommendation(health);
 }

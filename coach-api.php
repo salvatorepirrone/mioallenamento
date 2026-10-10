@@ -28,7 +28,7 @@ function valid_date($d): bool {
 $name = auth_current_user();
 if (!$name) reply(['error' => 'Accesso richiesto'], 401);
 
-$isCoach = auth_is_coach($name);
+$isCoach = auth_is_coach($name) || auth_is_admin($name);
 $canSend = $name === COACH_DEFAULT_ATHLETE;
 $method = $_SERVER['REQUEST_METHOD'];
 $action = (string)($_GET['action'] ?? '');
@@ -46,7 +46,7 @@ function publicView(array $w): array {
     $date = $w['date'] ?? null;
     $sentForDate = false;
     foreach ($sends as $s) if ($date && ($s['date'] ?? null) === $date) $sentForDate = true;
-    return ['id' => $w['id'], 'title' => $w['parsed']['title'], 'parsed' => $w['parsed'], 'text' => $w['text'],
+    return ['id' => $w['id'], 'sport' => $w['parsed']['sport'] ?? 'swimming', 'title' => $w['parsed']['title'], 'parsed' => $w['parsed'], 'text' => $w['text'],
             'created_by' => $w['created_by'], 'created_at' => $w['created_at'] ?? null, 'date' => $date,
             'sends' => array_map(function ($s) { return ['date' => $s['date'] ?? null, 'scheduled' => !empty($s['scheduled']), 'at' => $s['at'] ?? null]; }, $sends),
             'sent_for_date' => $sentForDate];
@@ -73,8 +73,11 @@ try {
         set_time_limit(120);
         $text = trim((string)($body['text'] ?? ''));
         if ($text === '' || mb_strlen($text) > 4000) reply(['error' => 'Scrivi il testo dell\'allenamento (massimo 4000 caratteri).'], 400);
-        $parsed = coach_validate_parsed(coach_call_claude($text));
-        auth_log('coach_parse', $name, mb_strlen($text) . ' caratteri');
+        $sport = in_array($body['sport'] ?? 'swimming', ['swimming', 'running', 'strength'], true) ? ($body['sport'] ?? 'swimming') : 'swimming';
+        if ($sport === 'running') $parsed = coach_parse_run($text);
+        elseif ($sport === 'strength') $parsed = coach_parse_strength($text);
+        else { $parsed = coach_validate_parsed(coach_call_claude($text)); $parsed['sport'] = 'swimming'; }
+        auth_log('coach_parse', $name, $sport . ' ' . mb_strlen($text) . ' caratteri');
         reply(['parsed' => $parsed]);
     }
 
@@ -85,12 +88,13 @@ try {
         if ($date === '' || $date === null) $date = null;
         elseif (!valid_date($date)) reply(['error' => 'Data non valida.'], 400);
         if ($text === '' || mb_strlen($text) > 4000) reply(['error' => 'Testo mancante.'], 400);
-        $parsed = coach_validate_parsed($body['parsed'] ?? null);
+        $sport = in_array($body['parsed']['sport'] ?? 'swimming', ['swimming', 'running', 'strength'], true) ? ($body['parsed']['sport'] ?? 'swimming') : 'swimming';
+        $parsed = coach_validate_entry($sport, $body['parsed'] ?? null);
         if ($date !== null && !auth_get_user(COACH_DEFAULT_ATHLETE)) reply(['error' => 'Atleta non trovato.'], 400);
         $w = ['id' => bin2hex(random_bytes(6)), 'text' => $text, 'parsed' => $parsed, 'created_by' => $name,
               'created_at' => date('Y-m-d H:i:s'), 'date' => $date, 'assigned_to' => $date ? COACH_DEFAULT_ATHLETE : null, 'sends' => []];
         coach_update(function ($all) use ($w) { $all[] = $w; return $all; });
-        auth_log('coach_library_add', '', $parsed['title'] . ' (' . $parsed['total_m'] . ' m) da ' . $name . ($date ? ' per il ' . $date : ''));
+        auth_log('coach_library_add', '', $parsed['title'] . ' (' . $sport . ') da ' . $name . ($date ? ' per il ' . $date : ''));
         reply(['ok' => true, 'program' => publicView($w)]);
     }
 
