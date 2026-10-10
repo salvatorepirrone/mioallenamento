@@ -1,7 +1,7 @@
 <?php
 // Libreria degli allenamenti: tutti la vedono; i coach inseriscono i programmi scritti in linguaggio naturale.
 // Sta fuori da /auth/ cosi' passa dal gate: serve gia' una sessione valida.
-require_once __DIR__ . '/auth/coach-lib.php';
+require_once __DIR__ . '/../auth/coach-lib.php';
 
 $name = auth_current_user();
 $isCoach = auth_is_coach($name);

@@ -3,13 +3,13 @@
 
 [[redirects]]
   from = "/callback"
-  to = "/callback.html"
+  to = "/pianoallenamento/callback.html"
   status = 200
 
 [[redirects]]
   from = "/peso"
-  to = "/peso.html"
+  to = "/pianoallenamento/peso.html"
   status = 200
 
 [build.environment]
-  SECRETS_SCAN_OMIT_PATHS = "callback.html,peso.html"
+  SECRETS_SCAN_OMIT_PATHS = "pianoallenamento/callback.html,pianoallenamento/peso.html"

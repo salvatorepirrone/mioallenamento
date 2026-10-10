@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attività · Lodestar</title>
+<meta name="theme-color" content="#12263f">
+<link rel="manifest" href="/lodestar/manifest.json">
+<link rel="icon" href="/lodestar/icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/lodestar/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/lodestar/lodestar.css">
+</head>
+<body data-page="attivita">
+<main>
+
+<div class="hero">
+  <h1>📈 Attività</h1>
+  <p>Gli ultimi allenamenti registrati da Garmin e cosa raccontano</p>
+</div>
+
+<div class="sec">Commento generale sugli ultimi allenamenti</div>
+<div class="ld-panel ld-panel-train" id="ld-comments"><div class="ld-panel-body"><span class="ld-muted">Analisi in corso…</span></div></div>
+
+<div class="sec">Ultimi allenamenti registrati · da Garmin Connect</div>
+<table class="act-table">
+  <tr><th>Data</th><th>Attività</th><th>Distanza</th><th>Durata</th><th>FC media/max</th><th>Kcal</th></tr>
+  <tbody id="act-table-body"><tr><td colspan="6" style="color:var(--muted);text-align:center">Caricamento...</td></tr></tbody>
+</table>
+<p class="act-note">🔻 = attività con ripetute/lap registrate — clicca la riga per vedere il dettaglio di ognuna.</p>
+
+</main>
+<script src="/lodestar/app.js"></script>
+<script src="/lodestar/engine.js"></script>
+<script src="/lodestar/attivita.js"></script>
+</body>
+</html>

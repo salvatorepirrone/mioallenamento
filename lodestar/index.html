@@ -20,35 +20,22 @@
   <div class="hero-stats" id="ld-stats"></div>
 </div>
 
-<!-- 1 · SALUTE E FORMA -->
-<section>
-  <div class="sec">Salute e forma · <span id="ld-refresh" style="text-transform:none;letter-spacing:normal">Garmin · Withings</span></div>
-  <div class="ld-card"><div class="ld-ready" id="ld-ready"><span class="ld-muted">Caricamento dei dati…</span></div></div>
-</section>
+<!-- ALLENAMENTO CONSIGLIATO -->
+<div class="ld-panel ld-panel-train">
+  <div class="ld-panel-head"><span class="ld-panel-ico">🏃</span>Allenamento di oggi<span class="ld-panel-sub">consigliato in base a forma, andamento e obiettivi</span></div>
+  <div class="ld-panel-body"><div class="reco-box" id="reco-box"><div class="reco-text">Analisi in corso…</div></div></div>
+</div>
 
-<!-- 2 · ATTIVITA' CONSIGLIATA -->
-<section>
-  <div class="sec">Allenamento consigliato oggi · <span id="ld-x516" style="text-transform:none;letter-spacing:normal"><a class="reco-link" href="/libreria.php">libreria coach</a></span></div>
-  <div class="reco-box" id="reco-box"><div class="reco-text">Analisi in corso…</div></div>
-</section>
-
-<!-- 3 · NUTRIZIONE -->
-<section>
-  <div class="sec">Nutrizione · <span id="ld-x783" style="text-transform:none;letter-spacing:normal">pranzo e cena</span></div>
-  <div class="ld-card" id="ld-meals">
-    <div class="reco-title">🥗 In arrivo: pasti consigliati</div>
-    <div class="reco-text">Qui troverai un pranzo e una cena bilanciati, scelti in base a peso, allenamenti e a cosa hai mangiato prima — con un tasto per cambiarli (carne, pesce, pollo, legumi…). Nel frattempo: <a class="reco-link" href="/nutrizione.html">linee guida nutrizionali</a>.</div>
+<!-- NUTRIZIONE -->
+<div class="ld-panel ld-panel-food">
+  <div class="ld-panel-head"><span class="ld-panel-ico">🥗</span>Nutrizione di oggi<span class="ld-panel-sub">pranzo e cena</span></div>
+  <div class="ld-panel-body" id="ld-meals">
+    <div class="reco-title">In arrivo: pasti consigliati</div>
+    <div class="reco-text">Qui troverai un pranzo e una cena bilanciati, scelti in base a peso, allenamenti e a cosa hai mangiato prima — con un tasto per cambiarli (carne, pesce, pollo, legumi…). Nel frattempo: <a class="reco-link" href="/pianoallenamento/nutrizione.html">linee guida nutrizionali</a>.</div>
   </div>
-</section>
+</div>
 
-<!-- ULTIME ATTIVITA' -->
-<section>
-  <div class="sec">Ultimi allenamenti · da Garmin Connect</div>
-  <div class="ld-card" style="padding:0;overflow:auto">
-    <table class="ld-table"><thead><tr><th>Data</th><th>Attività</th><th>Distanza</th><th>Durata</th><th>FC med/max</th><th>kcal</th></tr></thead>
-    <tbody id="ld-acts"><tr><td colspan="6" class="ld-muted">Caricamento…</td></tr></tbody></table>
-  </div>
-</section>
+<p class="ld-muted" style="margin-top:18px"><span id="ld-refresh">Dati Garmin · Withings</span> · <a class="reco-link" href="/lodestar/attivita.html">Ultimi allenamenti e commento →</a></p>
 
 </main>
 <script src="/lodestar/app.js"></script>

@@ -9,18 +9,17 @@
   // Pagine non ancora migrate nella nuova app: per ora rimandano alla versione esistente.
   var LINKS = [
     { id: 'home', href: '/lodestar/', label: 'Home', dot: '#e8b64b' },
-    { id: 'corsa', href: '/corsa.html', label: 'Corsa', dot: '#f55a5a' },
-    { id: 'nuoto', href: '/nuoto.html', label: 'Nuoto', dot: '#7ab8f5' },
-    { id: 'palestra', href: '/palestra.html', label: 'Palestra', dot: '#c85af5' },
-    { id: 'nutrizione', href: '/nutrizione.html', label: 'Nutrizione 🥗', dot: '#f5965a' },
-    { id: 'piano', href: '/index.html', label: 'Piano', dot: '#2E6DA4' },
+    { id: 'corsa', href: '/pianoallenamento/corsa.html', label: 'Libreria corsa', dot: '#f55a5a' },
+    { id: 'nuoto', href: '/pianoallenamento/nuoto.html', label: 'Libreria nuoto', dot: '#7ab8f5' },
+    { id: 'palestra', href: '/pianoallenamento/palestra.html', label: 'Libreria palestra', dot: '#c85af5' },
+    { id: 'nutrizione', href: '/pianoallenamento/nutrizione.html', label: 'Nutrizione 🥗', dot: '#f5965a' },
+    { id: 'attivita', href: '/lodestar/attivita.html', label: 'Attività 📈', dot: '#2E6DA4' },
+    { id: 'piano', href: '/pianoallenamento/index.html', label: 'Piano', dot: '#2E6DA4' },
   ];
   var TOOLS = [
-    { href: '/editor.html', label: 'Editor FIT', dot: '#f55ac8' },
-    { href: '/libreria.php', label: 'Libreria coach 📚', dot: '#5ac8f5' },
-    { href: '/peso.html', label: 'Peso ⚖️', dot: '#f5c85a' },
-    { href: '/callback.html', label: 'Sonno 😴', dot: '#5af5c8' },
-    { href: '/index.html', label: 'App classica', dot: '#9aa5ad' },
+    { href: '/pianoallenamento/peso.html', label: 'Peso ⚖️', dot: '#f5c85a' },
+    { href: '/pianoallenamento/callback.html', label: 'Sonno 😴', dot: '#5af5c8' },
+    { href: '/pianoallenamento/editor.html', label: 'Editor FIT', dot: '#f55ac8' },
   ];
 
   var active = document.body.getAttribute('data-page') || 'home';
@@ -62,7 +61,7 @@
     .then(function (data) {
       if (!data) return;
       if (data.user) logout.textContent = '🚪 Esci (' + data.user + ')';
-      if (data.admin) links.insertAdjacentHTML('beforeend', link({ href: '/accessi.php', label: 'Accessi 🔐', dot: '#9aa5ad' }, false));
+      if (data.admin) links.insertAdjacentHTML('beforeend', link({ href: '/pianoallenamento/accessi.php', label: 'Accessi 🔐', dot: '#9aa5ad' }, false));
     })
     .catch(function () {});
 })();

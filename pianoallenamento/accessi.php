@@ -1,12 +1,12 @@
 <?php
 // Registro degli accessi, riservato agli amministratori (vedi auth/make-admin.php).
 // Sta fuori da /auth/ cosi' passa dal gate: serve gia' una sessione valida.
-require_once __DIR__ . '/auth/lib.php';
+require_once __DIR__ . '/../auth/lib.php';
 
 $name = auth_current_user();
 if (!auth_is_admin($name)) {
     http_response_code(403);
-    auth_page('Accesso negato', '<p>Questa pagina è riservata agli amministratori.</p><p><a href="/">Torna al sito</a></p>');
+    auth_page('Accesso negato', '<p>Questa pagina è riservata agli amministratori.</p><p><a href="/pianoallenamento/">Torna al sito</a></p>');
     exit;
 }
 
@@ -207,7 +207,7 @@ th{background:var(--s2);color:var(--muted);font-size:11px;text-transform:upperca
 <?php if ($formError): ?><p class="bad"><?= e($formError) ?></p><?php endif; ?>
 <?php
 function user_btn(string $action, string $user, string $label, string $confirm = '', bool $danger = false): string {
-    return '<form method="post" action="/accessi.php" style="display:inline"' . ($confirm ? ' onsubmit="return confirm(' . e(json_encode($confirm, JSON_UNESCAPED_UNICODE)) . ')"' : '') . '>'
+    return '<form method="post" action="/pianoallenamento/accessi.php" style="display:inline"' . ($confirm ? ' onsubmit="return confirm(' . e(json_encode($confirm, JSON_UNESCAPED_UNICODE)) . ')"' : '') . '>'
         . '<input type="hidden" name="csrf" value="' . e(auth_csrf_token()) . '"><input type="hidden" name="action" value="' . e($action) . '">'
         . '<input type="hidden" name="user" value="' . e($user) . '">'
         . '<button type="submit" class="ubtn' . ($danger ? ' danger' : '') . '">' . e($label) . '</button></form> ';
@@ -241,7 +241,7 @@ function user_btn(string $action, string $user, string $label, string $confirm =
 ?></td></tr>
 <?php endforeach; ?>
 </table>
-<form method="post" action="/accessi.php" style="margin:0 0 28px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+<form method="post" action="/pianoallenamento/accessi.php" style="margin:0 0 28px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
   <input type="hidden" name="csrf" value="<?= e(auth_csrf_token()) ?>">
   <div><div class="muted" style="margin-bottom:4px">Nuovo utente</div>
   <input name="new_user" required minlength="2" maxlength="32" pattern="[a-z0-9._\-]{2,32}" placeholder="nome (es. luca)" autocomplete="off"
@@ -263,8 +263,8 @@ function user_btn(string $action, string $user, string $label, string $confirm =
 
 <h2>Eventi</h2>
 <div class="filters">
-<a href="/accessi.php" class="<?= $filter === '' ? 'on' : '' ?>">Tutti</a>
-<?php foreach ($labels as $k => $l): ?><a href="/accessi.php?e=<?= e($k) ?>" class="<?= $filter === $k ? 'on' : '' ?>"><?= e($l) ?></a><?php endforeach; ?>
+<a href="/pianoallenamento/accessi.php" class="<?= $filter === '' ? 'on' : '' ?>">Tutti</a>
+<?php foreach ($labels as $k => $l): ?><a href="/pianoallenamento/accessi.php?e=<?= e($k) ?>" class="<?= $filter === $k ? 'on' : '' ?>"><?= e($l) ?></a><?php endforeach; ?>
 </div>
 <table>
 <tr><th>Quando</th><th>Evento</th><th>Utente</th><th>IP</th><th>Dettaglio</th></tr>

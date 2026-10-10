@@ -92,22 +92,22 @@ const RUN_SESSIONS = {
   velocita: {
     label: 'Velocità · 6×400 m',
     html: `Riscaldamento 15' Z1 (FC&nbsp;&lt;123) + 4×80&nbsp;m progressivi. Poi <strong>6×400&nbsp;m</strong> a 4:30–4:50/km (FC 162–172, Z4), recupero 90″ jogging Z1. Defaticamento 10' Z1.<br><span class="reco-opt-meta">~8 km · ~50–55 min · ~560 kcal</span>`,
-    link: 'corsa.html#c-mar-vel',
+    link: '/pianoallenamento/corsa.html#c-mar-vel',
   },
   soglia: {
     label: 'Soglia · 3×1000 m',
     html: `Riscaldamento 12' Z1. Poi <strong>3×1000&nbsp;m</strong> a 5:20–5:40/km (FC 148–162, Z3), recupero 2' jogging Z1, seguiti da 15' Z2 continuo (5:45–6:00/km). Defaticamento 8' Z1.<br><span class="reco-opt-meta">~9,5 km · ~55 min · ~540 kcal</span>`,
-    link: 'corsa.html#c-mar-sog',
+    link: '/pianoallenamento/corsa.html#c-mar-sog',
   },
   lungo: {
     label: 'Lunga Z2',
     html: `<strong>8–10&nbsp;km</strong> in Z2 puro, FC&nbsp;&lt;148, passo 5:45–6:10/km (fino a 6:30 se fa caldo). Se superi 148 cammina 1–2' e riprendi.<br><span class="reco-opt-meta">~60–70 min · ~620–680 kcal</span>`,
-    link: 'corsa.html#c-sab-z2',
+    link: '/pianoallenamento/corsa.html#c-sab-z2',
   },
   facile: {
     label: 'Facile rigenerante',
     html: `<strong>20–30 min</strong> di corsa lenta in Z1 (FC&nbsp;&lt;123, passo &gt;6:15/km), solo per sciogliere le gambe — oggi è recupero attivo, niente ritmo.`,
-    link: 'corsa.html',
+    link: '/pianoallenamento/corsa.html',
     spec: { sport: 'running', title: 'Corsa facile rigenerante', steps: [{ kind: 'interval', time_s: 1500, hr_zone: 1, note: 'Z1, FC sotto 123' }] },
   },
 };
@@ -115,13 +115,13 @@ const SWIM_SESSIONS = {
   tecnica: {
     label: 'Tecnica + Soglia',
     html: `<strong>~2.000 m</strong>: 400 riscaldamento (300 crawl + 100 dorso) → 300 drill (6×50) → 600 soglia (6×100 a ~1:45/100m) → 400 pullbuoy contrasto (4×100) → 200 dorso → 100 defaticante.`,
-    link: 'nuoto.html#sessA',
+    link: '/pianoallenamento/nuoto.html#sessA',
     spec: SWIM_SPECS.tecnica,
   },
   leggero: {
     label: 'Tecnica leggera (recupero attivo)',
     html: `<strong>1.200–1.500 m</strong> a ritmo facile/aerobico, solo drill e tecnica. Niente sprint né pullbuoy pesante: oggi l'acqua serve a scaricare, non a costruire.`,
-    link: 'nuoto.html',
+    link: '/pianoallenamento/nuoto.html',
     spec: SWIM_SPECS.leggero,
   },
 };
@@ -132,19 +132,19 @@ const SWIM_VELOCITA_VARIANTS = [
   {
     label: 'Velocità pura',
     html: `<strong>~2.500 m</strong>: 400 riscaldamento → 200 drill → 300 progressivi (6×50) → 400 sprint massimali (8×50, rec. 60–75″) → 200 sprint con palette (4×50) → 600 aerobico di scarico → 200 dorso → 200 defaticante.`,
-    link: 'nuoto.html#sessBdom',
+    link: '/pianoallenamento/nuoto.html#sessBdom',
     spec: SWIM_SPECS.velocitaPura,
   },
   {
     label: 'Sprint & Virate',
     html: `<strong>~1.850 m</strong>: 400 riscaldamento → 100 drill → 250 virate esplosive (10×25, spinta massimale + breakout) → 200 sprint pieno (8×25) → 600 aerobico di scarico → 200 dorso → 100 defaticante.`,
-    link: 'nuoto.html#sessC',
+    link: '/pianoallenamento/nuoto.html#sessC',
     spec: SWIM_SPECS.sprintVirate,
   },
   {
     label: 'Bracciata & Velocità',
     html: `<strong>~2.000 m</strong>: 400 riscaldamento → 150 drill → 400 conteggio bracciate progressivo (8×50) → 250 sprint a bracciate controllate (10×25, vincolo di non aumentarle) → 500 aerobico di scarico → 200 dorso → 100 defaticante.`,
-    link: 'nuoto.html#sessD',
+    link: '/pianoallenamento/nuoto.html#sessD',
     spec: SWIM_SPECS.bracciataVelocita,
   },
 ];
@@ -407,7 +407,7 @@ function planVelocita(activities, band, goals) {
   return {
     label: `Velocità · ${reps}×${dist} m`,
     html: `Riscaldamento 15' Z1 (FC&nbsp;&lt;123) + 4×80&nbsp;m progressivi. Poi <strong>${reps}×${dist}&nbsp;m</strong> a ${lo}–${hi}/km (FC 162–172, Z4), recupero ${rest}″ jogging Z1. Defaticamento 10' Z1.<br><span class="reco-opt-meta">~${km.toFixed(1).replace('.', ',')} km · ~${min} min</span>`,
-    progress, link: 'corsa.html#c-mar-vel',
+    progress, link: '/pianoallenamento/corsa.html#c-mar-vel',
     spec: { sport: 'running', title: `Velocità ${reps}×${dist} m`, steps: [
       { kind: 'warmup', time_s: 900, hr_zone: 1 },
       { kind: 'repeat', reps: 4, steps: [{ kind: 'interval', distance_m: 80, note: 'progressivo' }, { kind: 'recovery', time_s: 40 }] },
@@ -439,7 +439,7 @@ function planSoglia(activities, band) {
   return {
     label: `Soglia · ${reps}×${dist} m`,
     html: `Riscaldamento 12' Z1. Poi <strong>${reps}×${dist}&nbsp;m</strong> a ${lo}–${hi}/km (FC 148–162, Z3), recupero 2' jogging Z1, seguiti da 15' Z2 continuo (5:45–6:00/km). Defaticamento 8' Z1.<br><span class="reco-opt-meta">~${km.toFixed(1).replace('.', ',')} km · ~${min} min</span>`,
-    progress, link: 'corsa.html#c-mar-sog',
+    progress, link: '/pianoallenamento/corsa.html#c-mar-sog',
     spec: { sport: 'running', title: `Soglia ${reps}×${dist} m`, steps: [
       { kind: 'warmup', time_s: 720, hr_zone: 1 },
       { kind: 'repeat', reps, steps: [{ kind: 'interval', distance_m: dist, pace: [Math.round(pace * 60) - 4, Math.round(pace * 60) + 4] }, { kind: 'recovery', time_s: 120, note: 'jogging Z1' }] },
@@ -465,7 +465,7 @@ function planLungo(activities, band) {
   return {
     label: `Lunga Z2 · ${String(km).replace('.', ',')} km`,
     html: `<strong>${String(km).replace('.', ',')}&nbsp;km</strong> in Z2 puro, FC&nbsp;&lt;148, passo 5:45–6:10/km (fino a 6:30 se fa caldo). Se superi 148 cammina 1–2' e riprendi.<br><span class="reco-opt-meta">~${min} min · ~${Math.round(km * 70)} kcal</span>`,
-    progress, link: 'corsa.html#c-sab-z2',
+    progress, link: '/pianoallenamento/corsa.html#c-sab-z2',
     spec: { sport: 'running', title: `Lunga Z2 ${String(km).replace('.', ',')} km`, steps: [{ kind: 'interval', distance_m: Math.round(km * 1000), pace: [345, 375], note: 'Z2, FC sotto 148' }] },
   };
 }
@@ -548,7 +548,7 @@ function planFartlek(activities, band, form, paces) {
     label: title,
     html: `Riscaldamento 12' Z1 (FC&nbsp;&lt;123). Poi ${body}. Defaticamento 10' Z1.<br><span class="reco-opt-meta">~${minutes} min · variante ${variant + 1} di 3</span>`,
     progress: done ? `tu hai già fatto ${done} fartlek: ${variant === 0 ? 'si riparte dal classico 2′/1′ con una ripetizione in più' : 'oggi cambia la variante per non ripetere lo stesso stimolo'}` : 'prima volta: si parte da una variante semplice',
-    link: 'corsa.html', spec: { sport: 'running', title, steps },
+    link: '/pianoallenamento/corsa.html', spec: { sport: 'running', title, steps },
   };
 }
 
@@ -563,7 +563,7 @@ function planProgressivo(band, form, paces) {
     label: title,
     html: `Riscaldamento 10' Z1. Poi <strong>${total}' progressivi</strong>: ${z2}' in Z2 (5:45–6:15/km) → ${mid}' a ritmo medio (${rangeText(midP)}) → ${thr}' a ritmo da 10 km (${rangeText(thrP)}). Defaticamento 8' Z1.<br><span class="reco-opt-meta">~${total + 18} min · FC in salita da Z2 a Z3</span>`,
     progress: 'ritmi ricavati dalle previsioni di gara di Garmin di oggi, quindi seguono la tua forma',
-    link: 'corsa.html',
+    link: '/pianoallenamento/corsa.html',
     spec: { sport: 'running', title, steps: [
       { kind: 'warmup', time_s: 600, hr_zone: 1 },
       { kind: 'interval', time_s: z2 * 60, pace: [345, 375], note: 'Z2' },
@@ -603,7 +603,7 @@ function planVo2(activities, band, form, paces) {
     label: title,
     html: `Riscaldamento 12' Z1 + 4×80&nbsp;m progressivi. Poi ${body}. Defaticamento 10' Z1.<br><span class="reco-opt-meta">~${Math.round(minutes)} min · FC 162–172 (Z4)</span>`,
     progress: done ? `alterna con ${pyramid ? 'le ripetute lunghe' : 'la piramide'} per non ripetere lo stesso stimolo` : 'stimolo diverso dalle ripetute corte: tempo più a lungo vicino al VO2max',
-    link: 'corsa.html', spec: { sport: 'running', title, steps },
+    link: '/pianoallenamento/corsa.html', spec: { sport: 'running', title, steps },
   };
 }
 
@@ -658,7 +658,7 @@ const SWIM_EXTRA_SPECS = {
     SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
 };
 const SWIM_ALL_SPECS = { ...SWIM_SPECS, ...SWIM_EXTRA_SPECS };
-const SWIM_LINKS = { tecnica: 'nuoto.html#sessA', velocitaPura: 'nuoto.html#sessBdom', sprintVirate: 'nuoto.html#sessC', bracciataVelocita: 'nuoto.html#sessD' };
+const SWIM_LINKS = { tecnica: '/pianoallenamento/nuoto.html#sessA', velocitaPura: '/pianoallenamento/nuoto.html#sessBdom', sprintVirate: '/pianoallenamento/nuoto.html#sessC', bracciataVelocita: '/pianoallenamento/nuoto.html#sessD' };
 const SWIM_FAMILIES = [
   { key: 'tecnica', match: ['soglia'] }, { key: 'resistenza', match: ['resistenza'] },
   { key: 'gambePull', match: ['gambe'] }, { key: 'piramide', match: ['piramide'] }, { key: 'misti', match: ['misti'] },
@@ -703,7 +703,7 @@ function buildSwimSession(key, form, activities) {
     return nb;
   });
   const spec = { ...base, blocks };
-  return { label: spec.title, html: swimHtml(spec), link: SWIM_LINKS[key] || 'nuoto.html', spec };
+  return { label: spec.title, html: swimHtml(spec), link: SWIM_LINKS[key] || '/pianoallenamento/nuoto.html', spec };
 }
 
 function computeTrends(activities, fitness, goals) {
@@ -818,7 +818,7 @@ function computeRecommendation(activities, fitness, sleepNights, goals) {
   else if (runChoice === 'base') run = {
     label: 'Corsa aerobica Z2',
     html: `<strong>35–45 min</strong> in Z2, FC&nbsp;&lt;148, passo 5:45–6:10/km, senza ritmo né ripetute: oggi si costruisce base senza accumulare fatica.`,
-    link: 'corsa.html#c-sab-z2',
+    link: '/pianoallenamento/corsa.html#c-sab-z2',
     spec: { sport: 'running', title: 'Corsa aerobica Z2', steps: [{ kind: 'interval', time_s: 2400, pace: [345, 375], note: 'Z2, FC sotto 148' }] },
   };
   else run = RUN_SESSIONS.facile;
@@ -861,7 +861,7 @@ function renderRecommendation(model) {
       </div>
     </div>
     <div class="reco-signals">
-      <div class="reco-sig"><b>Prontezza ${r.score}/100</b> (${bandText})<div class="reco-sig-detail">${parts}</div></div>
+      <div class="reco-sig"><b>Forma di oggi: ${bandText}</b><div class="reco-sig-detail">Dipende da: ${parts}</div></div>
       ${trendLines}${goalLines}
     </div>
     <div class="reco-options">

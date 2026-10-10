@@ -2,7 +2,7 @@
   "name": "Piano Allenamento",
   "short_name": "Piano",
   "description": "Programma di allenamento, dati Garmin/Withings e sonno",
-  "start_url": "/index.html",
+  "start_url": "/pianoallenamento/index.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
