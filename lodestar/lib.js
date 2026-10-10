@@ -86,7 +86,6 @@ const LibUI = (function () {
   }
 
   function sendBox(onSend, canSend, sport) {
-    if (sport === 'strength') return '<div class="ld-muted">Invio all\'orologio non ancora disponibile per la palestra.</div>';
     if (!canSend) return '';
     return `<div class="reco-send"><input type="date" class="reco-date" title="Giorno in calendario (facoltativo)"> <button type="button" class="cw-btn" data-send>Invia all'orologio</button> <span class="reco-send-msg"></span></div>`;
   }

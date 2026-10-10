@@ -66,7 +66,7 @@ function sessionHtml(s, date) {
   const past = date < todayISO();
   const status = done ? '<span class="ld-ok">✅ fatto</span>' : (past ? '<span class="ld-muted">non registrato</span>' : '');
   const meta = [s.km ? (s.sport === 'swimming' ? Math.round(s.km * 1000) + ' m' : s.km + ' km') : '', s.min ? '~' + s.min + ' min' : ''].filter(Boolean).join(' · ');
-  const send = s.sport === 'strength' ? '' : (state.canSend && !past ? `<div class="reco-send"><button type="button" class="cw-btn" data-send="${s.id}" data-date="${date}">${s.sent ? 'Reinvia' : "Invia all'orologio"} (${dayLabel(date)})</button> <span class="reco-send-msg"></span></div>` : '');
+  const send = (state.canSend && !past ? `<div class="reco-send"><button type="button" class="cw-btn" data-send="${s.id}" data-date="${date}">${s.sent ? 'Reinvia' : "Invia all'orologio"} (${dayLabel(date)})</button> <span class="reco-send-msg"></span></div>` : '');
   return `<details class="pl-sess${done ? ' pl-done' : ''}" data-sid="${s.id}"><summary>${icon} <b>${LibUI.e(s.title)}</b> <span class="ld-muted">${meta}</span> ${status}${s.sent ? ' <span class="ld-badge alt">inviato</span>' : ''}</summary>
     ${LibUI.html(s.spec)}${send}</details>`;
 }

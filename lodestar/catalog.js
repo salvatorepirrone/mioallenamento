@@ -1,5 +1,5 @@
 // Lodestar — allenamenti di base delle tre librerie (corsa, nuoto, palestra).
-// Corsa e nuoto hanno una struttura inviabile a Garmin; la palestra e' una scheda da seguire (invio all'orologio non ancora disponibile).
+// Tutte e tre hanno una struttura inviabile a Garmin (la palestra come allenamento di forza con serie, ripetizioni e carichi).
 // Il consiglio del giorno (engine.js) genera varianti adattate a forma e andamento; qui c'e' il catalogo di partenza.
 
 const RUN_CATALOG = [

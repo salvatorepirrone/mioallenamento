@@ -209,7 +209,9 @@ function coach_send_to_garmin(array $w): array {
     if ($sport === 'running') {
         return coach_run_python(['sport' => 'running', 'name' => 'Coach · ' . $p['title'], 'date' => $w['date'] ?? null, 'steps' => $p['steps']]);
     }
-    if ($sport === 'strength') throw new InvalidArgumentException("L'invio all'orologio degli allenamenti di palestra non è ancora disponibile.");
+    if ($sport === 'strength') {
+        return coach_run_python(['sport' => 'strength', 'name' => 'Coach · ' . $p['title'], 'date' => $w['date'] ?? null, 'exercises' => $p['exercises']]);
+    }
     return coach_run_python([
         'name' => 'Coach · ' . $p['title'], 'date' => $w['date'] ?? null,
         'pool_length_m' => $p['pool_length_m'] ?? 25, 'blocks' => $p['blocks'],
@@ -286,6 +288,10 @@ function coach_send_plan(array $plan, ?string $date): array {
         [$dist, $secs] = coach_run_totals($steps);
         if ($dist > 60000 || $secs > 6 * 3600) throw new InvalidArgumentException('Allenamento troppo lungo per essere plausibile.');
         return coach_run_python(['sport' => 'running', 'name' => $label, 'date' => $date, 'steps' => $steps]);
+    }
+    if ($sport === 'strength') {
+        $parsed = coach_validate_strength(['title' => $title, 'exercises' => $plan['exercises'] ?? null]);
+        return coach_run_python(['sport' => 'strength', 'name' => $label, 'date' => $date, 'exercises' => $parsed['exercises']]);
     }
     if ($sport === 'swimming') {
         $parsed = coach_validate_parsed(['title' => $title, 'pool_length_m' => 25, 'blocks' => $plan['blocks'] ?? null]);

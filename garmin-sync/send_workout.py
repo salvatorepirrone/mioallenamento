@@ -236,9 +236,102 @@ def build_run_workout(spec: dict) -> dict:
     }
 
 
+STRENGTH = {"sportTypeId": 5, "sportTypeKey": "strength_training", "displayOrder": 5}
+KG_UNIT = {"unitId": 8, "unitKey": "kilogram", "factor": 1000.0}
+# Nome dell'esercizio (italiano, anche abbreviato) -> (categoria, esercizio) del profilo FIT di Garmin.
+# Chi non e' riconosciuto resta un passo generico con il nome nella descrizione.
+STRENGTH_EXERCISES = [
+    (r"plank.*(laterale|side)|side.?plank", "PLANK", "SIDE_PLANK"),
+    (r"plank.*rotazione|plank.*obliqu", "PLANK", "PLANK_WITH_OBLIQUE_CRUNCH"),
+    (r"plank", "PLANK", "PLANK"),
+    (r"hollow|dead.?bug", "HIP_STABILITY", "DEAD_BUG"),
+    (r"piegament|push.?up", "PUSH_UP", "PUSH_UP"),
+    (r"trazion|pull.?up|sbarra", "PULL_UP", "PULL_UP"),
+    (r"lat|pulldown|lat machine", "PULL_UP", "REVERSE_GRIP_PULLDOWN"),
+    (r"face.?pull", "ROW", "FACE_PULL"),
+    (r"rear.?delt|rematore|row", "ROW", "WIDE_GRIP_SEATED_CABLE_ROW"),
+    (r"goblet", "SQUAT", "GOBLET_SQUAT"),
+    (r"squat", "SQUAT", "SQUAT"),
+    (r"hip.?thrust|ponte", "HIP_RAISE", "WEIGHTED_HIP_RAISE"),
+    (r"pectoral|chest.?press|panca", "BENCH_PRESS", "SINGLE_ARM_CABLE_CHEST_PRESS"),
+    (r"affond|lunge", "LUNGE", "LUNGE"),
+    (r"stacco|deadlift", "DEADLIFT", "DEADLIFT"),
+    (r"crunch|addominal", "CRUNCH", "CRUNCH"),
+    (r"curl", "CURL", "STANDING_BICEPS_CURL"),
+    (r"calf|polpacc", "CALF_RAISE", "STANDING_CALF_RAISE"),
+]
+SECONDS_PER_REP = 3.5
+
+
+def _strength_exercise_ids(name: str):
+    import re
+    low = (name or "").lower()
+    for pattern, category, ex in STRENGTH_EXERCISES:
+        if re.search(pattern, low):
+            return category, ex
+    return None, None
+
+
+def _strength_step(order: int, ex: dict) -> dict:
+    category, exercise = _strength_exercise_ids(ex.get("name", ""))
+    if ex.get("seconds"):
+        end = {"conditionTypeId": 2, "conditionTypeKey": "time", "displayOrder": 2, "displayable": True}
+        value = float(ex["seconds"])
+    else:
+        end = {"conditionTypeId": 10, "conditionTypeKey": "reps", "displayOrder": 10, "displayable": True}
+        value = float(ex.get("reps") or 10)
+    weight = ex.get("weight_kg")
+    note = (ex.get("note") or "").strip()
+    desc = (ex["name"] + (" - " + note if note else ""))[:500]
+    step = _run_executable(order, {"kind": "interval", "note": desc})
+    step.update({"endCondition": end, "endConditionValue": value, "preferredEndConditionUnit": None,
+                 "category": category, "exerciseName": exercise,
+                 "weightValue": float(weight) if weight else None, "weightUnit": KG_UNIT if weight else None})
+    return step
+
+
+def _strength_rest(order: int, seconds: int) -> dict:
+    step = _run_executable(order, {"kind": "recovery"})
+    step["stepType"] = {"stepTypeId": 5, "stepTypeKey": "rest", "displayOrder": 5}
+    step["endCondition"] = {"conditionTypeId": 2, "conditionTypeKey": "time", "displayOrder": 2, "displayable": True}
+    step["endConditionValue"] = float(seconds)
+    step["description"] = None
+    return step
+
+
+def build_strength_workout(spec: dict) -> dict:
+    order = 0
+    secs = 0.0
+    steps = []
+    for ex in spec["exercises"]:
+        sets = max(1, int(ex.get("sets") or 1))
+        rest = int(ex["rest_s"]) if ex.get("rest_s") else 60
+        work = float(ex["seconds"]) if ex.get("seconds") else float(ex.get("reps") or 10) * SECONDS_PER_REP
+        secs += sets * work + (sets - 1) * rest
+        if sets == 1:
+            order += 1
+            steps.append(_strength_step(order, ex))
+            continue
+        group = order + 1
+        order += 1
+        children = []
+        order += 1
+        children.append(_strength_step(order, ex))
+        order += 1
+        children.append(_strength_rest(order, rest))
+        steps.append(_repeat(group, sets, children, True))
+    return {
+        "workoutName": spec["name"][:80], "description": (spec.get("description") or None),
+        "sportType": STRENGTH, "estimatedDistanceInMeters": 0.0, "estimatedDurationInSecs": int(secs),
+        "workoutSegments": [{"segmentOrder": 1, "sportType": STRENGTH, "workoutSteps": steps}],
+    }
+
+
 def build_workout(spec: dict) -> dict:
     if spec.get("sport") == "running":
         return build_run_workout(spec)
+    if spec.get("sport") == "strength":
+        return build_strength_workout(spec)
     steps, total = build_steps(spec["blocks"])
     pool = float(spec.get("pool_length_m") or 25)
     return {
