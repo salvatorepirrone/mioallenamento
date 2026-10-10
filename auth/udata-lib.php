@@ -101,3 +101,13 @@ function udata_start_sync(string $user): array {
     exec($cmd);
     return ['started' => true];
 }
+
+
+// Cancella tutto cio' che Lodestar conserva di un utente: dati sincronizzati, token, profilo, diario dei pasti e piano.
+function udata_delete_all(string $user): void {
+    udata_rm_dir(udata_base($user));
+    foreach (['meals-', 'plan-'] as $prefix) {
+        $f = dirname(auth_users_file()) . '/' . $prefix . $user . '.json';
+        if (is_file($f)) @unlink($f);
+    }
+}

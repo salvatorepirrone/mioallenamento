@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sonno · Lodestar</title>
+<link rel="manifest" href="/lodestar/manifest.json">
+<meta name="theme-color" content="#12263f">
+<link rel="icon" href="/lodestar/icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/lodestar/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Piano">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f6f8f3;
+    --border: #dce3d3;
+    --accent: #2E6DA4;
+    --hero: #1B4965;
+    --accent2: #3f72a0;
+    --text: #262b22;
+    --muted: #5f6a58;
+    --good: #2f8f66;
+    --warn: #8f6a1f;
+    --bad: #b94a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', 'Courier New', monospace;
+    min-height: 100vh;
+  }
+
+  /* NAV -> SIDEBAR A SCOMPARSA */
+  .nav-toggle {
+    position: fixed; top: 12px; left: 12px; z-index: 200;
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 1px 4px rgba(20,40,55,.1);
+  }
+  .nav-toggle span {
+    position: relative; width: 18px; height: 2px; background: var(--text);
+    display: block; transition: background .2s;
+  }
+  .nav-toggle span::before, .nav-toggle span::after {
+    content: ''; position: absolute; left: 0; width: 18px; height: 2px;
+    background: var(--text); transition: transform .2s, top .2s;
+  }
+  .nav-toggle span::before { top: -6px; }
+  .nav-toggle span::after { top: 6px; }
+  body.nav-open .nav-toggle span { background: transparent; }
+  body.nav-open .nav-toggle span::before { top: 0; transform: rotate(45deg); }
+  body.nav-open .nav-toggle span::after { top: 0; transform: rotate(-45deg); }
+
+  nav {
+    background: var(--surface); border-right: 1px solid var(--border);
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 150;
+    width: 230px; padding: 64px 14px 20px; height: 100vh;
+    display: flex; flex-direction: column;
+    transform: translateX(-100%); transition: transform .25s ease;
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  body.nav-open nav { transform: translateX(0); }
+  .nav-logo {
+    font-size: 18px; font-weight: 700; color: var(--accent);
+    letter-spacing: .04em; margin-bottom: 18px; white-space: nowrap;
+  }
+  .nav-links { display: flex; flex-direction: column; gap: 4px; }
+  .nav-links a {
+    padding: 9px 12px; border-radius: 8px; font-size: 13px;
+    color: var(--muted); white-space: nowrap; transition: all .2s;
+    display: flex; align-items: center; gap: 8px; text-decoration: none;
+  }
+  .nav-links a:hover { background: #eef2e7; color: var(--text); }
+  .nav-links a.active { background: var(--hero); color: #fff; }
+  .nav-links a.active .dot { background: #fff !important; }
+  .nav-links a .dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  .nav-backdrop {
+    position: fixed; inset: 0; background: rgba(15,25,35,.4); z-index: 140;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  body.nav-open .nav-backdrop { opacity: 1; pointer-events: auto; }
+  @media (min-width: 900px) { .nav-backdrop { display: none; } }
+
+  .nav-refresh-btn {
+    margin-top: auto; padding: 9px 12px; border-radius: 8px;
+    font-size: 13px; font-family: inherit; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--border);
+    cursor: pointer; text-align: left; transition: all .2s;
+  }
+  .nav-refresh-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+  .nav-refresh-btn:disabled { opacity: .6; cursor: default; }
+
+  /* MAIN */
+  main { max-width: 900px; margin: 0 auto; padding: 64px 1.5rem 4rem; font-family: 'DM Mono', 'Courier New', monospace; }
+  @media (min-width: 900px) {
+    body.nav-open main { margin-left: 230px; transition: margin-left .25s ease; }
+  }
+
+  .page-hero {
+    background: var(--hero); color: #fff; border-radius: 20px;
+    padding: 22px 24px 24px; margin-bottom: 2rem;
+  }
+  .page-hero h1 { color: #fff; }
+  .page-hero .subtitle { color: rgba(255,255,255,.72); margin-bottom: 0; }
+
+  h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .25rem; }
+  .subtitle { color: var(--muted); font-size: .8rem; margin-bottom: 2rem; }
+
+  /* STATO */
+  #status-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2rem; text-align: center;
+    margin-bottom: 2rem;
+  }
+  #status-box .icon { font-size: 2.5rem; margin-bottom: .75rem; }
+  #status-box p { color: var(--muted); font-size: .85rem; }
+  #status-box strong { color: var(--text); }
+
+  /* CONNECT BUTTON */
+  .btn-connect {
+    display: inline-block; background: var(--accent); color: #ffffff;
+    padding: .65rem 1.5rem; border-radius: 6px; font-family: inherit;
+    font-size: .8rem; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; cursor: pointer; border: none;
+    text-decoration: none; transition: opacity .2s;
+  }
+  .btn-connect:hover { opacity: .85; }
+  .btn-secondary {
+    display: inline-block; background: transparent; color: var(--muted);
+    padding: .65rem 1.5rem; border-radius: 6px; font-family: inherit;
+    font-size: .8rem; cursor: pointer; border: 1px solid var(--border);
+    text-decoration: none; transition: all .2s; margin-left: .5rem;
+  }
+  .btn-secondary:hover { color: var(--text); border-color: var(--text); }
+
+  /* GRID DATI */
+  .data-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem;
+  }
+  .card-label {
+    font-size: .65rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: .5rem;
+  }
+  .card-value { font-size: 2rem; font-weight: 700; line-height: 1; }
+  .card-sub { font-size: .75rem; color: var(--muted); margin-top: .3rem; }
+  .card-accent { border-left: 3px solid var(--accent); }
+  .card-blue { border-left: 3px solid var(--accent2); }
+  .card-green { border-left: 3px solid var(--good); }
+
+  /* SLEEP STAGES */
+  .sleep-bar { margin-top: 1rem; }
+  .sleep-bar-track {
+    height: 8px; border-radius: 4px; background: var(--border);
+    display: flex; overflow: hidden; margin: .5rem 0;
+  }
+  .seg-deep { background: #6b7fa0; }
+  .seg-light { background: #9aa8cc; }
+  .seg-rem { background: var(--accent2); }
+  .seg-awake { background: var(--border); }
+  .sleep-legend {
+    display: flex; gap: 1rem; flex-wrap: wrap; font-size: .7rem; color: var(--muted);
+  }
+  .leg-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    display: inline-block; margin-right: 4px; vertical-align: middle;
+  }
+
+  /* SCORE RING */
+  .score-wrap { display: flex; align-items: center; gap: 1.5rem; }
+  .score-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-num {
+    position: absolute; inset: 0; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 1.3rem; font-weight: 700;
+  }
+  .score-details { flex: 1; }
+  .score-row { display: flex; justify-content: space-between; font-size: .78rem; padding: .2rem 0; border-bottom: 1px solid var(--border); }
+  .score-row:last-child { border: none; }
+  .score-row span:last-child { color: var(--accent); font-weight: 600; }
+
+  /* HRV */
+  .hrv-bar { margin-top: .75rem; }
+  .hrv-track {
+    height: 6px; background: var(--border); border-radius: 3px;
+    position: relative; margin: .4rem 0 .2rem;
+  }
+  .hrv-fill { height: 100%; border-radius: 3px; background: var(--good); }
+  .hrv-pointer {
+    position: absolute; top: -3px; width: 2px; height: 12px;
+    background: var(--accent); border-radius: 1px;
+  }
+
+  /* TABLE */
+  .history-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  .history-table th {
+    text-align: left; font-size: .65rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+    padding: .5rem .75rem; border-bottom: 1px solid var(--border);
+  }
+  .history-table td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); }
+  .history-table tr:last-child td { border: none; }
+  .badge {
+    display: inline-block; padding: .15rem .5rem; border-radius: 3px;
+    font-size: .65rem; font-weight: 600; letter-spacing: .05em;
+  }
+  .badge-good { background: rgba(47,143,102,.15); color: var(--good); }
+  .badge-ok { background: rgba(166,124,36,.15); color: var(--warn); }
+  .badge-bad { background: rgba(185,74,58,.15); color: var(--bad); }
+
+  /* SPINNER */
+  .spinner {
+    width: 32px; height: 32px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin .8s linear infinite; margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* APNEA ALERT */
+  .alert {
+    border: 1px solid var(--warn); background: rgba(166,124,36,.05);
+    border-radius: 6px; padding: .75rem 1rem; font-size: .8rem;
+    color: var(--warn); margin-top: 1rem;
+  }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body data-page="sonno">
+
+
+<main>
+  <div class="hero">
+    <h1>😴 Dati Withings</h1>
+    <p class="subtitle">Sonno · Peso · FC notturna — da Withings Health Mate</p>
+  </div>
+
+  <!-- STATO: caricamento -->
+  <div id="view-loading" class="hidden">
+    <div id="status-box">
+      <div class="spinner"></div>
+      <strong>Caricamento dati...</strong>
+      <p>Recupero dati sincronizzati dal NAS</p>
+    </div>
+  </div>
+
+  <!-- STATO: errore -->
+  <div id="view-error" class="hidden">
+    <div id="status-box">
+      <div class="icon">⚠️</div>
+      <strong id="error-msg">Dati non disponibili</strong>
+      <p style="margin:.5rem 0 1.25rem">Riprova, o controlla che lo script di sync sul NAS funzioni.</p>
+      <button class="btn-connect" onclick="loadData()">Riprova</button>
+      <a href="/lodestar/" class="btn-secondary">← Torna alla home</a>
+    </div>
+  </div>
+
+  <!-- STATO: dati caricati -->
+  <div id="view-data" class="hidden">
+
+    <!-- ULTIMA NOTTE -->
+    <div class="data-grid">
+
+      <!-- Score sonno -->
+      <div class="card card-accent">
+        <div class="card-label">Score sonno — stanotte</div>
+        <div id="sleep-unavailable" class="hidden" style="font-size:.75rem;color:var(--warn);margin-bottom:.75rem">⚠️ Dati sonno non ancora disponibili — scope in attesa di approvazione Withings.</div>
+        <div class="score-wrap">
+          <div class="score-ring">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="#dce3d3" stroke-width="8"/>
+              <circle id="score-arc" cx="40" cy="40" r="34" fill="none"
+                stroke="#2E6DA4" stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+            </svg>
+            <div class="score-num" id="score-num">—</div>
+          </div>
+          <div class="score-details">
+            <div class="score-row"><span>Durata</span><span id="s-duration">—</span></div>
+            <div class="score-row"><span>Profondo</span><span id="s-deep">—</span></div>
+            <div class="score-row"><span>REM</span><span id="s-rem">—</span></div>
+            <div class="score-row"><span>Risvegli</span><span id="s-wakeup">—</span></div>
+          </div>
+        </div>
+        <!-- Barra fasi -->
+        <div class="sleep-bar">
+          <div class="sleep-bar-track" id="stage-bar"></div>
+          <div class="sleep-legend">
+            <span><span class="leg-dot" style="background:#6b7fa0"></span>Profondo</span>
+            <span><span class="leg-dot" style="background:#9aa8cc"></span>Leggero</span>
+            <span><span class="leg-dot" style="background:#3f72a0"></span>REM</span>
+            <span><span class="leg-dot" style="background:#dce3d3"></span>Sveglio</span>
+          </div>
+        </div>
+        <div id="apnea-alert" class="alert hidden">⚠️ Rilevate possibili apnee — valuta consulto medico.</div>
+      </div>
+
+      <!-- FC notturna + HRV -->
+      <div class="card card-blue">
+        <div class="card-label">Frequenza cardiaca notturna</div>
+        <div class="card-value" id="hr-min">—</div>
+        <div class="card-sub">bpm minimo · media <span id="hr-avg">—</span> bpm</div>
+        <div class="hrv-bar">
+          <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-top:.75rem">
+            <span>Respirazione media</span>
+            <span id="rr-val">— resp/min</span>
+          </div>
+        </div>
+        <div style="margin-top:1rem">
+          <div class="card-label">Snoring</div>
+          <div style="font-size:1.1rem;font-weight:600" id="snoring-val">—</div>
+        </div>
+      </div>
+
+      <!-- Peso -->
+      <div class="card card-green">
+        <div class="card-label">Ultimo peso rilevato</div>
+        <div class="card-value" id="weight-val">—</div>
+        <div class="card-sub" id="weight-date">—</div>
+        <div style="margin-top:1rem;font-size:.78rem">
+          <div style="display:flex;justify-content:space-between;padding:.2rem 0">
+            <span style="color:var(--muted)">Target piano</span>
+            <span style="color:var(--accent)">73,0 kg</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:.2rem 0">
+            <span style="color:var(--muted)">Differenza</span>
+            <span id="weight-diff">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:.2rem 0">
+            <span style="color:var(--muted)">Grasso corporeo</span>
+            <span id="fat-val">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- STORICO SONNO -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="card-label" style="margin-bottom:1rem">Storico ultime notti</div>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Notte</th>
+            <th>Durata</th>
+            <th>Profondo</th>
+            <th>REM</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="history-body">
+          <tr><td colspan="5" style="color:var(--muted);text-align:center">Caricamento...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+function show(id) {
+  ['view-loading','view-error','view-data'].forEach(v => {
+    document.getElementById(v).classList.toggle('hidden', v !== id);
+  });
+}
+
+function fmtMin(min) {
+  if (!min) return '—';
+  return `${Math.floor(min/60)}h ${min%60}m`;
+}
+
+function scoreColor(s) {
+  if (s >= 75) return 'var(--good)';
+  if (s >= 55) return 'var(--warn)';
+  return 'var(--bad)';
+}
+
+function scoreBadge(s) {
+  if (!s) return '<span class="badge badge-ok">—</span>';
+  if (s >= 75) return `<span class="badge badge-good">${s}</span>`;
+  if (s >= 55) return `<span class="badge badge-ok">${s}</span>`;
+  return `<span class="badge badge-bad">${s}</span>`;
+}
+
+// -- CARICAMENTO DATI (live da data/*.json, sincronizzati dallo script sul NAS) --
+
+async function fetchJSON(path) {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`${path} non disponibile`);
+  return res.json();
+}
+
+async function loadData() {
+  show('view-loading');
+  try {
+    const [sleep, weight] = await Promise.all([
+      fetchJSON('/lodestar/mydata.php?f=withings-sleep'),
+      fetchJSON('/lodestar/mydata.php?f=withings-weight')
+    ]);
+    renderData(sleep, weight);
+    show('view-data');
+  } catch (e) {
+    console.error(e);
+    document.getElementById('error-msg').textContent = e.message;
+    show('view-error');
+  }
+}
+
+// -- RENDER --
+
+function renderData(sleepNights, weightData) {
+  const nights = (sleepNights || []).slice().sort((a, b) => b.date < a.date ? -1 : 1);
+
+  if (nights.length > 0) {
+    const d = nights[0];
+
+    const score = d.sleep_score || null;
+    document.getElementById('score-num').textContent = score || '—';
+    if (score) {
+      const arc = document.getElementById('score-arc');
+      const circ = 213.6;
+      arc.style.strokeDashoffset = circ - (score / 100) * circ;
+      arc.style.stroke = scoreColor(score);
+    }
+
+    document.getElementById('s-duration').textContent = fmtMin(d.total_sleep_time_min || 0);
+    document.getElementById('s-deep').textContent = fmtMin(d.deep_min || 0);
+    document.getElementById('s-rem').textContent = fmtMin(d.rem_min || 0);
+    document.getElementById('s-wakeup').textContent = d.wakeupcount != null ? `${d.wakeupcount}×` : '—';
+
+    const total = (d.deep_min || 0) + (d.light_min || 0) + (d.rem_min || 0) + Math.max(0, (d.total_timeinbed_min || 0) - (d.total_sleep_time_min || 0));
+    if (total > 0) {
+      const bar = document.getElementById('stage-bar');
+      bar.innerHTML = `
+        <div class="seg-deep" style="flex:${d.deep_min || 0}"></div>
+        <div class="seg-light" style="flex:${d.light_min || 0}"></div>
+        <div class="seg-rem" style="flex:${d.rem_min || 0}"></div>
+        <div class="seg-awake" style="flex:${Math.max(0, (d.total_timeinbed_min || 0) - (d.total_sleep_time_min || 0))}"></div>
+      `;
+    }
+
+    if ((d.breathing_disturbances_intensity || 0) > 40) {
+      document.getElementById('apnea-alert').classList.remove('hidden');
+    }
+
+    document.getElementById('hr-min').textContent = d.hr_min ? `${d.hr_min} bpm` : '—';
+    document.getElementById('hr-avg').textContent = d.hr_average || '—';
+    document.getElementById('rr-val').textContent = d.rr_average ? `${d.rr_average} resp/min` : '—';
+
+    const snor = d.snoring_min || 0;
+    document.getElementById('snoring-val').textContent = `${snor} min`;
+  }
+
+  const tbody = document.getElementById('history-body');
+  if (nights.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center">Nessun dato disponibile</td></tr>';
+  } else {
+    tbody.innerHTML = nights.slice(0, 7).map(d => {
+      const date = new Date(d.date);
+      const label = date.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+      return `<tr>
+        <td>${label}</td>
+        <td>${fmtMin(d.total_sleep_time_min || 0)}</td>
+        <td>${fmtMin(d.deep_min || 0)}</td>
+        <td>${fmtMin(d.rem_min || 0)}</td>
+        <td>${scoreBadge(d.sleep_score)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  if (weightData && weightData.length > 0) {
+    const latest = weightData[0];
+    if (latest.weight != null) {
+      document.getElementById('weight-val').textContent = `${latest.weight.toFixed(1)} kg`;
+      document.getElementById('weight-date').textContent = new Date(latest.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+      const diff = latest.weight - 73.0;
+      const diffEl = document.getElementById('weight-diff');
+      diffEl.textContent = `${diff > 0 ? '+' : ''}${diff.toFixed(1)} kg`;
+      diffEl.style.color = diff <= 0 ? 'var(--good)' : diff < 2 ? 'var(--warn)' : 'var(--bad)';
+    }
+    document.getElementById('fat-val').textContent = latest.fat != null ? `${latest.fat.toFixed(1)}%` : '—';
+  }
+}
+
+loadData();
+</script>
+<script src="/lodestar/app.js"></script>
+</body>
+</html>

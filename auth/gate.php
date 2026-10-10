@@ -30,6 +30,23 @@ if (!$valid) {
     exit;
 }
 
+// Accesso per app: /lodestar/ solo a chi e' abilitato a Lodestar, /pianoallenamento/ solo a chi e' abilitato al sito classico (lo decide
+// l'admin a mano). Il resto (endpoint e risorse condivise) richiede l'abilitazione ad almeno una delle due.
+$appNeeded = ($path === '/lodestar' || strpos($path, '/lodestar/') === 0) ? 'lodestar'
+           : (($path === '/pianoallenamento' || strpos($path, '/pianoallenamento/') === 0) ? 'pianoallenamento' : null);
+$mine = auth_apps_of($name);
+if (($appNeeded !== null && !in_array($appNeeded, $mine, true)) || ($appNeeded === null && !$mine)) {
+    http_response_code(403);
+    if (in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD'], true) && substr($path, -4) !== '.php' && substr($path, -5) !== '.json') {
+        $other = $mine ? ('<p>Puoi usare <a href="/">' . auth_h(AUTH_APPS[$mine[0]]) . '</a>.</p>') : '';
+        auth_page('Accesso non abilitato', '<p>Il tuo account non è abilitato a ' . auth_h($appNeeded ? AUTH_APPS[$appNeeded] : 'questo sito') . '.</p>' . $other . '<p><a href="/auth/logout.php">Esci</a></p>');
+    } else {
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Accesso non abilitato a questa app']);
+    }
+    exit;
+}
+
 // /data/ contiene le attivita' e il peso dell'atleta storico (le usa il sito classico): niente accesso per gli altri utenti,
 // che leggono i propri dati da lodestar/mydata.php.
 if (strpos($path, '/data/') === 0 && $name !== UDATA_DEFAULT_ATHLETE) {

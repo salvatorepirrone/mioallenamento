@@ -82,12 +82,6 @@ if ('serviceWorker' in navigator) {
     lib.innerHTML = '<span class="dot" style="background:#5ac8f5"></span>Libreria allenamenti 📚';
     links.appendChild(lib);
   }
-  if (links && !links.querySelector('a[href="/lodestar/"]')) {
-    var ld = document.createElement('a');
-    ld.href = '/lodestar/';
-    ld.innerHTML = '<span class="dot" style="background:#e8b64b"></span>✦ Lodestar (nuova app)';
-    links.insertBefore(ld, links.firstChild);
-  }
   fetch('/whoami.php', { cache: 'no-store', credentials: 'same-origin' })
     .then(function (res) { return res.ok ? res.json() : null; })
     .then(function (data) {

@@ -2,7 +2,7 @@
 (function () {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/service-worker.js').catch(function () {});
+      navigator.serviceWorker.register('/lodestar/sw.js', { scope: '/lodestar/' }).catch(function () {});
     });
   }
 
@@ -17,8 +17,8 @@
     { id: 'piano', href: '/lodestar/piano.html', label: 'Piano 🎯', dot: '#2E6DA4' },
   ];
   var TOOLS = [
-    { href: '/pianoallenamento/peso.html', label: 'Peso ⚖️', dot: '#f5c85a' },
-    { href: '/pianoallenamento/callback.html', label: 'Sonno 😴', dot: '#5af5c8' },
+    { id: 'peso', href: '/lodestar/peso.html', label: 'Peso ⚖️', dot: '#f5c85a' },
+    { id: 'sonno', href: '/lodestar/sonno.html', label: 'Sonno 😴', dot: '#5af5c8' },
     { id: 'editor', href: '/lodestar/editor.html', label: 'Editor FIT', dot: '#f55ac8' },
     { id: 'collegamenti', href: '/lodestar/collegamenti.html', label: 'Collegamenti 🔗', dot: '#9aa5ad' },
     { id: 'profilo', href: '/lodestar/profilo.html', label: 'Profilo 👤', dot: '#9aa5ad' },
@@ -110,7 +110,7 @@
     .then(function (data) {
       if (!data) return;
       if (data.user) logout.textContent = '🚪 Esci (' + data.user + ')';
-      if (data.admin) links.insertAdjacentHTML('beforeend', link({ href: '/pianoallenamento/accessi.php', label: 'Accessi 🔐', dot: '#9aa5ad' }, false));
+      if (data.admin) links.insertAdjacentHTML('beforeend', link({ href: '/lodestar/utenti.php', label: 'Utenti 👥', dot: '#9aa5ad' }, false));
     })
     .catch(function () {});
 })();

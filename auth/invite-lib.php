@@ -95,7 +95,7 @@ function invite_user(string $email, array $roles, string $by): array {
     if ($existing && empty($existing['pending'])) return ['ok' => false, 'error' => 'Esiste già un utente con questa email.'];
     auth_update_users(function ($users) use ($email, $roles, $by) {
         $rec = ['hash' => password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), 'pending' => true, 'email' => $email,
-                'invited_by' => $by, 'invited_at' => time(), 'fails' => 0, 'locked_until' => 0];
+                'invited_by' => $by, 'invited_at' => time(), 'fails' => 0, 'locked_until' => 0, 'apps' => ['lodestar' => true]];
         foreach (['coach', 'nutrizionista'] as $r) if (!empty($roles[$r]) || !empty($users[$email][$r])) $rec[$r] = true;
         $users[$email] = $rec;
         return $users;

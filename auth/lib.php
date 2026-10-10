@@ -54,18 +54,32 @@ function auth_all_users(): array {
 // Crea l'utente con una password temporanea casuale (da cambiare al primo accesso) e la
 // restituisce. Se l'utente esiste gia': null, a meno di $overwrite (azzera la password e
 // mantiene il ruolo admin).
-function auth_create_user(string $name, bool $overwrite = false): ?string {
+// Ogni utente ha accesso a una o piu' app del sito: 'lodestar' e 'pianoallenamento' (il sito classico, gestito a mano dall'admin).
+// Gli utenti storici, senza il campo 'apps', mantengono l'accesso a entrambe.
+const AUTH_APPS = ['lodestar' => 'Lodestar', 'pianoallenamento' => 'Piano allenamento'];
+
+function auth_has_app(?string $name, string $app): bool {
+    $u = $name ? auth_get_user($name) : null;
+    if (!$u) return false;
+    if (!array_key_exists('apps', $u)) return true;
+    return !empty($u['apps'][$app]);
+}
+
+function auth_apps_of(?string $name): array {
+    return array_values(array_filter(array_keys(AUTH_APPS), function ($a) use ($name) { return auth_has_app($name, $a); }));
+}
+
+function auth_create_user(string $name, bool $overwrite = false, ?array $apps = null): ?string {
     $alphabet = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     $temp = '';
     for ($i = 0; $i < 14; $i++) $temp .= $alphabet[random_int(0, strlen($alphabet) - 1)];
 
     $created = false;
-    auth_update_users(function ($users) use ($name, $temp, $overwrite, &$created) {
+    auth_update_users(function ($users) use ($name, $temp, $overwrite, $apps, &$created) {
         if (isset($users[$name]) && !$overwrite) return $users;
         $record = ['hash' => password_hash($temp, PASSWORD_DEFAULT), 'must_change' => true, 'fails' => 0, 'locked_until' => 0, 'temp_pw' => $temp];
-        if (!empty($users[$name]['admin'])) $record['admin'] = true;
-        if (!empty($users[$name]['coach'])) $record['coach'] = true;
-        if (!empty($users[$name]['disabled'])) $record['disabled'] = true;
+        foreach (['admin', 'coach', 'nutrizionista', 'disabled', 'email', 'apps'] as $keep) if (!empty($users[$name][$keep])) $record[$keep] = $users[$name][$keep];
+        if ($apps !== null && !isset($users[$name])) $record['apps'] = $apps;
         $users[$name] = $record;
         $created = true;
         return $users;
