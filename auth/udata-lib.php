@@ -11,6 +11,7 @@ const UDATA_SCRIPTS = '/volume2/homes/Claude/garmin-sync';
 const UDATA_LEGACY_OUT = '/volume2/web/data';
 const WITHINGS_CLIENT_ID = '3fbf541859fb9995d2e1ea7e89754aafc8375d2e6af6cc20846de2db87a91445';
 const WITHINGS_REDIRECT = 'https://pirrone.direct.quickconnect.to/callback.html';
+const UDATA_SITE_URL = 'https://pirrone.direct.quickconnect.to';
 const UDATA_FILES = ['garmin-activities', 'garmin-fitness', 'garmin-weight', 'withings-weight', 'withings-sleep', 'goals'];
 
 function udata_legacy(string $user): bool { return $user === UDATA_DEFAULT_ATHLETE; }
@@ -34,6 +35,10 @@ function udata_ensure(string $user): array {
     foreach ([$p['work'], $p['out'], $p['work'] . '/tmp'] as $d) if (!is_dir($d)) @mkdir($d, 0770, true);
     return $p;
 }
+
+// Stato della configurazione di un utente: profilo compilato e guida del primo accesso chiusa.
+function udata_has_profile(string $user): bool { return is_file(udata_base($user) . '/profile.json'); }
+function udata_onboarded(string $user): bool { return is_file(udata_base($user) . '/onboarded.json'); }
 
 function udata_connected(string $user): array {
     $p = udata_paths($user);

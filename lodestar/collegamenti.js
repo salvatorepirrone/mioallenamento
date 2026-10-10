@@ -101,6 +101,7 @@ async function load() {
 
 (async function init() {
   const q = new URLSearchParams(location.search);
+  if (q.get('from') === 'benvenuto') $('cn-msg').innerHTML = '<div class="ld-card"><a class="reco-link" href="/lodestar/benvenuto.html">← Torna alla guida iniziale</a></div>';
   try {
     await load();
     if (q.get('code') && q.get('state')) {                       // ritorno da Withings

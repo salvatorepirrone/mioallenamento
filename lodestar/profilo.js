@@ -27,6 +27,7 @@ P('p-save').onclick = async () => {
       sex: P('p-sex').value, birth_year: Number(P('p-birth').value), height_cm: Number(P('p-height').value), goal: P('p-goal').value,
       target_weight_kg: P('p-target').value, activity: P('p-activity').value, diet: P('p-diet').value } });
     st.innerHTML = '<span class="ld-ok">✅ Profilo salvato: gli obiettivi di nutrizione si aggiornano da subito.</span>';
+    if (new URLSearchParams(location.search).get('from') === 'benvenuto') setTimeout(() => { location.href = '/lodestar/benvenuto.html'; }, 1200);
   } catch (e) { st.innerHTML = `<span class="ld-err">${String(e.message).replace(/</g, '&lt;')}</span>`; }
 };
 

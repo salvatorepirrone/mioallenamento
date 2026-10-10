@@ -98,6 +98,15 @@
 .ld-weekrow { display: grid; grid-template-columns: 58px 1fr 150px; gap: 10px; align-items: center; font-size: 12.5px; padding: 3px 0; }
 .ld-cats[hidden] { display: none; }
 
+/* ---- guida del primo accesso ---- */
+.wz-steps { margin-top: 14px; display: grid; gap: 10px; }
+.wz-step { display: flex; align-items: center; gap: 14px; background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; flex-wrap: wrap; }
+.wz-step.done { border-color: rgba(46,125,50,.4); background: rgba(46,125,50,.06); }
+.wz-num { width: 30px; height: 30px; border-radius: 50%; background: var(--ld-navy); color: var(--ld-gold); font-weight: 700; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.wz-step.done .wz-num { background: var(--ld-good); color: #fff; }
+.wz-body { flex: 1; min-width: 200px; }
+.wz-step a.ld-btn { text-decoration: none; display: inline-block; }
+
 /* ---- collegamenti ---- */
 .cn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
 .cn-row input { flex: 1; min-width: 180px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; font: inherit; }

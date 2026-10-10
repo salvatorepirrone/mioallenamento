@@ -123,6 +123,7 @@ async function loadProfileBanner() {
   try {
     const d = await (await fetch('/lodestar/profile-api.php?action=get', { cache: 'no-store', credentials: 'same-origin' })).json();
     if (d.profile) return;
+    if (!d.onboarded) { location.replace('/lodestar/benvenuto.html'); return; }   // primo accesso: guida iniziale
     document.getElementById('ld-profile-banner').innerHTML = '<div class="ld-adapt" style="margin-top:14px">👤 Completa il tuo <a class="reco-link" href="/lodestar/profilo.html">profilo</a> (sesso, età, altezza, obiettivo): servono per calcolare calorie e pasti su misura per te.</div>';
   } catch (e) { /* profilo non disponibile */ }
 }

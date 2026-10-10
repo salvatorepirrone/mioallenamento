@@ -2,6 +2,7 @@
 // Registro degli accessi, riservato agli amministratori (vedi auth/make-admin.php).
 // Sta fuori da /auth/ cosi' passa dal gate: serve gia' una sessione valida.
 require_once __DIR__ . '/../auth/lib.php';
+require_once __DIR__ . '/../auth/udata-lib.php';
 
 $name = auth_current_user();
 if (!auth_is_admin($name)) {
@@ -215,6 +216,11 @@ th{background:var(--s2);color:var(--muted);font-size:11px;text-transform:upperca
   <b><?= e($created['label']) ?></b> Comunica queste credenziali in modo riservato: la password temporanea <b>non verrà più mostrata</b>
   e al primo accesso l'utente dovrà sceglierne una nuova.
   <div style="font-size:16px;margin-top:10px">Utente: <b><?= e($created['user']) ?></b><br>Password temporanea: <b style="font-family:monospace;user-select:all"><?= e($created['pw']) ?></b></div>
+  <?php $invite = "Ciao! Ti ho creato l'accesso a Lodestar, il coach AI per allenamento e nutrizione.\n\nIndirizzo: " . UDATA_SITE_URL . "/\nUtente: " . $created['user'] . "\nPassword temporanea: " . $created['pw']
+      . "\n\nAl primo accesso ti chiede di scegliere una nuova password; poi una breve guida ti aiuta a compilare il profilo e a collegare Garmin e/o Withings."; ?>
+  <div style="margin-top:12px"><div class="muted" style="margin-bottom:4px">Messaggio di invito pronto da inviare:</div>
+    <textarea id="invite" readonly rows="7" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--border);border-radius:var(--r);font:inherit;font-size:13px"><?= e($invite) ?></textarea>
+    <button type="button" class="ubtn" onclick="var t=document.getElementById('invite');t.select();document.execCommand('copy');this.textContent='Copiato ✓'">Copia messaggio</button></div>
 </div>
 <?php endif; ?>
 <?php if ($notice): ?><p style="border:1px solid var(--border);background:var(--s2);border-radius:var(--r);padding:10px 14px"><?= e($notice) ?></p><?php endif; ?>
@@ -228,7 +234,7 @@ function user_btn(string $action, string $user, string $label, string $confirm =
 }
 ?>
 <table>
-<tr><th>Utente</th><th>Ruolo</th><th>Stato</th><th>Azioni</th></tr>
+<tr><th>Utente</th><th>Ruolo</th><th>Stato</th><th>Configurazione</th><th>Azioni</th></tr>
 <?php foreach (auth_all_users() as $un => $uu):
     $isSelf = $un === $name; $isAdm = !empty($uu['admin']); $isOff = !empty($uu['disabled']); $isLocked = ($uu['locked_until'] ?? 0) > time(); ?>
 <tr><td><?= e($un) ?><?= $isSelf ? ' <span class="muted">(tu)</span>' : '' ?></td><td><?= $isAdm ? 'Amministratore' : 'Utente' ?><?= !empty($uu['coach']) ? ' · Coach' : '' ?><?= !empty($uu['nutrizionista']) ? ' · Nutrizionista' : '' ?></td>
@@ -242,6 +248,10 @@ function user_btn(string $action, string $user, string $label, string $confirm =
             : '<div class="muted">Password temporanea non disponibile: usa "Azzera password"</div>';
     }
     else echo 'Attivo';
+?></td>
+<td class="muted"><?php
+    $cn = udata_connected($un);
+    echo 'Garmin ' . ($cn['garmin'] ? '✅' : '—') . ' · Withings ' . ($cn['withings'] ? '✅' : '—') . '<br>Profilo ' . (udata_has_profile($un) ? '✅' : '—') . ' · Guida ' . (udata_onboarded($un) ? '✅' : '—');
 ?></td>
 <td><?php
     echo user_btn('reset', $un, 'Azzera password', "Azzerare la password di $un? Le sue sessioni verranno chiuse e avrà una nuova password temporanea.");

@@ -21,7 +21,14 @@ $method = $_SERVER['REQUEST_METHOD'];
 $action = (string)($_GET['action'] ?? '');
 
 if ($method === 'GET' && $action === 'get') {
-    reply(['csrf' => auth_csrf_token(), 'profile' => udata_read_json($file)]);
+    reply(['csrf' => auth_csrf_token(), 'profile' => udata_read_json($file), 'onboarded' => udata_onboarded($name)]);
+}
+
+if ($method === 'POST' && $action === 'onboarded') {
+    $sent = $_SERVER['HTTP_X_CSRF'] ?? '';
+    if (!is_string($sent) || !hash_equals($_SESSION['csrf'] ?? '', $sent)) reply(['error' => 'Richiesta non valida, ricarica la pagina.'], 400);
+    file_put_contents(udata_ensure($name)['work'] . '/onboarded.json', json_encode(['done' => date('Y-m-d')]));
+    reply(['ok' => true]);
 }
 
 if ($method === 'POST' && $action === 'save') {
