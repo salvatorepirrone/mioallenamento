@@ -1,4 +1,4 @@
-"""Rimuove da index.html i giorni del programma gia' trascorsi.
+"""Rimuove da pianoallenamento/index.html i giorni del programma gia' trascorsi.
 
 A mezzanotte, per ogni giorno che e' appena finito, l'attivita' effettivamente
 svolta e' gia' visibile nella tabella live "Ultimi allenamenti registrati"
@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 REPO_ROOT = Path(os.environ.get("REPO_ROOT", Path(__file__).resolve().parent.parent))
-INDEX_HTML = REPO_ROOT / "index.html"
+INDEX_HTML = REPO_ROOT / "pianoallenamento" / "index.html"  # il programma classico sta sotto /pianoallenamento (la home e' Lodestar)
 
 MESI_IT = {
     "gen": 1, "feb": 2, "mar": 3, "apr": 4, "mag": 5, "giu": 6,
