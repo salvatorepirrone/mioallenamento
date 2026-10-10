@@ -7,8 +7,8 @@
 <script>
 // Il redirect registrato su Withings punta a /callback.html: la pagina vera sta in /pianoallenamento/.
 // Si conservano parametri (?code=...&state=...) e frammento.
-location.replace('/pianoallenamento/callback.html' + location.search + location.hash);
+location.replace(/[?&]code=/.test(location.search) ? '/lodestar/collegamenti.html' + location.search : '/pianoallenamento/callback.html' + location.search + location.hash);
 </script>
 </head>
-<body><a href="/pianoallenamento/callback.html">Continua</a></body>
+<body><a href="/lodestar/collegamenti.html">Continua</a></body>
 </html>

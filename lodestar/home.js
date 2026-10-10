@@ -64,13 +64,13 @@ async function maybeAutoRefresh() {
   const s = document.getElementById('ld-refresh');
   s.textContent = '🔄 aggiornamento dati…';
   try {
-    const res = await fetch('/refresh-sync.php', { method: 'POST' });
-    const d = await res.json();
+    const d = await window.LodestarSync.run();
+    if (!d.connected) { document.getElementById('ld-refresh').innerHTML = '<a class="reco-link" href="/lodestar/collegamenti.html">Collega Garmin o Withings per vedere i tuoi dati →</a>'; return false; }
     return !!d.ok;
   } catch (e) {
     return false;
   } finally {
-    s.textContent = 'Dati Garmin · Withings';
+    if (s.textContent.indexOf('aggiornamento') >= 0) s.textContent = 'Dati Garmin · Withings';
   }
 }
 

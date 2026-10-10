@@ -2,7 +2,7 @@
 // per la parte statica (pagine, stile, icone). I dati Garmin/Withings in
 // data/*.json restano invece "network-first" -- l'obiettivo del sito e'
 // mostrare dati live, quindi la cache li serve solo se sei offline.
-const SHELL_CACHE = 'piano-shell-v2';
+const SHELL_CACHE = 'piano-shell-v3';
 const DATA_CACHE = 'piano-data-v1';
 
 const SHELL_ASSETS = [
@@ -38,7 +38,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
   // Pagine dinamiche per-utente e login/logout: mai dalla cache (un logout servito da cache non esce davvero).
-  if (url.pathname === '/whoami.php' || url.pathname === '/accessi.php' || url.pathname.startsWith('/auth/')) return;
+  if (url.pathname.endsWith('.php') || url.pathname.startsWith('/auth/')) return; // API e pagine dinamiche per utente: sempre dalla rete, mai dalla cache (niente dati di un altro utente)
 
   if (url.pathname.startsWith('/data/')) {
     event.respondWith(

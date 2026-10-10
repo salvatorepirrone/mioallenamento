@@ -20,6 +20,7 @@
     { href: '/pianoallenamento/peso.html', label: 'Peso ⚖️', dot: '#f5c85a' },
     { href: '/pianoallenamento/callback.html', label: 'Sonno 😴', dot: '#5af5c8' },
     { id: 'editor', href: '/lodestar/editor.html', label: 'Editor FIT', dot: '#f55ac8' },
+    { id: 'collegamenti', href: '/lodestar/collegamenti.html', label: 'Collegamenti 🔗', dot: '#9aa5ad' },
   ];
 
   var active = document.body.getAttribute('data-page') || 'home';
@@ -45,7 +46,31 @@
 
   var nav = document.querySelector('nav');
 
-  // Tasto "Aggiorna dati": forza subito la sincronizzazione con Garmin e Withings.
+  // Sincronizzazione dei dati dell'utente (Garmin e Withings collegati): avvia in background e aspetta la fine.
+  // Restituisce { connected, ok } oppure { connected: false } se non c'e' niente di collegato.
+  window.LodestarSync = {
+    run: async function () {
+      var api = function (action, post, csrf) {
+        return fetch('/lodestar/connect-api.php?action=' + action, post
+          ? { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-CSRF': csrf }, body: '{}' }
+          : { credentials: 'same-origin', cache: 'no-store' }).then(function (r) { return r.json(); });
+      };
+      var st = await api('status');
+      if (!st.connected || (!st.connected.garmin && !st.connected.withings)) return { connected: false };
+      await api('sync_start', true, st.csrf);
+      for (var i = 0; i < 400; i++) {
+        await new Promise(function (r) { setTimeout(r, 3000); });
+        var s = (await api('sync_status')).sync || {};
+        if (s.state !== 'running') {
+          var res = s.results || {};
+          return { connected: true, ok: Object.keys(res).every(function (k) { return res[k].ok; }) };
+        }
+      }
+      return { connected: true, ok: false };
+    },
+  };
+
+  // Tasto "Sincronizza dati": forza subito la sincronizzazione con Garmin e Withings.
   var sync = document.createElement('button');
   sync.type = 'button';
   sync.className = 'nav-refresh-btn';
@@ -55,10 +80,10 @@
     sync.disabled = true;
     sync.textContent = '⏳ Sincronizzazione…';
     try { localStorage.setItem('lastAutoRefresh', String(Date.now())); } catch (e) { /* storage non disponibile */ }
-    fetch('/refresh-sync.php', { method: 'POST', credentials: 'same-origin' })
-      .then(function (res) { return res.json(); })
+    window.LodestarSync.run()
       .then(function (data) {
-        if (!data.ok) throw new Error(data.error || 'Errore sconosciuto');
+        if (!data.connected) { location.href = '/lodestar/collegamenti.html'; return; }
+        if (!data.ok) throw new Error('Sincronizzazione non riuscita');
         sync.textContent = '✅ Dati aggiornati';
         setTimeout(function () { location.reload(); }, 900);
       })

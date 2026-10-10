@@ -157,7 +157,7 @@ const GYM_NOTE = 'Se hai tempo, abbina una sessione di forza (Sessione A o B, qu
 
 async function fetchJSONSafe(path, fallback) {
   try {
-    const res = await fetch(path);
+    const res = await fetch(path.replace(/^\/data\/([\w-]+)\.json$/, '/lodestar/mydata.php?f=$1'), { credentials: 'same-origin', cache: 'no-store' });
     if (!res.ok) return fallback;
     return await res.json();
   } catch (err) {
