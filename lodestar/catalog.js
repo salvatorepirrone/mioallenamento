@@ -60,6 +60,18 @@ const GYM_CATALOG = [
       { name: 'Hip thrust', sets: 3, reps: 12, weight_kg: 20 }] } },
 ];
 
+// Categoria usata dalle librerie (filtri) e dal consiglio del giorno per scegliere l'allenamento giusto.
+const LIB_CATS = {
+  running: { recupero: 'Recupero', base: 'Base', lungo: 'Lungo', qualita: 'Qualità' },
+  swimming: { leggero: 'Recupero', tecnica: 'Tecnica', velocita: 'Velocità', resistenza: 'Resistenza' },
+  strength: { forza: 'Forza' },
+};
+const RUN_CATS = { 'run-facile': 'recupero', 'run-z2': 'base', 'run-lunga': 'lungo' };
+const SWIM_CATS = { tecnica: 'tecnica', leggero: 'leggero', velocitaPura: 'velocita', sprintVirate: 'velocita', bracciataVelocita: 'velocita', resistenza: 'resistenza', gambePull: 'tecnica', piramide: 'resistenza', misti: 'tecnica' };
+RUN_CATALOG.forEach(c => { c.cat = RUN_CATS[c.id] || 'qualita'; });
+SWIM_CATALOG.forEach(c => { c.cat = SWIM_CATS[c.id.slice(5)] || 'resistenza'; });
+GYM_CATALOG.forEach(c => { c.cat = 'forza'; });
+
 const SPORT_CONFIG = {
   running: { api: 'running', catalog: RUN_CATALOG, noun: 'corsa', placeholder: "Es. riscaldamento 15' Z1, poi 6x400 a 4:30-4:50 recupero 90'' jogging, defaticamento 10' Z1" },
   swimming: { api: 'swimming', catalog: SWIM_CATALOG, noun: 'nuoto', placeholder: "Es.\n200 sciolti\n8x50 (1 contando le bracciate, 1 nuotando senza pensare alla tecnica)\n2x100 pinne gambe (tavola davanti)\n4x200 aerobici (dispari senza nulla, pari con pull e palette)" },

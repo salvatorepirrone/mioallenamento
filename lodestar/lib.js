@@ -93,33 +93,108 @@ const LibUI = (function () {
   return { html, e, api, sendBox, totals, setCsrf: v => { csrf = v; }, getCsrf: () => csrf };
 })();
 
+// ---------- libreria unica: allenamenti Lodestar + allenamenti dei coach ----------
+// Categoria di un allenamento inserito da un coach, dedotta dalla struttura (quelli di base hanno la categoria nel catalogo).
+function libCategory(sport, spec) {
+  if (sport === 'strength') return 'forza';
+  if (sport === 'running') {
+    const t = LibUI.totals(spec);
+    const flat = [];
+    (function walk(steps, inRepeat) { steps.forEach(st => { if (st.kind === 'repeat') walk(st.steps, true); else flat.push({ st, inRepeat }); }); })(spec.steps, false);
+    const fast = flat.some(x => x.st.kind === 'interval' && x.st.pace && (x.st.pace[0] + x.st.pace[1]) / 2 < 330);
+    const repeats = spec.steps.some(st => st.kind === 'repeat') || flat.filter(x => x.st.kind === 'interval').length >= 3;
+    if (fast || repeats) return 'qualita';
+    if (t.m >= 11000 || t.s >= 4200) return 'lungo';
+    return t.s <= 1800 ? 'recupero' : 'base';
+  }
+  const blocks = spec.blocks || [];
+  const meters = b => b.reps * b.distance_m;
+  const total = blocks.reduce((s, b) => s + meters(b), 0) || 1;
+  const fast = blocks.filter(b => b.intensity === 'fast' || b.intensity === 'sprint').reduce((s, b) => s + meters(b), 0);
+  const drill = blocks.filter(b => b.stroke === 'drill').reduce((s, b) => s + meters(b), 0);
+  if (fast >= 200) return 'velocita';
+  if (drill / total >= 0.25) return 'tecnica';
+  if (total <= 1500 && !blocks.some(b => b.intensity === 'threshold')) return 'leggero';
+  return 'resistenza';
+}
+
+// Riduce il volume di un allenamento (solo al ribasso) per adattarlo alla forma: ripetizioni, tratti continui, serie.
+function scaleSpec(spec, factor) {
+  if (!(factor < 0.95)) return spec;
+  const f = Math.max(0.5, factor);
+  const copy = JSON.parse(JSON.stringify(spec));
+  delete copy.total_m; delete copy.total_s;   // i totali si ricalcolano dopo la riduzione
+  if (copy.steps) {
+    const hasRepeat = copy.steps.some(st => st.kind === 'repeat');
+    copy.steps.forEach(st => {
+      if (st.kind === 'repeat') st.reps = Math.max(2, Math.round(st.reps * f));
+      else if (!hasRepeat && st.kind === 'interval') {
+        if (st.distance_m) st.distance_m = Math.round(st.distance_m * Math.max(0.7, f) / 100) * 100;
+        else if (st.time_s) st.time_s = Math.round(st.time_s * Math.max(0.7, f) / 60) * 60;
+      }
+    });
+  }
+  if (copy.blocks) copy.blocks.forEach(b => { if (b.kind === 'interval' && b.reps >= 3 && !b.alternate) b.reps = Math.max(2, Math.round(b.reps * f)); });
+  if (copy.exercises && f < 0.8) copy.exercises.forEach(x => { x.sets = Math.max(2, x.sets - 1); });
+  return copy;
+}
+
+// Tutte le librerie in una volta: { running:[...], swimming:[...], strength:[...], meta }.
+// Ogni voce: { id, source: 'lodestar' | 'coach', createdBy, sport, title, spec, cat, note, date, sends }.
+async function loadAllLibraries() {
+  let data = { programs: [], csrf: '', me: '', is_coach: false, can_send: false };
+  try { data = await LibUI.api('library'); } catch (e) { console.warn('Libreria dei coach non disponibile:', e.message); }
+  const out = { running: [], swimming: [], strength: [], meta: { me: data.me, isCoach: data.is_coach, canSend: data.can_send } };
+  data.programs.forEach(p => {
+    const sport = p.sport || 'swimming';
+    if (!out[sport]) return;
+    const spec = Object.assign({ sport }, p.parsed);
+    out[sport].push({ id: p.id, source: 'coach', createdBy: p.created_by, sport, title: p.title, spec, cat: libCategory(sport, spec), note: '', date: p.date, sends: p.sends || [] });
+  });
+  [['running', RUN_CATALOG], ['swimming', SWIM_CATALOG], ['strength', GYM_CATALOG]].forEach(([sport, list]) => {
+    list.forEach(c => out[sport].push({ id: c.id, source: 'lodestar', createdBy: 'Lodestar', sport, title: c.title, spec: c.spec, cat: c.cat, note: c.note || '', date: null, sends: [] }));
+  });
+  return out;
+}
+
 // ---------- pagina di una libreria ----------
 async function initLibrary(sport) {
   const cfg = SPORT_CONFIG[sport];
   const box = document.getElementById('lib-list');
-  let data;
-  try { data = await LibUI.api('library'); } catch (err) { box.innerHTML = `<div class="ld-err">${LibUI.e(err.message)}</div>`; return; }
-  const programs = data.programs.filter(p => p.sport === sport);
-  const canSend = data.can_send;
+  const libs = await loadAllLibraries();
+  const meta = libs.meta, canSend = meta.canSend;
+  const entries = libs[sport];
+  let filter = 'all';
 
-  const card = (title, tag, body, meta, extra, sendHtml) => `<div class="ld-recipe ld-wk"><div class="ld-recipe-head"><b>${LibUI.e(title)}</b> <span class="ld-badge">${LibUI.e(tag)}</span></div>
-    ${meta ? `<div class="ld-muted" style="margin-bottom:6px">${meta}</div>` : ''}${body}${sendHtml}${extra || ''}<div class="cw-msg ld-muted"></div></div>`;
+  const card = e => {
+    const coach = e.source === 'coach';
+    const mine = coach && e.createdBy === meta.me;
+    const sendHtml = LibUI.sendBox(null, canSend, sport);
+    const extra = coach && meta.isCoach ? `<div class="reco-send"><input type="date" class="reco-date" data-assign-date title="Giorno da assegnare all'atleta" value="${e.date || ''}"> <button type="button" class="cw-btn secondary" data-assign>Assegna</button>${mine ? ' <button type="button" class="cw-btn secondary" data-del>Elimina</button>' : ''}</div>` : '';
+    const sends = e.sends.length ? `<div class="ld-muted">✅ inviato ${e.sends.map(s => s.date || 'libreria Garmin').join(' · ')}</div>` : '';
+    const info = [e.note, e.date ? 'assegnato al ' + e.date : ''].filter(Boolean).join(' · ');
+    return `<div ${coach ? 'data-prog' : 'data-base'}="${e.id}" id="e-${e.id}"><div class="ld-recipe ld-wk"><div class="ld-recipe-head"><b>${LibUI.e(e.title)}</b>
+      <span class="ld-badge">${LibUI.e(LIB_CATS[sport][e.cat] || e.cat)}</span> <span class="ld-badge alt">${coach ? '📚 Coach · ' + LibUI.e(e.createdBy) : '✦ Lodestar'}</span></div>
+      ${info ? `<div class="ld-muted" style="margin-bottom:6px">${LibUI.e(info)}</div>` : ''}${LibUI.html(e.spec)}${sends}${sendHtml}${extra}<div class="cw-msg ld-muted"></div></div></div>`;
+  };
 
-  const coachCards = programs.map(p => {
-    const mine = p.created_by === data.me;
-    const extra = data.is_coach ? `<div class="reco-send"><input type="date" class="reco-date" data-assign-date title="Giorno da assegnare all'atleta" value="${p.date || ''}"> <button type="button" class="cw-btn secondary" data-assign>Assegna</button>${mine ? ' <button type="button" class="cw-btn secondary" data-del>Elimina</button>' : ''}</div>` : '';
-    const sends = (p.sends || []).length ? `<div class="ld-muted">✅ inviato ${(p.sends || []).map(s => s.date || 'libreria Garmin').join(' · ')}</div>` : '';
-    return `<div data-prog="${p.id}">` + card(p.title, 'Coach · ' + p.created_by, LibUI.html(p.parsed) + sends, p.date ? 'assegnato al ' + p.date : '', extra, LibUI.sendBox(null, canSend, sport)) + '</div>';
-  }).join('');
-
-  const baseCards = cfg.catalog.map(c => `<div data-base="${c.id}">` + card(c.title, c.tag, LibUI.html(c.spec), c.note, '', LibUI.sendBox(null, canSend, sport)) + '</div>').join('');
-
-  box.innerHTML = `<div class="sec">Dai coach</div>${coachCards ? `<div class="ld-recipes">${coachCards}</div>` : `<div class="ld-muted">Ancora nessun allenamento dei coach per la ${cfg.noun}.</div>`}
-    <div class="sec">Allenamenti di base Lodestar</div><div class="ld-recipes">${baseCards}</div>`;
+  function draw() {
+    const cats = Object.keys(LIB_CATS[sport]).filter(k => entries.some(e => e.cat === k));
+    const chip = (v, label) => `<button type="button" class="ld-cat${filter === v ? ' on' : ''}" data-filter="${v}">${label}</button>`;
+    const shown = entries.filter(e => filter === 'all' || filter === e.cat || (filter === 'coach' && e.source === 'coach') || (filter === 'lodestar' && e.source === 'lodestar'));
+    shown.sort((a, b) => (a.source === b.source ? 0 : (a.source === 'coach' ? -1 : 1)));
+    box.innerHTML = `<div class="ld-filters">${chip('all', `Tutti (${entries.length})`)}${cats.map(k => chip(k, LIB_CATS[sport][k])).join('')}<span class="ld-sep"></span>${chip('coach', '📚 Coach')}${chip('lodestar', '✦ Lodestar')}</div>
+      <div class="ld-recipes">${shown.map(card).join('') || '<div class="ld-muted">Nessun allenamento con questo filtro.</div>'}</div>`;
+    if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView({ block: 'center' }); }
+  }
+  draw();
 
   box.addEventListener('click', async ev => {
+    const chipBtn = ev.target.closest('[data-filter]');
+    if (chipBtn) { filter = chipBtn.dataset.filter; draw(); return; }
     const b = ev.target.closest('button'); if (!b) return;
     const wrap = b.closest('[data-prog],[data-base]');
+    if (!wrap) return;
     const msg = wrap.querySelector('.cw-msg');
     const dateInput = wrap.querySelector('.reco-date:not([data-assign-date])');
     const run = async (promise, ok) => {
@@ -132,7 +207,7 @@ async function initLibrary(sport) {
       const date = (dateInput && dateInput.value) || null;
       const done = 'Inviato a Garmin' + (date ? ' e messo in calendario.' : ' (nella tua libreria allenamenti).');
       if (wrap.dataset.prog) await run(LibUI.api('send', { id: wrap.dataset.prog, date }), done);
-      else await run(LibUI.api('send_plan', { plan: cfg.catalog.find(c => c.id === wrap.dataset.base).spec, date }), done);
+      else await run(LibUI.api('send_plan', { plan: entries.find(x => x.id === wrap.dataset.base).spec, date }), done);
     } else if (b.hasAttribute('data-assign')) {
       await run(LibUI.api('assign', { id: wrap.dataset.prog, date: wrap.querySelector('[data-assign-date]').value || null }), 'Assegnato.');
     } else if (b.hasAttribute('data-del')) {
@@ -142,7 +217,7 @@ async function initLibrary(sport) {
 
   // inserimento (coach e admin)
   const form = document.getElementById('lib-form');
-  if (form && data.is_coach) {
+  if (form && meta.isCoach) {
     form.hidden = false;
     let parsed = null;
     const $ = id => document.getElementById(id);
@@ -152,7 +227,7 @@ async function initLibrary(sport) {
       $('lib-parse').disabled = true; $('lib-msg').textContent = 'Analisi in corso…';
       try {
         parsed = (await LibUI.api('parse', { text, sport })).parsed;
-        $('lib-preview-body').innerHTML = `<div class="ld-recipe-head"><b>${LibUI.e(parsed.title)}</b></div>` + LibUI.html(parsed);
+        $('lib-preview-body').innerHTML = `<div class="ld-recipe-head"><b>${LibUI.e(parsed.title)}</b> <span class="ld-badge">${LibUI.e(LIB_CATS[sport][libCategory(sport, parsed)] || '')}</span></div>` + LibUI.html(parsed);
         $('lib-preview').hidden = false; $('lib-msg').textContent = '';
       } catch (err) { parsed = null; $('lib-preview').hidden = true; $('lib-msg').innerHTML = `<span class="ld-err">${LibUI.e(err.message)}</span>`; }
       $('lib-parse').disabled = false;

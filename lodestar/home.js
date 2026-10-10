@@ -45,6 +45,7 @@ async function loadRecommendation(health) {
     const activities = await fetchJSONSafe('/data/garmin-activities.json', []);
     const goals = await loadGoals(health.fitness);
     const model = computeRecommendation(activities, health.fitness, health.sleep, goals);
+    try { applyLibrary(model, await loadAllLibraries(), activities); } catch (e) { console.warn('Libreria non disponibile per il consiglio:', e); }
     renderStats(readinessTiles(health.fitness));
     renderRecommendation(model);
     attachSendButtons(model);

@@ -840,7 +840,7 @@ function computeRecommendation(activities, fitness, sleepNights, goals) {
     : ((recoveryMode || lowMode) ? '' : [swimProgressNote(activities, band), `Adattata allo stato di forma: ${form.text}.`, GYM_NOTE].filter(Boolean).join(' '));
 
   const trends = computeTrends(activities, fitness, goals);
-  return { preferred, rationale, recoveryMode, readiness, form, run, swim, runNote, swimNote, trends };
+  return { preferred, rationale, recoveryMode, readiness, form, run, swim, runNote, swimNote, trends, runChoice, swimChoice };
 }
 
 function renderRecommendation(model) {
@@ -866,20 +866,26 @@ function renderRecommendation(model) {
     </div>
     <div class="reco-options">
       <div class="reco-opt${model.preferred === 'corsa' ? ' reco-opt-pref' : ''}">
-        <div class="reco-opt-hdr">🏃 Se opti per la corsa <span class="reco-opt-tag">${model.run.label}</span></div>
+        <div class="reco-opt-hdr">🏃 Se opti per la corsa <span class="reco-opt-tag">${model.run.label}</span>${model.run.by ? `<span class="reco-opt-tag">📚 Libreria · ${model.run.by}</span>` : ''}</div>
         <div class="reco-opt-body">${model.run.html}</div>
         ${model.runNote ? `<div class="reco-opt-note">${model.runNote}</div>` : ''}
         <a class="reco-link" href="${model.run.link}">Dettaglio scheda →</a>
         <div class="reco-send" data-sport="run"></div>
       </div>
       <div class="reco-opt${model.preferred === 'nuoto' ? ' reco-opt-pref' : ''}">
-        <div class="reco-opt-hdr">🏊 Se opti per nuoto/palestra <span class="reco-opt-tag">${model.swim.label}</span></div>
+        <div class="reco-opt-hdr">🏊 Se opti per nuoto/palestra <span class="reco-opt-tag">${model.swim.label}</span>${model.swim.by ? `<span class="reco-opt-tag">📚 Libreria · ${model.swim.by}</span>` : ''}</div>
         <div class="reco-opt-body">${model.swim.html}</div>
         ${model.swimNote ? `<div class="reco-opt-note">${model.swimNote}</div>` : ''}
         <a class="reco-link" href="${model.swim.link}">Dettaglio scheda →</a>
         <div class="reco-send" data-sport="swim"></div>
       </div>
-    </div>`;
+    </div>
+    ${model.gym ? `<div class="reco-opt" style="margin-top:14px">
+        <div class="reco-opt-hdr">💪 In più, forza <span class="reco-opt-tag">${model.gym.label}</span>${model.gym.by && model.gym.by !== 'Lodestar' ? `<span class="reco-opt-tag">📚 Libreria · ${model.gym.by}</span>` : ''}</div>
+        <div class="reco-opt-body">${model.gym.html}</div>
+        <a class="reco-link" href="${model.gym.link}">Apri in libreria →</a>
+        <div class="reco-send" data-sport="gym"></div>
+      </div>` : ''}`;
 }
 
 // Pulsante "Invia all'orologio" sotto ogni seduta consigliata: crea l'allenamento su Garmin Connect e lo
@@ -896,9 +902,9 @@ async function attachSendButtons(model) {
     if (!res.ok) return;
     const info = await res.json();
     if (!info.can_send) return;
-    for (const [key, plan] of [['run', model.run], ['swim', model.swim]]) {
+    for (const [key, plan] of [['run', model.run], ['swim', model.swim], ['gym', model.gym]]) {
       const slot = document.querySelector(`.reco-send[data-sport="${key}"]`);
-      if (!slot || !plan.spec) continue;
+      if (!slot || !plan || !plan.spec) continue;
       slot.innerHTML = '<input type="date" class="reco-date" title="Giorno in calendario"> <button type="button" class="cw-btn">Invia all\'orologio</button> <span class="reco-send-msg"></span>';
       const dateInput = slot.querySelector('.reco-date');
       const btn = slot.querySelector('button');
