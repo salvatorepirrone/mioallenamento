@@ -1,45 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Libreria nuoto · Lodestar</title>
-<meta name="theme-color" content="#12263f">
-<link rel="manifest" href="/lodestar/manifest.json">
-<link rel="icon" href="/lodestar/icons/favicon-32.png" sizes="32x32">
-<link rel="apple-touch-icon" href="/lodestar/icons/apple-touch-icon.png">
-<link rel="stylesheet" href="/style.css">
-<link rel="stylesheet" href="/lodestar/lodestar.css">
-</head>
-<body data-page="nuoto">
-<main>
-
-<div class="hero">
-  <h1>🏊 Libreria nuoto</h1>
-  <p>Allenamenti di nuoto: quelli di base e quelli dei coach, inviabili all'orologio</p>
-</div>
-
-<div class="ld-card" id="lib-form" hidden>
-  <div class="reco-title">Aggiungi un allenamento</div>
-  <p class="ld-muted" style="margin:4px 0 8px">Scrivilo come lo diresti a voce: Lodestar lo scompone in passi e lo inserisce in libreria. Controlla l'anteprima prima di salvare.</p>
-  <textarea id="lib-text" rows="5" maxlength="4000" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--border);border-radius:10px;font:inherit"></textarea>
-  <div style="margin-top:8px"><button class="ld-btn" id="lib-parse" type="button">Analizza</button> <span id="lib-msg" class="ld-muted"></span></div>
-  <div id="lib-preview" hidden class="ld-recipe" style="margin-top:12px">
-    <div id="lib-preview-body"></div>
-    <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      <label class="ld-muted">Assegna a <select id="lib-user"></select> per il giorno (facoltativo) <input type="date" id="lib-date" class="reco-date"></label>
-      <button class="ld-btn gold" id="lib-save" type="button">Inserisci in libreria</button>
-    </div>
-  </div>
-</div>
-
-<div id="lib-list"><span class="ld-muted">Caricamento…</span></div>
-
-</main>
-<script src="/lodestar/app.js"></script>
-<script src="/lodestar/engine.js"></script>
-<script src="/lodestar/catalog.js"></script>
-<script src="/lodestar/lib.js"></script>
-<script>initLibrary('swimming');</script>
-</body>
-</html>
+<html lang="it"><head><meta charset="UTF-8"><title>Libreria · Lodestar</title>
+<script>location.replace('/lodestar/libreria.html?tipo=nuoto' + location.hash);</script>
+<meta http-equiv="refresh" content="0;url=/lodestar/libreria.html?tipo=nuoto"></head>
+<body><a href="/lodestar/libreria.html?tipo=nuoto">Vai alla libreria allenamenti</a></body></html>

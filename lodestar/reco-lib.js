@@ -34,13 +34,13 @@ function applyLibrary(model, library, activities) {
   const runEntry = recoPickCoach(library.running || [], RECO_RUN_CATS[model.runChoice] || [], activities);
   if (runEntry) {
     const r = recoFromEntry(runEntry, factor);
-    model.run = Object.assign(r, { link: '/lodestar/corsa.html#e-' + runEntry.id });
+    model.run = Object.assign(r, { link: '/lodestar/libreria.html?tipo=corsa#e-' + runEntry.id });
     model.runNote = note(runEntry.createdBy);
   }
   const swimEntry = recoPickCoach(library.swimming || [], RECO_SWIM_CATS[model.swimChoice] || [], activities);
   if (swimEntry) {
     const r = recoFromEntry(swimEntry, factor);
-    model.swim = Object.assign(r, { link: '/lodestar/nuoto.html#e-' + swimEntry.id });
+    model.swim = Object.assign(r, { link: '/lodestar/libreria.html?tipo=nuoto#e-' + swimEntry.id });
     model.swimNote = note(swimEntry.createdBy);
   }
   // forza: una seduta della libreria (Lodestar o coach), a rotazione e non fatta da poco
@@ -49,7 +49,7 @@ function applyLibrary(model, library, activities) {
     const done30 = activities.filter(a => a.type === GYM_TYPE && daysSinceDate(a.date) <= 30).length;
     const e = gymPool[done30 % gymPool.length];
     const r = recoFromEntry(e, factor);
-    model.gym = Object.assign(r, { link: '/lodestar/palestra.html#e-' + e.id });
+    model.gym = Object.assign(r, { link: '/lodestar/libreria.html?tipo=palestra#e-' + e.id });
     model.swimNote = (model.swimNote || '').replace(GYM_NOTE, '').trim();
   }
   return model;

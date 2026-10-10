@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Libreria allenamenti · Lodestar</title>
+<meta name="theme-color" content="#12263f">
+<link rel="manifest" href="/lodestar/manifest.json">
+<link rel="icon" href="/lodestar/icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/lodestar/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/lodestar/lodestar.css">
+</head>
+<body data-page="libreria">
+<main>
+
+<div class="hero">
+  <h1 id="lib-h1">📚 Libreria allenamenti</h1>
+  <p id="lib-sub"></p>
+</div>
+
+<div class="ld-filters" id="lib-tipo" role="tablist" aria-label="Tipo di attività">
+  <button type="button" class="ld-cat" data-tipo="corsa">🏃 Corsa</button>
+  <button type="button" class="ld-cat" data-tipo="nuoto">🏊 Nuoto</button>
+  <button type="button" class="ld-cat" data-tipo="palestra">🏋️ Palestra</button>
+</div>
+
+<div class="ld-card" id="lib-form" hidden>
+  <div class="reco-title">Aggiungi un allenamento</div>
+  <p class="ld-muted" style="margin:4px 0 8px">Scrivilo come lo diresti a voce: Lodestar lo scompone in passi e lo inserisce in libreria. Controlla l'anteprima prima di salvare.</p>
+  <textarea id="lib-text" rows="5" maxlength="4000" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--border);border-radius:10px;font:inherit"></textarea>
+  <div style="margin-top:8px"><button class="ld-btn" id="lib-parse" type="button">Analizza</button> <span id="lib-msg" class="ld-muted"></span></div>
+  <div id="lib-preview" hidden class="ld-recipe" style="margin-top:12px">
+    <div id="lib-preview-body"></div>
+    <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <label class="ld-muted">Assegna a <select id="lib-user"></select> per il giorno (facoltativo) <input type="date" id="lib-date" class="reco-date"></label>
+      <button class="ld-btn gold" id="lib-save" type="button">Inserisci in libreria</button>
+    </div>
+  </div>
+</div>
+
+<div id="lib-list"><span class="ld-muted">Caricamento…</span></div>
+
+</main>
+<script src="/lodestar/app.js"></script>
+<script src="/lodestar/engine.js"></script>
+<script src="/lodestar/catalog.js"></script>
+<script src="/lodestar/lib.js"></script>
+<script>
+(function () {
+  var TIPI = {
+    corsa: { sport: 'running', sub: "Allenamenti di corsa: quelli di base e quelli dei coach, inviabili all'orologio" },
+    nuoto: { sport: 'swimming', sub: "Allenamenti di nuoto: quelli di base e quelli dei coach, inviabili all'orologio" },
+    palestra: { sport: 'strength', sub: "Schede di palestra: quelle di base e quelle dei coach, inviabili all'orologio" },
+  };
+  var tipo = new URLSearchParams(location.search).get('tipo');
+  if (!TIPI[tipo]) {
+    var h = location.hash;
+    tipo = /^#e-run/.test(h) ? 'corsa' : /^#e-swim/.test(h) ? 'nuoto' : null;
+    if (!tipo) { try { tipo = localStorage.getItem('ld-lib-tipo'); } catch (e) {} }
+    if (!TIPI[tipo]) tipo = 'corsa';
+  }
+  function show(t, first) {
+    tipo = t;
+    try { localStorage.setItem('ld-lib-tipo', t); } catch (e) {}
+    document.querySelectorAll('[data-tipo]').forEach(function (b) { b.classList.toggle('on', b.dataset.tipo === t); b.setAttribute('aria-selected', b.dataset.tipo === t); });
+    document.getElementById('lib-sub').textContent = TIPI[t].sub;
+    if (!first) history.replaceState(null, '', location.pathname + '?tipo=' + t);
+    document.getElementById('lib-text').value = '';
+    document.getElementById('lib-preview').hidden = true;
+    document.getElementById('lib-msg').textContent = '';
+    document.getElementById('lib-list').innerHTML = '<span class="ld-muted">Caricamento…</span>';
+    initLibraryRefresh(TIPI[t].sport);
+  }
+  document.getElementById('lib-tipo').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-tipo]');
+    if (b && b.dataset.tipo !== tipo) show(b.dataset.tipo, false);
+  });
+  show(tipo, true);
+})();
+</script>
+</body>
+</html>
