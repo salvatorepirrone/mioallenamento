@@ -878,13 +878,25 @@ function runWorkPace(a, cls) {
   return { pace: work.reduce((s, l) => s + l.avg_pace_min_per_km * l.distance_m, 0) / dist, reps: work.length };
 }
 
+// Passo dei tratti veloci di una seduta mista (fartlek, progressivo, ripetute lunghe): giri sotto 5:20/km.
+function qualityPace(a) {
+  const laps = (a.laps || []).filter(l => l.avg_pace_min_per_km != null && l.duration_s >= 25 && l.avg_pace_min_per_km <= 5.33 && l.distance_m >= 60);
+  if (!laps.length) return { pace: a.avg_pace_min_per_km, reps: 0 };
+  const dist = laps.reduce((x, l) => x + l.distance_m, 0);
+  return { pace: laps.reduce((x, l) => x + l.avg_pace_min_per_km * l.distance_m, 0) / dist, reps: laps.length };
+}
+
 function evaluateRun(a, activities) {
   const cls = classifyRun(a);
-  const names = { facile: 'Corsa facile · Z2', lungo: 'Corsa lunga · Z2', soglia: 'Soglia', velocita: 'Ripetute · velocità' };
+  const names = { facile: 'Corsa facile · Z2', lungo: 'Corsa lunga · Z2', soglia: 'Soglia', velocita: 'Ripetute · velocità', fartlek: 'Fartlek', progressivo: 'Progressivo', vo2: 'Ripetute lunghe / piramide' };
+  const mixed = ['fartlek', 'progressivo', 'vo2'].includes(cls);
   const items = [];
-  const { pace, reps } = runWorkPace(a, cls);
+  const { pace, reps } = mixed ? qualityPace(a) : runWorkPace(a, cls);
 
-  if (cls === 'velocita') {
+  if (mixed) {
+    items.push({ status: reps >= 3 ? 'ok' : 'partial', text: `<b>${reps} tratti veloci</b> a ${fmtPace(pace)}` });
+    if (a.max_hr != null) items.push({ status: a.max_hr >= 160 ? 'ok' : 'partial', text: `FC max <b>${a.max_hr}</b> (nei tratti veloci si sale in Z4, 162–172)` });
+  } else if (cls === 'velocita') {
     const ok = pace <= 4.84;
     items.push({ status: ok ? 'ok' : 'partial', text: `<b>${reps} ripetute</b> a ${fmtPace(pace)} (target 4:30–4:50/km)` });
     if (a.max_hr != null) items.push({ status: a.max_hr >= 162 ? 'ok' : 'partial', text: `FC max <b>${a.max_hr}</b> (target 162–172 sulle ripetute)` });
@@ -904,10 +916,10 @@ function evaluateRun(a, activities) {
   const prev = activities.find(p => RUN_TYPES.includes(p.type) && p.date < a.date && classifyRun(p) === cls);
   const progress = [];
   if (prev) {
-    const prevPace = runWorkPace(prev, cls).pace;
+    const prevPace = mixed ? qualityPace(prev).pace : runWorkPace(prev, cls).pace;
     const hrNote = a.avg_hr != null && prev.avg_hr != null
       ? `FC media ${a.avg_hr} vs ${prev.avg_hr} bpm` : '';
-    progress.push(paceDeltaLine(cls === 'velocita' || cls === 'soglia' ? 'Passo sul lavoro' : 'Passo medio', pace, prevPace, prev.date, 'run', hrNote));
+    progress.push(paceDeltaLine(cls === 'velocita' || cls === 'soglia' || mixed ? 'Passo sul lavoro' : 'Passo medio', pace, prevPace, prev.date, 'run', hrNote));
   }
   return { activity: a, tag: names[cls], items, progress };
 }
@@ -1199,7 +1211,7 @@ const SWIM_SPECS = {
     SB('Soglia', 'interval', 6, 100, { rest_s: 20, intensity: 'threshold', note: '~1:45/100 m uniforme' }),
     SB('Pullbuoy contrasto', 'interval', 4, 100, { equipment: ['pull_buoy'], rest_s: 25, intensity: 'aerobic' }),
     SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
-  leggero: { sport: 'swimming', title: 'Tecnica leggera', blocks: [
+  leggero: { sport: 'swimming', title: 'Scarico leggero', blocks: [
     SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }),
     SB('Drill', 'interval', 6, 50, { stroke: 'drill', rest_s: 20, note: 'solo tecnica' }),
     SB('Aerobico facile', 'interval', 4, 100, { rest_s: 20, intensity: 'easy' }),
@@ -1327,6 +1339,9 @@ function mostRecentOfType(activities, types) {
 // (distanza e passo dei lap), non a un'etichetta prestabilita.
 function classifyRun(a) {
   const name = (a.name || '').toLowerCase();
+  if (name.includes('fartlek')) return 'fartlek';
+  if (name.includes('progressiv')) return 'progressivo';
+  if (name.includes('piramide') || name.includes('ripetute lunghe')) return 'vo2';
   if (name.includes('ripetut')) return 'velocita';
   if (name.includes('soglia')) return 'soglia';
   const laps = a.laps || [];
@@ -1611,6 +1626,237 @@ function monthsLabel(days) {
   return days >= 56 ? `${Math.round(days / 7)} settimane` : `${days} giorni`;
 }
 
+// ── Stato di forma: quanto spingere, e perché ──
+// Combina prontezza, stato di allenamento Garmin, carico (ACWR) e VO2max in un fattore di volume
+// (1 = scheda base) usato per ripetizioni e durate delle sedute di oggi.
+function formProfile(fitness, readiness) {
+  const reasons = [];
+  let f = { alta: 1.0, media: 0.75, bassa: 0.6, 'molto bassa': 0.5 }[readiness.band];
+  const cat = fitness && fitness.training_status_category;
+  const adj = {
+    PRODUCTIVE: [0.05, 'stato produttivo'], MAINTAINING: [0.1, 'stato di mantenimento: serve più stimolo'],
+    PEAKING: [-0.1, 'picco di forma: meno volume, più qualità'], DETRAINING: [-0.15, 'ripresa graduale dopo il calo di forma'],
+    UNPRODUCTIVE: [-0.05, 'stato improduttivo: stimolo diverso'], RECOVERY: [-0.2, 'fase di recupero'],
+  }[cat];
+  if (adj) { f += adj[0]; reasons.push(adj[1]); }
+  const r = fitness && fitness.acwr_ratio;
+  if (r != null) {
+    if (r > 1.3) { f -= 0.15; reasons.push(`carico alto (${r.toFixed(2).replace('.', ',')})`); }
+    else if (r < 0.8) { f += 0.1; reasons.push(`carico basso (${r.toFixed(2).replace('.', ',')}): c'è margine per salire`); }
+  }
+  f = Math.max(0.5, Math.min(1.2, f));
+  return { factor: f, reasons, text: `${reasons.length ? reasons.join(', ') + '; ' : ''}volume ×${f.toFixed(2).replace('.', ',')}` };
+}
+
+// Ritmi di riferimento (s/km) dalle previsioni di gara di Garmin: seguono la forma del momento.
+function racePaces(fitness) {
+  const rp = fitness && fitness.race_predictions;
+  return { p5: rp && rp.time_5k_s ? rp.time_5k_s / 5 : 300, p10: rp && rp.time_10k_s ? rp.time_10k_s / 10 : 322 };
+}
+
+function countOfClass(activities, cls) {
+  return activities.filter(a => RUN_TYPES.includes(a.type) && classifyRun(a) === cls).length;
+}
+
+function rangeText(range) {
+  return `${paceText(range[0] / 60)}–${paceText(range[1] / 60)}/km`;
+}
+
+// ── Fartlek: tre varianti a rotazione ──
+function planFartlek(activities, band, form, paces) {
+  const done = countOfClass(activities, 'fartlek');
+  const variant = done % 3;
+  const centre = band === 'alta' ? paces.p5 + 3 : paces.p10 - 2; // alta: ritmo 5 km; altrimenti ritmo 10 km
+  const pr = [Math.round(centre - 4), Math.round(centre + 4)];
+  const steps = [{ kind: 'warmup', time_s: 720, hr_zone: 1 }];
+  let title, body, minutes;
+
+  if (variant === 0) {
+    const reps = Math.max(4, Math.min(10, Math.round((6 + Math.min(done, 3)) * form.factor)));
+    steps.push({ kind: 'repeat', reps, steps: [{ kind: 'interval', time_s: 120, pace: pr }, { kind: 'recovery', time_s: 60, note: 'corsa lenta Z1' }] });
+    title = `Fartlek ${reps}×(2′ + 1′)`;
+    body = `<strong>${reps}×(2' veloce + 1' lento)</strong>: i 2' a ${rangeText(pr)} (${band === 'alta' ? 'ritmo da 5 km' : 'ritmo da 10 km'}), l'1' in corsa lenta Z1`;
+    minutes = 12 + reps * 3 + 10;
+  } else if (variant === 1) {
+    const ups = form.factor >= 0.85 ? [60, 120, 180, 240, 180, 120, 60] : [60, 120, 180, 120, 60];
+    ups.forEach(t => {
+      steps.push({ kind: 'interval', time_s: t, pace: pr });
+      steps.push({ kind: 'recovery', time_s: Math.max(45, Math.round(t / 2)), note: 'lento' });
+    });
+    title = `Fartlek a piramide ${ups.map(t => t / 60).join('-')}`;
+    body = `<strong>Piramide ${ups.map(t => t / 60 + "'").join(' · ')}</strong> veloci a ${rangeText(pr)}, con recupero lento pari alla metà del tratto veloce`;
+    minutes = 12 + Math.round(ups.reduce((s, t) => s + t * 1.5, 0) / 60) + 10;
+  } else {
+    const reps = Math.max(6, Math.min(12, Math.round(10 * form.factor)));
+    const sh = [Math.round(paces.p5 - 6), Math.round(paces.p5 + 2)];
+    steps.push({ kind: 'repeat', reps, steps: [{ kind: 'interval', time_s: 30, pace: sh }, { kind: 'recovery', time_s: 90, note: 'lento' }] });
+    title = `Fartlek di allunghi ${reps}×30″`;
+    body = `<strong>${reps}×(30″ forte + 90″ lento)</strong>: gli allunghi a ${rangeText(sh)}, sciolti e rilassati, il resto in corsa lenta`;
+    minutes = 12 + reps * 2 + 10;
+  }
+  steps.push({ kind: 'cooldown', time_s: 600, hr_zone: 1 });
+  return {
+    label: title,
+    html: `Riscaldamento 12' Z1 (FC&nbsp;&lt;123). Poi ${body}. Defaticamento 10' Z1.<br><span class="reco-opt-meta">~${minutes} min · variante ${variant + 1} di 3</span>`,
+    progress: done ? `tu hai già fatto ${done} fartlek: ${variant === 0 ? 'si riparte dal classico 2′/1′ con una ripetizione in più' : 'oggi cambia la variante per non ripetere lo stesso stimolo'}` : 'prima volta: si parte da una variante semplice',
+    link: 'corsa.html', spec: { sport: 'running', title, steps },
+  };
+}
+
+// ── Progressivo: tre blocchi a ritmo crescente ──
+function planProgressivo(band, form, paces) {
+  const total = Math.max(30, Math.min(60, 5 * Math.round(45 * form.factor / 5)));
+  const z2 = Math.round(total * 0.45), mid = Math.round(total * 0.33), thr = total - z2 - mid;
+  const midP = [Math.round(paces.p10 + 14), Math.round(paces.p10 + 26)];
+  const thrP = [Math.round(paces.p10 - 4), Math.round(paces.p10 + 6)];
+  const title = `Progressivo ${total}′`;
+  return {
+    label: title,
+    html: `Riscaldamento 10' Z1. Poi <strong>${total}' progressivi</strong>: ${z2}' in Z2 (5:45–6:15/km) → ${mid}' a ritmo medio (${rangeText(midP)}) → ${thr}' a ritmo da 10 km (${rangeText(thrP)}). Defaticamento 8' Z1.<br><span class="reco-opt-meta">~${total + 18} min · FC in salita da Z2 a Z3</span>`,
+    progress: 'ritmi ricavati dalle previsioni di gara di Garmin di oggi, quindi seguono la tua forma',
+    link: 'corsa.html',
+    spec: { sport: 'running', title, steps: [
+      { kind: 'warmup', time_s: 600, hr_zone: 1 },
+      { kind: 'interval', time_s: z2 * 60, pace: [345, 375], note: 'Z2' },
+      { kind: 'interval', time_s: mid * 60, pace: midP, note: 'ritmo medio' },
+      { kind: 'interval', time_s: thr * 60, pace: thrP, note: 'ritmo da 10 km' },
+      { kind: 'cooldown', time_s: 480, hr_zone: 1 }] },
+  };
+}
+
+// ── Ripetute lunghe / piramide (stimolo da VO2max) ──
+function planVo2(activities, band, form, paces) {
+  const done = countOfClass(activities, 'vo2');
+  const pyramid = done % 2 === 1;
+  const steps = [{ kind: 'warmup', time_s: 720, hr_zone: 1 }];
+  let title, body, minutes;
+  if (!pyramid) {
+    const reps = Math.max(3, Math.min(6, Math.round((4 + Math.min(done, 2)) * form.factor)));
+    const pr = [Math.round(paces.p5 + 2 - 4), Math.round(paces.p5 + 2 + 4)];
+    steps.push({ kind: 'repeat', reps, steps: [{ kind: 'interval', distance_m: 1000, pace: pr }, { kind: 'recovery', time_s: 150, note: 'jogging Z1' }] });
+    title = `Ripetute lunghe ${reps}×1000 m`;
+    body = `<strong>${reps}×1000&nbsp;m</strong> a ${rangeText(pr)} (ritmo da 5 km), recupero 2'30″ jogging Z1`;
+    minutes = 12 + reps * (Math.round((paces.p5 + 2) / 60 * 10) / 10 + 2.5) + 10;
+  } else {
+    const ds = form.factor >= 0.85 ? [400, 800, 1200, 800, 400] : [400, 800, 800, 400];
+    const offset = { 400: -8, 800: -2, 1200: 3 };
+    ds.forEach(d => {
+      const c = paces.p5 + offset[d];
+      steps.push({ kind: 'interval', distance_m: d, pace: [Math.round(c - 3), Math.round(c + 3)] });
+      steps.push({ kind: 'recovery', time_s: d <= 400 ? 90 : (d <= 800 ? 120 : 150), note: 'jogging Z1' });
+    });
+    title = `Piramide ${ds.join('-')}`;
+    body = `<strong>Piramide ${ds.join(' – ')} m</strong> a ritmo da 5 km (più veloce sui 400, più controllato sui 1200), recuperi di 90″–2'30″ in jogging`;
+    minutes = 12 + Math.round(ds.reduce((s, d) => s + d / 1000 * paces.p5 / 60 + 1.8, 0)) + 10;
+  }
+  steps.push({ kind: 'cooldown', time_s: 600, hr_zone: 1 });
+  return {
+    label: title,
+    html: `Riscaldamento 12' Z1 + 4×80&nbsp;m progressivi. Poi ${body}. Defaticamento 10' Z1.<br><span class="reco-opt-meta">~${Math.round(minutes)} min · FC 162–172 (Z4)</span>`,
+    progress: done ? `alterna con ${pyramid ? 'le ripetute lunghe' : 'la piramide'} per non ripetere lo stesso stimolo` : 'stimolo diverso dalle ripetute corte: tempo più a lungo vicino al VO2max',
+    link: 'corsa.html', spec: { sport: 'running', title, steps },
+  };
+}
+
+// ── Scelta del tipo di qualità: a rotazione, mai due volte di fila lo stesso ──
+const QUALITY_TYPES = ['velocita', 'soglia', 'fartlek', 'progressivo', 'vo2'];
+
+function pickQuality(runGaps, lastQuality, band, fitness, goals, vo2Push) {
+  const cat = fitness && fitness.training_status_category;
+  let best = null;
+  for (const t of QUALITY_TYPES) {
+    let sc = Math.min(30, runGaps[t] ?? 30);
+    if (t === lastQuality) sc -= 100;
+    if (vo2Push && (t === 'velocita' || t === 'vo2')) sc += 6;
+    if (vo2Push && t === 'fartlek') sc += 3;
+    if (goals && goals.race10k && (t === 'soglia' || t === 'progressivo')) sc += 3;
+    if (goals && goals.repeatPace && t === 'velocita') sc += 3;
+    if (band === 'media' && (t === 'velocita' || t === 'vo2')) sc -= 6;
+    if (cat === 'DETRAINING' && (t === 'velocita' || t === 'vo2')) sc -= 8;
+    if (best === null || sc > best.sc) best = { t, sc };
+  }
+  return best.t;
+}
+
+// ── Nuoto: più famiglie di sedute, adattate alla forma ──
+const SWIM_EXTRA_SPECS = {
+  resistenza: { sport: 'swimming', title: 'Resistenza aerobica', blocks: [
+    SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }), SB('Riscaldamento dorso', 'warmup', 1, 100, { stroke: 'back' }),
+    SB('Drill', 'interval', 4, 50, { stroke: 'drill', rest_s: 20 }),
+    SB('Aerobico continuo', 'interval', 3, 400, { rest_s: 30, intensity: 'aerobic', note: 'respiro ogni 3, bracciata lunga' }),
+    SB('Pull', 'interval', 4, 100, { equipment: ['pull_buoy'], rest_s: 20, intensity: 'aerobic' }),
+    SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
+  gambePull: { sport: 'swimming', title: 'Gambe e pull', blocks: [
+    SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }), SB('Riscaldamento dorso', 'warmup', 1, 100, { stroke: 'back' }),
+    SB('Gambe con pinne', 'interval', 6, 50, { stroke: 'any', equipment: ['fins', 'kickboard'], rest_s: 20, note: 'gambe, tavola davanti' }),
+    SB('Gambe senza pinne', 'interval', 4, 50, { stroke: 'any', equipment: ['kickboard'], rest_s: 25, note: 'gambe' }),
+    SB('Pull e palette', 'interval', 6, 100, { equipment: ['pull_buoy', 'paddles'], rest_s: 20, intensity: 'aerobic' }),
+    SB('Aerobico libero', 'interval', 4, 100, { rest_s: 20, intensity: 'aerobic' }),
+    SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
+  piramide: { sport: 'swimming', title: 'Piramide', blocks: [
+    SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }), SB('Riscaldamento dorso', 'warmup', 1, 100, { stroke: 'back' }),
+    SB('Drill', 'interval', 4, 50, { stroke: 'drill', rest_s: 20 }),
+    ...[50, 100, 150, 200, 150, 100, 50].map(d => SB(`Piramide ${d}`, 'interval', 1, d, { rest_s: 20, intensity: 'aerobic' })),
+    SB('Sprint', 'interval', 4, 50, { rest_s: 45, intensity: 'fast' }),
+    SB('Aerobico', 'interval', 4, 100, { rest_s: 20, intensity: 'aerobic' }),
+    SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
+  misti: { sport: 'swimming', title: 'Misti e stili', blocks: [
+    SB('Riscaldamento', 'warmup', 1, 300, { stroke: 'any' }), SB('Riscaldamento dorso', 'warmup', 1, 100, { stroke: 'back' }),
+    SB('Drill', 'interval', 4, 50, { stroke: 'drill', rest_s: 20, note: 'un drill per stile' }),
+    SB('Misti', 'interval', 4, 100, { stroke: 'im', rest_s: 25 }),
+    SB('Dorso', 'interval', 4, 50, { stroke: 'back', rest_s: 20 }), SB('Rana', 'interval', 4, 50, { stroke: 'breast', rest_s: 20 }),
+    SB('Stile libero con pull', 'interval', 4, 100, { equipment: ['pull_buoy'], rest_s: 20, intensity: 'aerobic' }),
+    SB('Defaticante', 'cooldown', 1, 100, { stroke: 'any' })] },
+};
+const SWIM_ALL_SPECS = { ...SWIM_SPECS, ...SWIM_EXTRA_SPECS };
+const SWIM_LINKS = { tecnica: 'nuoto.html#sessA', velocitaPura: 'nuoto.html#sessBdom', sprintVirate: 'nuoto.html#sessC', bracciataVelocita: 'nuoto.html#sessD' };
+const SWIM_FAMILIES = [
+  { key: 'tecnica', match: ['soglia'] }, { key: 'resistenza', match: ['resistenza'] },
+  { key: 'gambePull', match: ['gambe'] }, { key: 'piramide', match: ['piramide'] }, { key: 'misti', match: ['misti'] },
+];
+const SWIM_EQ_IT = { fins: 'pinne', kickboard: 'tavola', paddles: 'palette', pull_buoy: 'pull', snorkel: 'snorkel' };
+
+function dayOfYear() {
+  const start = new Date(new Date().getFullYear(), 0, 0);
+  return Math.floor((new Date() - start) / 86400000);
+}
+
+// Famiglia di nuoto meno recente (dal nome delle attivita'), a pari merito si ruota per giorno.
+function pickSwimFamily(activities) {
+  const swims = activities.filter(a => SWIM_TYPES.includes(a.type));
+  const gaps = SWIM_FAMILIES.map(fam => {
+    const hit = swims.find(a => fam.match.some(m => (a.name || '').toLowerCase().includes(m)));
+    return { key: fam.key, gap: hit ? daysSinceDate(hit.date) : Infinity };
+  });
+  const maxGap = Math.max(...gaps.map(g => g.gap));
+  const tied = gaps.filter(g => g.gap === maxGap);
+  return tied[dayOfYear() % tied.length].key;
+}
+
+function swimHtml(spec) {
+  const total = spec.blocks.reduce((s, b) => s + b.reps * b.distance_m, 0);
+  const parts = spec.blocks.map(b => `${b.reps > 1 ? b.reps + '×' : ''}${b.distance_m} ${b.label.toLowerCase()}${b.equipment && b.equipment.length ? ` (${b.equipment.map(e => SWIM_EQ_IT[e] || e).join(' + ')})` : ''}`);
+  return `<strong>~${total.toLocaleString('it-IT')} m</strong>: ${parts.join(' → ')}.`;
+}
+
+// Adatta la seduta alla forma: ripetizioni dei blocchi principali scalate (±) e ritmo di soglia dall'ultima nuotata.
+function buildSwimSession(key, form, activities) {
+  const base = SWIM_ALL_SPECS[key];
+  const last = activities.find(a => SWIM_TYPES.includes(a.type) && (a.distance_km || 0) >= 0.8);
+  const st = last && swimLapStats(last);
+  const thr = st ? fmtSwimPace100(st.median * 0.985) : null;
+  const f = form.factor;
+  const blocks = base.blocks.map(b => {
+    const nb = { ...b };
+    const main = b.kind === 'interval' && b.stroke !== 'drill' && !/dorso|rana/i.test(b.label) && b.reps >= 4;
+    if (main && Math.abs(f - 1) > 0.05) nb.reps = Math.max(Math.max(2, b.reps - 3), Math.min(b.reps + 2, Math.round(b.reps * f)));
+    if (b.intensity === 'threshold' && thr) nb.note = `ritmo ~${thr}`;
+    return nb;
+  });
+  const spec = { ...base, blocks };
+  return { label: spec.title, html: swimHtml(spec), link: SWIM_LINKS[key] || 'nuoto.html', spec };
+}
+
 function computeTrends(activities, fitness, goals) {
   const lines = [];
   const f1 = x => x.toFixed(1).replace('.', ',');
@@ -1703,18 +1949,22 @@ function computeRecommendation(activities, fitness, sleepNights, goals) {
   const v2 = vo2Trend(fitness);
   const vo2Push = !!(v2 && (v2.peak.value - v2.last.value >= 2 || (v2.daysRecent >= 28 && v2.deltaRecent <= 0.3)));
   const focusSpeed = !!(goals && (goals.repeatPace || goals.vo2max)) || vo2Push;
+  const form = formProfile(fitness, readiness);
+  const paces = racePaces(fitness);
+  const lastQualityRun = activities.find(a => RUN_TYPES.includes(a.type) && QUALITY_TYPES.includes(classifyRun(a)));
+  const lastQuality = lastQualityRun ? classifyRun(lastQualityRun) : null;
   let runChoice;
   if (recoveryMode || runLayoff) runChoice = 'facile';
   else if (lowMode || (justRanHard && band !== 'alta')) runChoice = 'base';
   else if ((runGaps.lungo ?? Infinity) >= 6) runChoice = 'lungo';
-  else if (vo2Push && band === 'alta' && (runGaps.velocita ?? Infinity) >= 3) runChoice = 'velocita';
-  else if ((runGaps.velocita ?? Infinity) === (runGaps.soglia ?? Infinity)) runChoice = focusSpeed ? 'velocita' : 'soglia';
-  else runChoice = (runGaps.velocita ?? Infinity) > (runGaps.soglia ?? Infinity) ? 'velocita' : 'soglia';
-  if (fitness && fitness.training_status_category === 'DETRAINING' && runChoice === 'velocita') runChoice = 'soglia';
+  else runChoice = pickQuality(runGaps, lastQuality, band, fitness, goals, vo2Push);
 
   let run;
   if (runChoice === 'velocita') run = planVelocita(activities, band, goals);
   else if (runChoice === 'soglia') run = planSoglia(activities, band);
+  else if (runChoice === 'fartlek') run = planFartlek(activities, band, form, paces);
+  else if (runChoice === 'progressivo') run = planProgressivo(band, form, paces);
+  else if (runChoice === 'vo2') run = planVo2(activities, band, form, paces);
   else if (runChoice === 'lungo') run = planLungo(activities, band);
   else if (runChoice === 'base') run = {
     label: 'Corsa aerobica Z2',
@@ -1728,17 +1978,20 @@ function computeRecommendation(activities, fitness, sleepNights, goals) {
   const swimChoice = (recoveryMode || lowMode || swimLayoff)
     ? (swimLayoff && !recoveryMode && !lowMode ? 'tecnica' : 'leggero')
     : ((swimGaps.velocita ?? Infinity) > (swimGaps.tecnica ?? Infinity) ? 'velocita' : 'tecnica');
-  const swim = swimChoice === 'velocita' ? pickVelocitaVariant() : SWIM_SESSIONS[swimChoice];
+  let swim;
+  if (swimChoice === 'leggero') swim = SWIM_SESSIONS.leggero;
+  else if (swimChoice === 'velocita') swim = buildSwimSession(['velocitaPura', 'sprintVirate', 'bracciataVelocita'][dayOfYear() % 3], form, activities);
+  else swim = buildSwimSession(swimLayoff ? 'tecnica' : pickSwimFamily(activities), form, activities);
 
   const runNote = runLayoff
     ? `Rientro dopo una pausa di ${fmtDays(daysSinceRun)}: oggi si riparte facile, non con lunga o qualità.`
-    : ((run.progress ? `Progressione: ${run.progress}.` : '') + (runChoice === 'velocita' && vo2Push ? ' Il VO2max è sotto il tuo massimo: le ripetute sono lo stimolo che lo fa salire.' : '')).trim();
+    : ((run.progress ? `Progressione: ${run.progress}.` : '') + (['velocita', 'vo2'].includes(runChoice) && vo2Push ? ' Il VO2max è sotto il tuo massimo: questo è lo stimolo che lo fa salire.' : '') + (['velocita', 'soglia', 'fartlek', 'progressivo', 'vo2', 'lungo'].includes(runChoice) ? ` Adattata allo stato di forma: ${form.text}.` : '')).trim();
   const swimNote = swimLayoff && !recoveryMode
     ? `Rientro dopo una pausa di ${fmtDays(daysSinceRecovery)}: oggi tecnica, non sprint.`
-    : ((recoveryMode || lowMode) ? '' : [swimProgressNote(activities, band), GYM_NOTE].filter(Boolean).join(' '));
+    : ((recoveryMode || lowMode) ? '' : [swimProgressNote(activities, band), `Adattata allo stato di forma: ${form.text}.`, GYM_NOTE].filter(Boolean).join(' '));
 
   const trends = computeTrends(activities, fitness, goals);
-  return { preferred, rationale, recoveryMode, readiness, run, swim, runNote, swimNote, trends };
+  return { preferred, rationale, recoveryMode, readiness, form, run, swim, runNote, swimNote, trends };
 }
 
 function renderRecommendation(model) {
