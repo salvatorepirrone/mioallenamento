@@ -9,7 +9,7 @@
 //   POST action=send         (atleta)  {id, date?}                   -> crea l'allenamento su Garmin (e lo pianifica)
 //   POST action=send_plan    (atleta)  {plan, date?}                 -> invia a Garmin il consiglio del giorno (corsa o nuoto)
 // Solo i coach inseriscono, assegnano ed eliminano programmi. L'invio all'orologio e' riservato a chi
-// possiede la sessione Garmin del sito (COACH_DEFAULT_ATHLETE). Le POST portano il token nell'intestazione X-CSRF.
+// ha collegato il proprio account Garmin (pagina Collegamenti). Le POST portano il token nell'intestazione X-CSRF.
 require_once __DIR__ . '/auth/coach-lib.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -29,7 +29,7 @@ $name = auth_current_user();
 if (!$name) reply(['error' => 'Accesso richiesto'], 401);
 
 $isCoach = auth_is_coach($name) || auth_is_admin($name);
-$canSend = $name === COACH_DEFAULT_ATHLETE;
+$canSend = udata_connected($name)['garmin'];   // chi ha collegato Garmin invia al proprio orologio
 $method = $_SERVER['REQUEST_METHOD'];
 $action = (string)($_GET['action'] ?? '');
 $body = [];
@@ -157,7 +157,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'send') {
-        if (!$canSend) reply(['error' => 'L\'invio all\'orologio è riservato al titolare dell\'account Garmin.'], 403);
+        if (!$canSend) reply(['error' => 'Per inviare all\'orologio collega prima Garmin dalla pagina Collegamenti.'], 403);
         set_time_limit(120);
         $id = (string)($body['id'] ?? '');
         $date = $body['date'] ?? null;
@@ -180,7 +180,7 @@ try {
         if (!$target) reply(['error' => 'Invio già in corso, attendi qualche secondo.'], 409);
         $target['date'] = $date;
         try {
-            $res = coach_send_to_garmin($target);
+            $res = coach_send_to_garmin($target, $name);
         } catch (Throwable $e) {
             coach_update(function ($all) use ($id) { foreach ($all as &$w) if ($w['id'] === $id) unset($w['sending_at']); unset($w); return $all; });
             throw $e;
@@ -198,7 +198,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'send_plan') {
-        if (!$canSend) reply(['error' => 'L\'invio all\'orologio è riservato al titolare dell\'account Garmin.'], 403);
+        if (!$canSend) reply(['error' => 'Per inviare all\'orologio collega prima Garmin dalla pagina Collegamenti.'], 403);
         set_time_limit(120);
         $date = $body['date'] ?? null;
         if ($date === '' || $date === null) $date = null;
@@ -209,7 +209,7 @@ try {
         if (($_SESSION['last_plan'] ?? '') === $fingerprint && time() - (int)($_SESSION['last_plan_at'] ?? 0) < 60) {
             reply(['error' => 'Questo allenamento è già stato inviato un momento fa.'], 409);
         }
-        $res = coach_send_plan($plan, $date);
+        $res = coach_send_plan($plan, $date, $name);
         $_SESSION['last_plan'] = $fingerprint;
         $_SESSION['last_plan_at'] = time();
         auth_log('plan_sent', $name, ($plan['sport'] ?? '?') . ' -> Garmin ' . $res['garmin_id'] . ($date ? ' (calendario ' . $date . ')' : ''));

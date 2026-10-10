@@ -2,6 +2,7 @@
 // Allenamenti assegnati dal coach: archivio, lettura del testo con Claude, invio a Garmin.
 // I dati stanno accanto a users.json (cartella chiusa al web).
 require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/udata-lib.php';
 
 const COACH_DEFAULT_ATHLETE = 'salvatore';
 const COACH_MODEL = 'claude-sonnet-5';
@@ -187,35 +188,40 @@ function coach_call_claude(string $text): array {
 }
 
 // Esegue send_workout.py con la specifica data e restituisce l'esito (id Garmin, se messo in calendario).
-function coach_run_python(array $spec): array {
+// Entra su Garmin con la sessione dell'utente che invia ($user): ognuno manda gli allenamenti al proprio orologio.
+function coach_run_python(array $spec, string $user): array {
+    if (!udata_connected($user)['garmin']) throw new InvalidArgumentException('Collega prima il tuo account Garmin dalla pagina Collegamenti.');
     $tmp = tempnam(sys_get_temp_dir(), 'cw');
     file_put_contents($tmp, json_encode($spec, JSON_UNESCAPED_UNICODE));
-    $cmd = 'PYTHONPATH=' . COACH_PYTHONPATH . ' ' . COACH_PYTHON . ' -u ' . COACH_GARMIN_SCRIPT . ' ' . escapeshellarg($tmp) . ' 2>&1';
+    $cmd = udata_env_prefix(udata_env($user)) . ' ' . COACH_PYTHON . ' -u ' . COACH_GARMIN_SCRIPT . ' ' . escapeshellarg($tmp) . ' 2>&1';
     $out = (string)shell_exec($cmd);
     @unlink($tmp);
     $lines = array_values(array_filter(array_map('trim', explode("\n", $out))));
     $last = $lines ? $lines[count($lines) - 1] : '';
     $res = json_decode($last, true);
     if (!is_array($res) || empty($res['ok'])) {
+        if (stripos($last, 'mancanti') !== false || stripos($last, 'sessione') !== false) {
+            throw new RuntimeException('La sessione Garmin è scaduta: ricollega Garmin dalla pagina Collegamenti.');
+        }
         throw new RuntimeException('Invio a Garmin non riuscito: ' . mb_substr($last ?: 'nessuna risposta', 0, 200));
     }
     return $res;
 }
 
 // Crea (e mette in calendario) un programma della libreria su Garmin Connect.
-function coach_send_to_garmin(array $w): array {
+function coach_send_to_garmin(array $w, string $user): array {
     $p = $w['parsed'];
     $sport = $p['sport'] ?? 'swimming';
     if ($sport === 'running') {
-        return coach_run_python(['sport' => 'running', 'name' => 'Coach · ' . $p['title'], 'date' => $w['date'] ?? null, 'steps' => $p['steps']]);
+        return coach_run_python(['sport' => 'running', 'name' => 'Coach · ' . $p['title'], 'date' => $w['date'] ?? null, 'steps' => $p['steps']], $user);
     }
     if ($sport === 'strength') {
-        return coach_run_python(['sport' => 'strength', 'name' => 'Coach · ' . $p['title'], 'date' => $w['date'] ?? null, 'exercises' => $p['exercises']]);
+        return coach_run_python(['sport' => 'strength', 'name' => 'Coach · ' . $p['title'], 'date' => $w['date'] ?? null, 'exercises' => $p['exercises']], $user);
     }
     return coach_run_python([
         'name' => 'Coach · ' . $p['title'], 'date' => $w['date'] ?? null,
         'pool_length_m' => $p['pool_length_m'] ?? 25, 'blocks' => $p['blocks'],
-    ]);
+    ], $user);
 }
 
 const RUN_STEP_KINDS = ['warmup', 'interval', 'recovery', 'cooldown'];
@@ -279,7 +285,7 @@ function coach_run_totals(array $steps, int $times = 1): array {
 }
 
 // Invia a Garmin il piano suggerito dalla home (corsa o nuoto), dopo averlo validato.
-function coach_send_plan(array $plan, ?string $date): array {
+function coach_send_plan(array $plan, ?string $date, string $user): array {
     $sport = $plan['sport'] ?? '';
     $title = coach_clean_text($plan['title'] ?? '', 60) ?: 'Allenamento';
     $label = 'Consiglio · ' . $title . ($date ? ' (' . substr($date, 8, 2) . '/' . substr($date, 5, 2) . ')' : '');
@@ -287,15 +293,15 @@ function coach_send_plan(array $plan, ?string $date): array {
         $steps = coach_validate_run_steps($plan['steps'] ?? null);
         [$dist, $secs] = coach_run_totals($steps);
         if ($dist > 60000 || $secs > 6 * 3600) throw new InvalidArgumentException('Allenamento troppo lungo per essere plausibile.');
-        return coach_run_python(['sport' => 'running', 'name' => $label, 'date' => $date, 'steps' => $steps]);
+        return coach_run_python(['sport' => 'running', 'name' => $label, 'date' => $date, 'steps' => $steps], $user);
     }
     if ($sport === 'strength') {
         $parsed = coach_validate_strength(['title' => $title, 'exercises' => $plan['exercises'] ?? null]);
-        return coach_run_python(['sport' => 'strength', 'name' => $label, 'date' => $date, 'exercises' => $parsed['exercises']]);
+        return coach_run_python(['sport' => 'strength', 'name' => $label, 'date' => $date, 'exercises' => $parsed['exercises']], $user);
     }
     if ($sport === 'swimming') {
         $parsed = coach_validate_parsed(['title' => $title, 'pool_length_m' => 25, 'blocks' => $plan['blocks'] ?? null]);
-        return coach_run_python(['name' => $label, 'date' => $date, 'pool_length_m' => 25, 'blocks' => $parsed['blocks']]);
+        return coach_run_python(['name' => $label, 'date' => $date, 'pool_length_m' => 25, 'blocks' => $parsed['blocks']], $user);
     }
     throw new InvalidArgumentException('Sport non riconosciuto.');
 }
