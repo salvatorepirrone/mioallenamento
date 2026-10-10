@@ -41,13 +41,20 @@ function mail_send(string $to, string $subject, string $text, string $html = '')
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return ['ok' => false, 'error' => 'Indirizzo email non valido.'];
     $secure = $cfg['secure'] ?? 'tls';
     $port = (int)($cfg['port'] ?? ($secure === 'ssl' ? 465 : ($secure === 'none' ? 25 : 587)));
+    $helo = parse_url(UDATA_SITE_URL, PHP_URL_HOST) ?: 'localhost';
+    $data = mail_build($cfg, $to, $subject, $text, $html, $helo);
+
+    // Il PHP del sito (Web Station) non ha l'estensione openssl, quindi i flussi sicuri non funzionano: con TLS si passa da curl,
+    // che ha il suo supporto e i certificati del sistema (lo stesso che usano le chiamate a Claude).
+    if ($secure !== 'none' && function_exists('curl_init') && !function_exists('openssl_get_cert_locations')) {
+        return mail_send_curl($cfg, $secure, $port, $to, $data);
+    }
     $fp = null;
     try {
         $fp = @stream_socket_client(($secure === 'ssl' ? 'ssl://' : 'tcp://') . $cfg['host'] . ':' . $port, $errno, $errstr, 15);
         if (!$fp) throw new RuntimeException('Server di posta non raggiungibile (' . $errstr . ')');
         stream_set_timeout($fp, 20);
         mail_cmd($fp, '', [220]);
-        $helo = parse_url(UDATA_SITE_URL, PHP_URL_HOST) ?: 'localhost';
         mail_cmd($fp, 'EHLO ' . $helo, [250]);
         if ($secure === 'tls') {
             mail_cmd($fp, 'STARTTLS', [220]);
@@ -63,28 +70,6 @@ function mail_send(string $to, string $subject, string $text, string $html = '')
         mail_cmd($fp, 'RCPT TO:<' . $to . '>', [250, 251]);
         mail_cmd($fp, 'DATA', [354]);
 
-        $boundary = 'b' . bin2hex(random_bytes(8));
-        $fromName = (string)($cfg['from_name'] ?? 'Lodestar');
-        $headers = [
-            'From: ' . mail_encode_header($fromName) . ' <' . $cfg['from'] . '>',
-            'To: <' . $to . '>',
-            'Subject: ' . mail_encode_header($subject),
-            'Date: ' . date('r'),
-            'Message-ID: <' . bin2hex(random_bytes(10)) . '@' . $helo . '>',
-            'MIME-Version: 1.0',
-        ];
-        $b64 = function (string $s) { return chunk_split(base64_encode($s), 76, "\r\n"); };
-        if ($html !== '') {
-            $headers[] = 'Content-Type: multipart/alternative; boundary="' . $boundary . '"';
-            $body = '--' . $boundary . "\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . $b64($text)
-                  . '--' . $boundary . "\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . $b64($html)
-                  . '--' . $boundary . "--\r\n";
-        } else {
-            $headers[] = 'Content-Type: text/plain; charset=UTF-8';
-            $headers[] = 'Content-Transfer-Encoding: base64';
-            $body = $b64($text);
-        }
-        $data = implode("\r\n", $headers) . "\r\n\r\n" . $body;
         $data = preg_replace('/^\./m', '..', $data);           // dot-stuffing
         fwrite($fp, $data . "\r\n.\r\n");
         [$code] = mail_read($fp);
@@ -96,4 +81,50 @@ function mail_send(string $to, string $subject, string $text, string $html = '')
         if (is_resource($fp)) @fclose($fp);
         return ['ok' => false, 'error' => $e->getMessage()];
     }
+}
+
+
+// Messaggio completo (intestazioni e corpo, con CRLF) pronto per l'invio.
+function mail_build(array $cfg, string $to, string $subject, string $text, string $html, string $helo): string {
+    $boundary = 'b' . bin2hex(random_bytes(8));
+    $fromName = (string)($cfg['from_name'] ?? 'Lodestar');
+    $headers = [
+        'From: ' . mail_encode_header($fromName) . ' <' . $cfg['from'] . '>',
+        'To: <' . $to . '>',
+        'Subject: ' . mail_encode_header($subject),
+        'Date: ' . date('r'),
+        'Message-ID: <' . bin2hex(random_bytes(10)) . '@' . $helo . '>',
+        'MIME-Version: 1.0',
+    ];
+    $b64 = function (string $s) { return chunk_split(base64_encode($s), 76, "\r\n"); };
+    if ($html !== '') {
+        $headers[] = 'Content-Type: multipart/alternative; boundary="' . $boundary . '"';
+        $body = '--' . $boundary . "\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . $b64($text)
+              . '--' . $boundary . "\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . $b64($html)
+              . '--' . $boundary . "--\r\n";
+    } else {
+        $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+        $headers[] = 'Content-Transfer-Encoding: base64';
+        $body = $b64($text);
+    }
+    return implode("\r\n", $headers) . "\r\n\r\n" . $body;
+}
+
+// Invio via libcurl (smtp:// con STARTTLS oppure smtps://). libcurl gestisce da sola dot-stuffing e fine messaggio.
+function mail_send_curl(array $cfg, string $secure, int $port, string $to, string $data): array {
+    $ch = curl_init(($secure === 'ssl' ? 'smtps://' : 'smtp://') . $cfg['host'] . ':' . $port);
+    $pos = 0;
+    $opts = [
+        CURLOPT_MAIL_FROM => '<' . $cfg['from'] . '>', CURLOPT_MAIL_RCPT => ['<' . $to . '>'],
+        CURLOPT_UPLOAD => true, CURLOPT_INFILESIZE => strlen($data),
+        CURLOPT_READFUNCTION => function ($c, $fd, $len) use ($data, &$pos) { $chunk = substr($data, $pos, $len); $pos += strlen($chunk); return $chunk; },
+        CURLOPT_TIMEOUT => 40, CURLOPT_CONNECTTIMEOUT => 15, CURLOPT_SSL_VERIFYPEER => true, CURLOPT_SSL_VERIFYHOST => 2,
+    ];
+    if ($secure === 'tls') $opts[CURLOPT_USE_SSL] = defined('CURLUSESSL_ALL') ? CURLUSESSL_ALL : 3;
+    if (!empty($cfg['user'])) { $opts[CURLOPT_USERNAME] = $cfg['user']; $opts[CURLOPT_PASSWORD] = (string)($cfg['pass'] ?? ''); }
+    curl_setopt_array($ch, $opts);
+    $ok = curl_exec($ch);
+    $err = curl_error($ch);
+    curl_close($ch);
+    return $ok === false ? ['ok' => false, 'error' => 'Invio non riuscito: ' . ($err ?: 'errore sconosciuto')] : ['ok' => true, 'error' => null];
 }
