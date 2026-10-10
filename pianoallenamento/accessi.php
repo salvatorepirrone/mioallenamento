@@ -35,6 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 auth_update_users(function ($users) use ($newName) { $users[$newName]['coach'] = true; return $users; });
                 auth_log('coach_granted', $newName, 'alla creazione, da ' . $name);
             }
+            if ($temp !== null && !empty($_POST['as_nutri'])) {
+                auth_update_users(function ($users) use ($newName) { $users[$newName]['nutrizionista'] = true; return $users; });
+                auth_log('nutri_granted', $newName, 'alla creazione, da ' . $name);
+            }
             if ($temp === null) {
                 $formError = 'Impossibile creare l\'utente, riprova.';
             } else {
@@ -82,6 +86,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
             auth_log($action === 'make_coach' ? 'coach_granted' : 'coach_revoked', $target, 'da ' . $name);
             $notice = $action === 'make_coach' ? "$target ora è coach." : "Tolto il ruolo di coach a $target.";
+        } elseif ($action === 'make_nutri' || $action === 'revoke_nutri') {
+            auth_update_users(function ($users) use ($target, $action) {
+                if ($action === 'make_nutri') $users[$target]['nutrizionista'] = true; else unset($users[$target]['nutrizionista']);
+                return $users;
+            });
+            auth_log($action === 'make_nutri' ? 'nutri_granted' : 'nutri_revoked', $target, 'da ' . $name);
+            $notice = $action === 'make_nutri' ? "$target ora è nutrizionista." : "Tolto il ruolo di nutrizionista a $target.";
         } elseif ($action === 'enable' || $action === 'make_admin') {
             auth_update_users(function ($users) use ($target, $action) {
                 if ($action === 'enable') unset($users[$target]['disabled']);
@@ -103,6 +114,9 @@ $labels = [
     'user_enabled' => 'Utente riattivato', 'user_deleted' => 'Utente eliminato', 'user_unlocked' => 'Utente sbloccato',
     'coach_granted' => 'Coach assegnato', 'coach_revoked' => 'Coach revocato', 'coach_assigned' => 'Allenamento assegnato',
     'coach_library_add' => 'Programma inserito in libreria',
+    'nutri_granted' => 'Nutrizionista assegnato', 'nutri_revoked' => 'Nutrizionista revocato',
+    'nutri_recipe_add' => 'Ricetta inserita', 'nutri_recipe_delete' => 'Ricetta eliminata', 'nutri_meal_add' => 'Pasto registrato',
+    'nutri_parse_recipe' => 'Ricetta analizzata', 'plan_saved' => 'Piano salvato', 'plan_deleted' => 'Piano eliminato',
     'plan_sent' => 'Consiglio inviato a Garmin',
     'coach_parse' => 'Testo analizzato (coach)', 'coach_deleted' => 'Allenamento eliminato', 'coach_sent' => 'Allenamento inviato a Garmin',
     'admin_granted' => 'Admin assegnato', 'admin_revoked' => 'Admin revocato', 'login_disabled' => 'Accesso con account disattivato',
@@ -217,7 +231,7 @@ function user_btn(string $action, string $user, string $label, string $confirm =
 <tr><th>Utente</th><th>Ruolo</th><th>Stato</th><th>Azioni</th></tr>
 <?php foreach (auth_all_users() as $un => $uu):
     $isSelf = $un === $name; $isAdm = !empty($uu['admin']); $isOff = !empty($uu['disabled']); $isLocked = ($uu['locked_until'] ?? 0) > time(); ?>
-<tr><td><?= e($un) ?><?= $isSelf ? ' <span class="muted">(tu)</span>' : '' ?></td><td><?= $isAdm ? 'Amministratore' : 'Utente' ?><?= !empty($uu['coach']) ? ' · Coach' : '' ?></td>
+<tr><td><?= e($un) ?><?= $isSelf ? ' <span class="muted">(tu)</span>' : '' ?></td><td><?= $isAdm ? 'Amministratore' : 'Utente' ?><?= !empty($uu['coach']) ? ' · Coach' : '' ?><?= !empty($uu['nutrizionista']) ? ' · Nutrizionista' : '' ?></td>
 <td><?php
     if ($isOff) echo '<span class="bad">Disattivato</span>';
     elseif ($isLocked) echo '<span class="bad">Bloccato (troppi tentativi)</span>';
@@ -237,6 +251,7 @@ function user_btn(string $action, string $user, string $label, string $confirm =
     }
     echo $isAdm ? user_btn('revoke_admin', $un, 'Togli admin', "Togliere il ruolo di amministratore a $un?") : user_btn('make_admin', $un, 'Rendi admin', "Rendere $un amministratore? Potrà creare ed eliminare utenti e vedere il registro accessi.");
     echo !empty($uu['coach']) ? user_btn('revoke_coach', $un, 'Togli coach', "Togliere il ruolo di coach a $un?") : user_btn('make_coach', $un, 'Rendi coach', "Rendere $un coach? Potrà scrivere e assegnare allenamenti.");
+    echo !empty($uu['nutrizionista']) ? user_btn('revoke_nutri', $un, 'Togli nutrizionista', "Togliere il ruolo di nutrizionista a $un?") : user_btn('make_nutri', $un, 'Rendi nutrizionista', "Rendere $un nutrizionista? Potrà eliminare qualsiasi ricetta della libreria.");
     if (!$isSelf) echo user_btn('delete', $un, 'Elimina', "Eliminare definitivamente $un? L'operazione non si può annullare.", true);
 ?></td></tr>
 <?php endforeach; ?>
@@ -247,6 +262,7 @@ function user_btn(string $action, string $user, string $label, string $confirm =
   <input name="new_user" required minlength="2" maxlength="32" pattern="[a-z0-9._\-]{2,32}" placeholder="nome (es. luca)" autocomplete="off"
          style="padding:9px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:14px"></div>
   <label class="muted" style="display:flex;gap:6px;align-items:center;padding-bottom:10px"><input type="checkbox" name="as_coach" value="1"> Coach</label>
+  <label class="muted" style="display:flex;gap:6px;align-items:center;padding-bottom:10px"><input type="checkbox" name="as_nutri" value="1"> Nutrizionista</label>
   <button type="submit" style="padding:10px 16px;border:0;border-radius:var(--r);background:var(--accent);font-weight:700;cursor:pointer">Crea utente</button>
 </form>
 

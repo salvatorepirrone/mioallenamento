@@ -91,5 +91,6 @@ document.getElementById('r-parse').addEventListener('click', async ev => {
 
 (async () => {
   try { await nutriLoad(); } catch (e) { document.getElementById('r-list').innerHTML = `<div class="ld-err">${esc(e.message)}</div>`; return; }
+  document.getElementById('r-role').hidden = !nutriState.canManage;
   renderWeek(); renderFilters(); renderList();
 })();
