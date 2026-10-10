@@ -91,10 +91,31 @@ function qualityRun(phase, k, paces, evPace, distKm, maxKm) {
 
 // Sedute di nuoto: rotazione dalla libreria; per eventi di nuoto, un lungo continuo che cresce fino a ~1,2x la distanza.
 const SWIM_ROTATION = { base: ['tecnica', 'gambePull', 'resistenza'], sviluppo: ['resistenza', 'piramide', 'tecnica'], picco: ['velocitaPura', 'resistenza', 'misti'], scarico: ['leggero', 'tecnica'] };
-function swimSession(phase, k) {
+const swimTotal = spec => spec.blocks.reduce((s, b) => s + b.reps * b.distance_m, 0);
+
+// Porta una seduta di nuoto a ~target metri cambiando le ripetizioni dei blocchi di lavoro (riscaldamento e defaticamento restano).
+function scaleSwimTo(spec, target) {
+  const total = swimTotal(spec);
+  if (!target || Math.abs(total - target) / total < 0.15) return spec;
+  const work = spec.blocks.filter(b => b.kind === 'interval' && b.reps >= 2);
+  const fixed = total - work.reduce((s, b) => s + b.reps * b.distance_m, 0);
+  const scalable = total - fixed;
+  if (scalable <= 0) return spec;
+  const f = Math.max(0.5, Math.min(1.6, (target - fixed) / scalable));
+  const copy = JSON.parse(JSON.stringify(spec));
+  copy.blocks.forEach(b => {
+    if (b.kind !== 'interval' || b.reps < 2) return;
+    let r = Math.max(1, Math.round(b.reps * f));
+    if (b.alternate && r % 2) r += 1;
+    b.reps = r;
+  });
+  return copy;
+}
+
+function swimSession(phase, k, targetM) {
   const keys = SWIM_ROTATION[phase].filter(x => SWIM_ALL_SPECS[x]);
-  const spec = SWIM_ALL_SPECS[keys[k % keys.length]];
-  const total = spec.blocks.reduce((s, b) => s + b.reps * b.distance_m, 0);
+  const spec = scaleSwimTo(SWIM_ALL_SPECS[keys[k % keys.length]], targetM);
+  const total = swimTotal(spec);
   return { sport: 'swimming', title: spec.title, spec, km: total / 1000, min: Math.round(total / 1000 * 32) };
 }
 function longSwim(meters, label) {
@@ -167,7 +188,7 @@ function generatePlan(input, activities, fitness, opts) {
   const peakKm = Math.min(pickBy(PEAK_KM, distKm), Math.max(startKm * Math.pow(1.09, (nWeeks - i0 - taper) * 0.75), startKm + 4));
   const longCap = pickBy(LONG_CAP, distKm);
   const evSwim = primary === 'swimming' ? (Number(input.distanceM) || 1500) : 0;
-  const startSwim = Math.max(base.swimM, 800);
+  const startSwim = Math.max(base.swimM, 1000 * Math.max(1, mix.swim));
   const peakSwim = primary === 'swimming' ? Math.max(startSwim * 1.4, evSwim * 1.8) : Math.max(startSwim * 1.3, 1800);
 
   const weeks = [];
@@ -210,7 +231,11 @@ function generatePlan(input, activities, fitness, opts) {
       if (primary === 'swimming' && s === 0) {
         const m = (evSwim || swimM) * (0.6 + 0.6 * f) * (down ? 0.8 : (phase === 'scarico' ? 0.5 : 1));
         swimSessions.push({ role: 'long', s: longSwim(Math.max(m, 800), phase === 'scarico' ? 'Nuoto facile' : 'Nuoto continuo') });
-      } else swimSessions.push({ role: 'swim', s: swimSession(phase, i + s) });
+      } else {
+        const longM = primary === 'swimming' ? (swimSessions.find(x => x.role === 'long') || { s: { km: 0 } }).s.km * 1000 : 0;
+        const others = Math.max(1, mix.swim - (primary === 'swimming' ? 1 : 0));
+        swimSessions.push({ role: 'swim', s: swimSession(phase, i + s, Math.max(800, (swimM - longM) / others)) });
+      }
     }
     const gymSessions = [];
     for (let g = 0; g < mix.gym; g++) gymSessions.push({ role: 'gym', s: GYM_SESSION(i + g, phase === 'scarico' || down) });
@@ -240,6 +265,16 @@ function generatePlan(input, activities, fitness, opts) {
     });
     if (hasEvent && date_in_week(monday, end)) days.push({ date: end, sessions: [{ id: 'event', role: 'event', sport: primary, title: input.eventName || 'Evento', spec: null, km: primary === 'running' ? distKm : (evSwim / 1000), min: 0 }] });
     days.sort((a, b) => a.date.localeCompare(b.date));
+    for (let k = 1; k < days.length; k++) {
+      if (daysBetween(days[k - 1].date, days[k].date) !== 1) continue;
+      const a = days[k - 1].sessions.find(x => x.sport === 'running' && (x.role === 'quality' || x.role === 'long'));
+      const b = days[k].sessions.find(x => x.sport === 'running' && (x.role === 'quality' || x.role === 'long'));
+      if (!a || !b) continue;
+      const q = a.role === 'quality' ? a : (b.role === 'quality' ? b : null);   // si alleggerisce la qualita', mai il lungo
+      if (!q) continue;
+      const e = easyRun(Math.max(4, q.km * 0.85), paces.p10);
+      Object.assign(q, { role: 'easy', title: e.title, spec: e.spec, km: Math.round(e.km * 10) / 10, min: e.min });
+    }
     const wkm = days.flatMap(d => d.sessions).filter(s => s.sport === 'running' && s.role !== 'event').reduce((s, x) => s + x.km, 0);
     const wswim = days.flatMap(d => d.sessions).filter(s => s.sport === 'swimming' && s.role !== 'event').reduce((s, x) => s + x.km * 1000, 0);
     weeks.push({ n: i + 1, phase, down, monday, runKm: Math.round(wkm * 10) / 10, swimM: Math.round(wswim / 50) * 50, days });
