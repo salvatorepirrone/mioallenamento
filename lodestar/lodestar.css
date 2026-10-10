@@ -147,3 +147,28 @@
 .pl-done > summary { opacity: .85; }
 .pl-sess .cw-list { margin: 8px 0 6px 18px; font-size: 12.5px; }
 .ld-planline { background: rgba(46,109,164,.08); border: 1px solid rgba(46,109,164,.25); border-radius: var(--r); padding: 10px 14px; margin-bottom: 14px; }
+
+/* ---- peso e sonno ---- */
+.ld-wrap-x { overflow-x: auto; }
+.ps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.ps-src { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 15px; }
+.ps-src-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; font-size: 13px; }
+.ps-row { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.ps-row:last-child { border-bottom: 0; }
+.ps-row span { color: var(--muted); }
+.ps-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+.ps-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.ps-legend i, .sl-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.sl-last { display: flex; gap: 22px; flex-wrap: wrap; align-items: center; }
+.sl-bar { display: flex; height: 18px; border-radius: 999px; overflow: hidden; background: var(--s3); }
+.sl-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); margin: 6px 0 10px; }
+.sl-chart { display: flex; gap: 6px; align-items: flex-end; height: 120px; }
+.sl-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; font-size: 10.5px; color: var(--muted); }
+.sl-colbar { flex: 1; width: 100%; display: flex; align-items: flex-end; }
+.sl-colbar > div { width: 100%; border-radius: 4px 4px 0 0; }
+.ld-gauge { text-align: center; }
+.ld-gauge .ring { --p: 0; --c: var(--ld-mid); width: 118px; height: 118px; border-radius: 50%; margin: 0 auto 6px; background: conic-gradient(var(--c) calc(var(--p) * 1%), var(--s3) 0); display: flex; align-items: center; justify-content: center; }
+.ld-gauge .ring-in { width: 90px; height: 90px; border-radius: 50%; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ld-gauge .ring-in b { font-size: 28px; line-height: 1; }
+.ld-gauge .ring-in span { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+.ld-gauge .cap { font-size: 12.5px; font-weight: 600; }
