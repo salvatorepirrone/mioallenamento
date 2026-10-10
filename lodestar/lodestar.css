@@ -98,6 +98,11 @@
 .ld-weekrow { display: grid; grid-template-columns: 58px 1fr 150px; gap: 10px; align-items: center; font-size: 12.5px; padding: 3px 0; }
 .ld-cats[hidden] { display: none; }
 
+/* ---- profilo: campi compilati da Garmin/Withings e campi da completare ---- */
+.pl-grid label.pf-filled input, .pl-grid label.pf-filled select { background: rgba(46,125,50,.08); border-color: rgba(46,125,50,.45); }
+.pl-grid label.pf-filled::after { content: attr(data-src); font-size: 11px; color: var(--ld-good); font-weight: 600; }
+.pl-grid label.pf-missing input, .pl-grid label.pf-missing select { border-color: var(--ld-gold); box-shadow: 0 0 0 2px rgba(232,182,75,.25); }
+
 /* ---- guida del primo accesso ---- */
 .wz-steps { margin-top: 14px; display: grid; gap: 10px; }
 .wz-step { display: flex; align-items: center; gap: 14px; background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; flex-wrap: wrap; }
