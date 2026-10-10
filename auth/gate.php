@@ -3,6 +3,7 @@
 // Senza sessione valida rimanda al login; con sessione valida serve il file
 // richiesto (statici tramite X-Accel-Redirect, .php eseguiti qui).
 require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/udata-lib.php';
 
 $name = auth_current_user();
 $valid = $name && empty($_SESSION['must_change']);
@@ -19,6 +20,14 @@ if (!$valid) {
         header('Content-Type: application/json');
         echo json_encode(['error' => 'Accesso richiesto']);
     }
+    exit;
+}
+
+// /data/ contiene le attivita' e il peso dell'atleta storico (le usa il sito classico): niente accesso per gli altri utenti,
+// che leggono i propri dati da lodestar/mydata.php.
+if (strpos($path, '/data/') === 0 && $name !== UDATA_DEFAULT_ATHLETE) {
+    http_response_code(403);
+    echo 'Non autorizzato';
     exit;
 }
 

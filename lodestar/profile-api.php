@@ -21,7 +21,17 @@ $method = $_SERVER['REQUEST_METHOD'];
 $action = (string)($_GET['action'] ?? '');
 
 if ($method === 'GET' && $action === 'get') {
-    reply(['csrf' => auth_csrf_token(), 'profile' => udata_read_json($file), 'onboarded' => udata_onboarded($name)]);
+    // Dati anagrafici letti da Garmin (preferiti) e Withings, per precompilare il profilo.
+    $h = udata_read_json(udata_ensure($name)['work'] . '/profile-hints.json') ?: [];
+    $g = $h['garmin'] ?? []; $w = $h['withings'] ?? [];
+    $hints = array_filter([
+        'sex' => $g['sex'] ?? null, 'birth_year' => $g['birth_year'] ?? null,
+        'height_cm' => $g['height_cm'] ?? ($w['height_cm'] ?? null), 'weight_kg' => $g['weight_kg'] ?? null,
+    ], function ($v) { return $v !== null; });
+    $src = [];
+    if ($g) $src[] = 'Garmin';
+    if ($w && !isset($g['height_cm'])) $src[] = 'Withings';
+    reply(['csrf' => auth_csrf_token(), 'profile' => udata_read_json($file), 'onboarded' => udata_onboarded($name), 'hints' => $hints ?: null, 'hints_source' => implode(' e ', $src)]);
 }
 
 if ($method === 'POST' && $action === 'onboarded') {

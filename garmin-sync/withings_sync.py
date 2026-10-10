@@ -143,6 +143,23 @@ def get_access_token(force_refresh: bool = False) -> str:
     return body["access_token"]
 
 
+# ── Dati per precompilare il profilo (sesso, nascita, altezza, peso) ──
+# Se PROFILE_HINTS_FILE e' impostato (lo fa il sito per ogni utente), i dati anagrafici letti da Garmin e da Withings
+# vengono salvati li', in un file privato fuori dalla cartella pubblica; il profilo poi li propone all'utente.
+def write_profile_hints(source: str, data: dict) -> None:
+    path = os.environ.get("PROFILE_HINTS_FILE")
+    if not path or not data:
+        return
+    try:
+        p = Path(path)
+        cur = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+        cur[source] = data
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(cur, ensure_ascii=False), encoding="utf-8")
+    except Exception as exc:  # non deve mai far fallire la sincronizzazione
+        print(f"Dati del profilo non salvati: {exc}")
+
+
 def get_height_m(access_token: str) -> float | None:
     """L'altezza non viene misurata ad ogni pesata: va cercata su tutto lo
     storico (nessun limite di data), non solo negli ultimi DAYS_BACK giorni."""
@@ -290,6 +307,12 @@ def main() -> None:
         access_token = get_access_token(force_refresh=True)
         weight = sync_weight(access_token)
         sleep = sync_sleep(access_token)
+    try:
+        h = get_height_m(access_token)
+        if h:
+            write_profile_hints("withings", {"height_cm": round(h * 100, 1)})
+    except Exception as exc:
+        print(f"Altezza Withings non letta: {exc}")
     write_json("withings-weight.json", weight)
     write_json("withings-sleep.json", sleep)
     print("Sincronizzazione Withings completata.")

@@ -55,6 +55,26 @@ def main(argv: list) -> int:
             name = client.profile.get("displayName")
         except Exception:
             pass
+        try:                                    # dati anagrafici per precompilare il profilo
+            hints_path = os.environ.get("PROFILE_HINTS_FILE")
+            if hints_path:
+                ud = client.connectapi("/userprofile-service/userprofile/user-settings").get("userData", {})
+                h = {}
+                if str(ud.get("gender") or "").upper() in ("MALE", "FEMALE"):
+                    h["sex"] = "m" if str(ud["gender"]).upper() == "MALE" else "f"
+                if str(ud.get("birthDate") or "")[:4].isdigit():
+                    h["birth_year"] = int(str(ud["birthDate"])[:4])
+                if ud.get("height"):
+                    h["height_cm"] = round(float(ud["height"]), 1)
+                if ud.get("weight"):
+                    h["weight_kg"] = round(float(ud["weight"]) / 1000, 1)
+                hp = Path(hints_path)
+                cur = json.loads(hp.read_text(encoding="utf-8")) if hp.exists() else {}
+                cur["garmin"] = h
+                hp.parent.mkdir(parents=True, exist_ok=True)
+                hp.write_text(json.dumps(cur, ensure_ascii=False), encoding="utf-8")
+        except Exception:
+            pass
         write_status(status_file, state="ok", name=name)
         return 0
     except Exception as exc:  # noqa: BLE001 - il messaggio va mostrato all'utente

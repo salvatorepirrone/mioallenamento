@@ -61,7 +61,7 @@ function udata_rm_dir(string $dir): void {
 // Variabili d'ambiente per sync.py / withings_sync.py. Per gli altri utenti si svuotano le credenziali dell'atleta storico:
 // una sessione scaduta deve fallire, mai ripiegare sull'account di qualcun altro.
 function udata_env(string $user, array $extra = []): array {
-    $env = ['PYTHONPATH' => UDATA_PYTHONPATH];
+    $env = ['PYTHONPATH' => UDATA_PYTHONPATH, 'PROFILE_HINTS_FILE' => udata_base($user) . '/profile-hints.json'];
     if (!udata_legacy($user)) {
         $p = udata_ensure($user);
         $env += [

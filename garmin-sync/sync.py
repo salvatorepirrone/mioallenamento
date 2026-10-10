@@ -405,6 +405,39 @@ def sync_fitness(client: Garmin) -> dict:
     return result
 
 
+# ── Dati per precompilare il profilo (sesso, nascita, altezza, peso) ──
+# Se PROFILE_HINTS_FILE e' impostato (lo fa il sito per ogni utente), i dati anagrafici letti da Garmin e da Withings
+# vengono salvati li', in un file privato fuori dalla cartella pubblica; il profilo poi li propone all'utente.
+def write_profile_hints(source: str, data: dict) -> None:
+    path = os.environ.get("PROFILE_HINTS_FILE")
+    if not path or not data:
+        return
+    try:
+        p = Path(path)
+        cur = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+        cur[source] = data
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(cur, ensure_ascii=False), encoding="utf-8")
+    except Exception as exc:  # non deve mai far fallire la sincronizzazione
+        print(f"Dati del profilo non salvati: {exc}")
+
+
+def garmin_profile_hints(client: Garmin) -> dict:
+    ud = client.garth.connectapi("/userprofile-service/userprofile/user-settings").get("userData", {})
+    out = {}
+    g = str(ud.get("gender") or "").upper()
+    if g in ("MALE", "FEMALE"):
+        out["sex"] = "m" if g == "MALE" else "f"
+    bd = str(ud.get("birthDate") or "")
+    if len(bd) >= 4 and bd[:4].isdigit():
+        out["birth_year"] = int(bd[:4])
+    if ud.get("height"):
+        out["height_cm"] = round(float(ud["height"]), 1)
+    if ud.get("weight"):
+        out["weight_kg"] = round(float(ud["weight"]) / 1000, 1)
+    return out
+
+
 def write_json(name: str, payload) -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     path = OUTPUT_DIR / name
@@ -414,6 +447,10 @@ def write_json(name: str, payload) -> None:
 
 def main() -> None:
     client = login()
+    try:
+        write_profile_hints("garmin", garmin_profile_hints(client))
+    except Exception as exc:
+        print(f"Dati anagrafici Garmin non letti: {exc}")
 
     weight = sync_weight(client)
     write_json("garmin-weight.json", weight)

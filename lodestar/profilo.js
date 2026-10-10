@@ -31,6 +31,24 @@ P('p-save').onclick = async () => {
   } catch (e) { st.innerHTML = `<span class="ld-err">${String(e.message).replace(/</g, '&lt;')}</span>`; }
 };
 
+let hints = null;
+function applyHints() {
+  if (!hints) return;
+  if (hints.sex) P('p-sex').value = hints.sex;
+  if (hints.birth_year) P('p-birth').value = hints.birth_year;
+  if (hints.height_cm) P('p-height').value = hints.height_cm;
+}
+
 (async () => {
-  try { fill((await pfApi('get')).profile); } catch (e) { P('pf-msg').innerHTML = `<div class="ld-err">${String(e.message).replace(/</g, '&lt;')}</div>`; }
+  try {
+    const d = await pfApi('get');
+    hints = d.hints;
+    fill(d.profile);
+    if (hints) {
+      const txt = [hints.sex ? (hints.sex === 'm' ? 'uomo' : 'donna') : null, hints.birth_year ? 'nato nel ' + hints.birth_year : null, hints.height_cm ? hints.height_cm + ' cm' : null].filter(Boolean).join(', ');
+      if (!d.profile) { applyHints(); P('pf-msg').innerHTML = `<div class="ld-adapt">Ho precompilato sesso, anno di nascita e altezza con i dati di ${d.hints_source || 'Garmin'} (${txt}). Controllali, scegli obiettivo e alimentazione e salva.</div>`; }
+      else P('pf-msg').innerHTML = `<div class="ld-muted">Dati di ${d.hints_source}: ${txt}. <a href="#" class="reco-link" id="p-hints">Usa questi dati</a></div>`;
+      const a = P('p-hints'); if (a) a.onclick = e => { e.preventDefault(); applyHints(); };
+    }
+  } catch (e) { P('pf-msg').innerHTML = `<div class="ld-err">${String(e.message).replace(/</g, '&lt;')}</div>`; }
 })();
