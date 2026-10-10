@@ -99,10 +99,12 @@ async function loadPlanToday() {
     const d = await res.json();
     if (!d.plan) { box.innerHTML = '<div class="reco-text" style="margin-bottom:12px">🎯 Non hai ancora un piano: <a class="reco-link" href="/lodestar/piano.html">crea il tuo piano personalizzato →</a></div>'; return; }
     const today = todayISO();
+    const [acts, fit, sleep] = await Promise.all([fetchJSONSafe('/data/garmin-activities.json', []), fetchJSONSafe('/data/garmin-fitness.json', null), fetchJSONSafe('/data/withings-sleep.json', [])]);
+    await applyPlanAdaptation(d.plan, { activities: acts, fitness: fit, sleep }, d.csrf);
     const items = d.plan.weeks.flatMap(w => w.days.map(x => ({ date: x.date, s: x.sessions })));
     const todayItem = items.find(x => x.date === today);
     const next = items.find(x => x.date > today);
-    const line = x => x.s.map(s => `${s.sport === 'running' ? '🏃' : (s.sport === 'swimming' ? '🏊' : (s.sport === 'strength' ? '🏋️' : '🏁'))} <b>${LibUI.e(s.title)}</b>`).join(' + ');
+    const line = x => x.s.map(s => `${s.adapted && s.adapted.orig ? '🔧 ' : ''}${s.sport === 'running' ? '🏃' : (s.sport === 'swimming' ? '🏊' : (s.sport === 'strength' ? '🏋️' : '🏁'))} <b>${LibUI.e(s.title)}</b>`).join(' + ');
     const wk = d.plan.weeks.find(w => daysBetweenIso(w.monday, today) >= 0 && daysBetweenIso(w.monday, today) < 7);
     box.innerHTML = `<div class="ld-planline"><div class="reco-title">🎯 Dal tuo piano${wk ? ` · settimana ${wk.n} di ${d.plan.weeks.length} (${PHASE_NAMES[wk.phase]})` : ''}</div>
       <div class="reco-text">${todayItem ? 'Oggi: ' + line(todayItem) : 'Oggi riposo.'}${next ? ` · Prossima: ${line(next)} <span class="ld-muted">(${next.date.slice(8)}/${next.date.slice(5, 7)})</span>` : ''} <a class="reco-link" href="/lodestar/piano.html">Apri il piano →</a></div></div>`;

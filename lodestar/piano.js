@@ -67,7 +67,8 @@ function sessionHtml(s, date) {
   const status = done ? '<span class="ld-ok">✅ fatto</span>' : (past ? '<span class="ld-muted">non registrato</span>' : '');
   const meta = [s.km ? (s.sport === 'swimming' ? Math.round(s.km * 1000) + ' m' : s.km + ' km') : '', s.min ? '~' + s.min + ' min' : ''].filter(Boolean).join(' · ');
   const send = (state.canSend && !past ? `<div class="reco-send"><button type="button" class="cw-btn" data-send="${s.id}" data-date="${date}">${s.sent ? 'Reinvia' : "Invia all'orologio"} (${dayLabel(date)})</button> <span class="reco-send-msg"></span></div>` : '');
-  return `<details class="pl-sess${done ? ' pl-done' : ''}" data-sid="${s.id}"><summary>${icon} <b>${LibUI.e(s.title)}</b> <span class="ld-muted">${meta}</span> ${status}${s.sent ? ' <span class="ld-badge alt">inviato</span>' : ''}</summary>
+  return `<details class="pl-sess${done ? ' pl-done' : ''}" data-sid="${s.id}"><summary>${icon} <b>${LibUI.e(s.title)}</b> <span class="ld-muted">${meta}</span> ${status}${s.sent ? ' <span class="ld-badge alt">inviato</span>' : ''}${s.adapted && s.adapted.orig ? ' <span class="ld-badge">adattata</span>' : ''}</summary>
+    ${s.adapted && s.adapted.orig ? `<div class="ld-adapt">🔧 ${LibUI.e(s.adapted.reason)}. Prevista: «${LibUI.e(s.adapted.orig.title)}». <a href="#" data-restore="${s.id}" class="reco-link">Ripristina</a></div>` : ''}
     ${LibUI.html(s.spec)}${send}</details>`;
 }
 
@@ -104,6 +105,7 @@ function renderPlan() {
       <div><button class="ld-btn ghost" id="pl-new" type="button">Nuovo piano</button></div></div>
       <div class="pl-bars">${bars}</div>
       <div class="pl-legend">${Object.keys(PHASE_LABEL).map(k => `<span><i style="background:${PHASE_COLOR[k]}"></i>${PHASE_LABEL[k]}</span>`).join('')}</div>
+      ${p.adapt && p.adapt.log && p.adapt.log.length ? `<details class="ld-adapt-log"><summary>🔧 Adattamenti recenti (${p.adapt.log.length})</summary>${p.adapt.log.slice(0, 6).map(l => `<div class="ld-muted">${dayLabel(l.date)} · ${LibUI.e(l.text)}</div>`).join('')}</details>` : ''}
       <div class="ld-muted" style="margin-top:6px">Aderenza finora: <b>${done}/${due.length}</b> sedute fatte${nextSess ? ` · prossima: <b>${LibUI.e(nextSess.s.title)}</b> (${dayLabel(nextSess.date)})` : ''}</div>
     </div>
     <div class="sec">Settimane</div>${p.weeks.map((w, i) => weekHtml(w, i === curWeek)).join('')}`;
@@ -118,6 +120,12 @@ function showForm(replacing) {
 }
 
 document.addEventListener('click', async ev => {
+  const rs = ev.target.closest('[data-restore]');
+  if (rs) {
+    ev.preventDefault();
+    if (restoreSession(state.plan, rs.dataset.restore)) { await pApi('save', { plan: state.plan }).catch(() => {}); renderPlan(); }
+    return;
+  }
   const b = ev.target.closest('[data-send]'); if (!b) return;
   const sid = b.dataset.send, date = b.dataset.date;
   const sess = state.plan.weeks.flatMap(w => w.days.flatMap(d => d.sessions)).find(s => s.id === sid);
@@ -154,6 +162,10 @@ document.addEventListener('click', async ev => {
       LibUI.api('mine').catch(() => ({ can_send: false })),
     ]);
     state.activities = acts; state.fitness = fit; state.canSend = !!mine.can_send; state.plan = d.plan;
-    if (state.plan) { $('pl-view').innerHTML = ''; renderPlan(); } else { $('pl-view').innerHTML = '<div class="ld-card"><div class="reco-title">Ancora nessun piano</div><div class="ld-muted">Scegli un evento di riferimento o una data di fine, le attività che pratichi e quanti giorni puoi allenarti: Lodestar costruisce il percorso settimana per settimana.</div></div>'; showForm(false); }
+    if (state.plan) {
+      const sleep = await fetchJSONSafe('/data/withings-sleep.json', []);
+      await applyPlanAdaptation(state.plan, { activities: acts, fitness: fit, sleep }, state.csrf);
+      $('pl-view').innerHTML = ''; renderPlan();
+    } else { $('pl-view').innerHTML = '<div class="ld-card"><div class="reco-title">Ancora nessun piano</div><div class="ld-muted">Scegli un evento di riferimento o una data di fine, le attività che pratichi e quanti giorni puoi allenarti: Lodestar costruisce il percorso settimana per settimana.</div></div>'; showForm(false); }
   } catch (e) { $('pl-view').innerHTML = `<div class="ld-err">${LibUI.e(e.message)}</div>`; }
 })();

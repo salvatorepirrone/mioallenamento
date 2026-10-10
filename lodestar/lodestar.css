@@ -99,6 +99,10 @@
 .ld-cats[hidden] { display: none; }
 
 /* ---- piano personalizzato ---- */
+.ld-adapt { font-size: 12.5px; background: rgba(217,130,43,.1); border-left: 3px solid #d9822b; padding: 6px 10px; margin: 6px 0; border-radius: 4px; }
+.ld-adapt-log { margin-top: 8px; font-size: 12.5px; }
+.ld-adapt-log summary { cursor: pointer; font-weight: 600; }
+.ld-adapt-log div { margin: 4px 0 0 14px; }
 .pl-form { margin-top: 10px; }
 .pl-goal { border: 0; padding: 0; margin: 0 0 10px; display: flex; gap: 18px; flex-wrap: wrap; font-size: 13.5px; }
 .pl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }

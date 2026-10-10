@@ -139,7 +139,10 @@ function planMix(primary, acts, n) {
 }
 
 // Piano completo. in: { sport, eventName, distanceKm | distanceM, eventDate | endDate, activities:[], days, start }
-function generatePlan(input, activities, fitness) {
+// opts: { i0, firstMonday } per rigenerare solo da una settimana in avanti mantenendo numerazione e fasi del piano originale.
+function generatePlan(input, activities, fitness, opts) {
+  opts = opts || {};
+  const i0 = opts.i0 || 0;
   const primary = input.sport;
   const acts = Array.from(new Set([primary, ...(input.activities || [])]));
   const start = input.start || todayISO();
@@ -153,7 +156,7 @@ function generatePlan(input, activities, fitness) {
   const paces = racePaces(fitness);
   const distKm = primary === 'running' ? (Number(input.distanceKm) || 10) : 10;
   const evPace = primary === 'running' ? eventPace(fitness, distKm) : paces.p10 + 10;
-  const weeks0 = mondayOf(start);
+  const weeks0 = opts.firstMonday || mondayOf(start);
   const nWeeks = Math.floor(daysBetween(weeks0, end) / 7) + 1;
   const taper = hasEvent ? (primary === 'running' && distKm > 25 ? 2 : 1) : 1;
   const mix = planMix(primary, acts, n);
@@ -161,7 +164,7 @@ function generatePlan(input, activities, fitness) {
 
   // volumi settimanali
   const startKm = Math.max(base.runKm, mix.run * 4, 10);
-  const peakKm = Math.min(pickBy(PEAK_KM, distKm), Math.max(startKm * Math.pow(1.09, (nWeeks - taper) * 0.75), startKm + 4));
+  const peakKm = Math.min(pickBy(PEAK_KM, distKm), Math.max(startKm * Math.pow(1.09, (nWeeks - i0 - taper) * 0.75), startKm + 4));
   const longCap = pickBy(LONG_CAP, distKm);
   const evSwim = primary === 'swimming' ? (Number(input.distanceM) || 1500) : 0;
   const startSwim = Math.max(base.swimM, 800);
@@ -169,16 +172,16 @@ function generatePlan(input, activities, fitness) {
 
   const weeks = [];
   let prevKm = startKm;
-  for (let i = 0; i < nWeeks; i++) {
+  for (let i = i0; i < nWeeks; i++) {
     const phase = phaseOf(i, nWeeks, taper);
     const buildWeeks = Math.max(1, nWeeks - taper - 1);
     const down = phase !== 'scarico' && (i + 1) % 4 === 0;
-    let km = startKm + (peakKm - startKm) * Math.min(1, i / buildWeeks);
+    let km = startKm + (peakKm - startKm) * Math.min(1, (i - i0) / Math.max(1, buildWeeks - i0));
     if (phase !== 'scarico') km = Math.min(km, prevKm * 1.1 + (i === 0 ? 0 : 0));
     const ramp = Math.round(km * 10) / 10;
     if (!down && phase !== 'scarico') prevKm = ramp;
     km = down ? ramp * 0.75 : (phase === 'scarico' ? prevKm * (nWeeks - i === 1 && taper === 1 ? 0.55 : 0.7) : ramp);
-    const f = Math.min(1, i / Math.max(1, nWeeks - taper - 1));
+    const f = Math.min(1, (i - i0) / Math.max(1, nWeeks - taper - 1 - i0));
     const swimM = (down ? 0.8 : (phase === 'scarico' ? 0.6 : 1)) * (startSwim + (peakSwim - startSwim) * f);
 
     const roles = [];
@@ -250,3 +253,144 @@ function generatePlan(input, activities, fitness) {
   };
 }
 function date_in_week(monday, d) { const k = daysBetween(monday, d); return k >= 0 && k < 7; }
+
+
+// ---------- adattamento automatico ----------
+// Due livelli: (1) ogni settimana si confronta quanto pianificato con quanto fatto davvero e, se la differenza e' netta o i ritmi
+// previsti sono cambiati, le settimane restanti si rigenerano dal livello attuale; (2) ogni giorno la seduta di oggi si alleggerisce
+// se la forma e' bassa. Tutto viene registrato in plan.adapt.log e ogni seduta modificata si puo' ripristinare.
+
+function planReadiness(activities, fitness, sleep) {
+  const recentRun = mostRecentOfType(activities, RUN_TYPES);
+  const daysSinceRun = recentRun ? daysSinceDate(recentRun.date) : Infinity;
+  const hard = !!(recentRun && classifyRun(recentRun) !== 'facile');
+  return computeReadiness(fitness, sleep || [], hard ? daysSinceRun : null);
+}
+
+const planNote = (plan, text) => {
+  plan.adapt = plan.adapt || { log: [], lastReplanWeek: null };
+  plan.adapt.log.unshift({ date: todayISO(), text });
+  plan.adapt.log = plan.adapt.log.slice(0, 20);
+};
+
+function lightGym(spec) {
+  return { ...spec, exercises: spec.exercises.map(x => ({ ...x, sets: Math.max(2, x.sets - 1) })) };
+}
+
+// Versione alleggerita di una seduta per forma bassa o molto bassa; null = lasciarla com'e'.
+function lighterSession(s, band, paces) {
+  if (s.role === 'event') return null;
+  const veryLow = band === 'molto bassa';
+  if (s.sport === 'running') {
+    if (veryLow) {
+      const spec = RUN_CATALOG.find(c => c.id === 'run-facile').spec;
+      return { title: spec.title, spec, km: Math.round(LibUI.totals(spec).m / 100) / 10, min: 25, role: 'easy' };
+    }
+    if (s.role === 'quality') { const r = easyRun(Math.max(4, s.km * 0.8), paces.p10); return { title: r.title + ' (al posto della qualità)', spec: r.spec, km: Math.round(r.km * 10) / 10, min: r.min, role: 'easy' }; }
+    if (s.role === 'long') { const r = longRun(Math.max(4, s.km * 0.8), paces.p10, false, paces.p10 + 10); return { title: r.title, spec: r.spec, km: Math.round(r.km * 10) / 10, min: r.min, role: 'long' }; }
+    return null;
+  }
+  if (s.sport === 'swimming') {
+    if (veryLow || s.role === 'swim') {
+      const sp = SWIM_ALL_SPECS.leggero;
+      const tot = sp.blocks.reduce((a, b) => a + b.reps * b.distance_m, 0);
+      if (s.title === sp.title) return null;
+      return { title: sp.title, spec: sp, km: tot / 1000, min: Math.round(tot / 1000 * 32), role: s.role };
+    }
+    return null;
+  }
+  if (s.sport === 'strength') {
+    if (/leggera/.test(s.title)) return null;
+    return { title: s.title + ' (leggera)', spec: lightGym(s.spec), km: 0, min: s.min, role: s.role };
+  }
+  return null;
+}
+
+// Alleggerisce le sedute di oggi in base alla forma; restituisce true se ha modificato il piano.
+function adaptPlan(plan, ctx) {
+  const today = todayISO();
+  const day = plan.weeks.flatMap(w => w.days).find(d => d.date === today);
+  if (!day) return false;
+  const r = planReadiness(ctx.activities, ctx.fitness, ctx.sleep);
+  if (r.band === 'alta' || r.band === 'media') return false;
+  const paces = racePaces(ctx.fitness);
+  let changed = false;
+  day.sessions.forEach(s => {
+    if (s.adapted && s.adapted.date === today) return;
+    const types = { running: RUN_TYPES, swimming: SWIM_TYPES, strength: [GYM_TYPE] }[s.sport] || [];
+    if (ctx.activities.some(a => a.date === today && types.includes(a.type))) return; // gia' fatta
+    const lighter = lighterSession(s, r.band, paces);
+    if (!lighter) return;
+    const why = r.factors.filter(f => f.value != null || f.delta < 0).slice(0, 3)
+      .map(f => (f.value != null ? `${f.label} ${f.value}` : `${f.label} ${f.delta}`)).join(', ');
+    s.adapted = { date: today, band: r.band, score: r.score, orig: { title: s.title, spec: s.spec, km: s.km, min: s.min, role: s.role }, reason: `forma ${r.band} (${r.score}/100: ${why})` };
+    Object.assign(s, { title: lighter.title, spec: lighter.spec, km: lighter.km, min: lighter.min, role: lighter.role, sent: false });
+    planNote(plan, `Oggi forma ${r.band}: «${s.adapted.orig.title}» → «${s.title}». ${s.adapted.reason}`);
+    changed = true;
+  });
+  return changed;
+}
+
+function restoreSession(plan, id) {
+  const s = plan.weeks.flatMap(w => w.days.flatMap(d => d.sessions)).find(x => x.id === id);
+  if (!s || !s.adapted || !s.adapted.orig) return false;
+  const o = s.adapted.orig;
+  Object.assign(s, { title: o.title, spec: o.spec, km: o.km, min: o.min, role: o.role, sent: false });
+  s.adapted = { date: s.adapted.date, restored: true };
+  planNote(plan, `Ripristinata la seduta originale «${o.title}».`);
+  return true;
+}
+
+function runKmDone(activities, from, to) {
+  return activities.filter(a => RUN_TYPES.includes(a.type) && a.date >= from && a.date <= to).reduce((sum, a) => sum + (a.distance_km || 0), 0);
+}
+
+// Una volta a settimana: se il volume fatto si discosta nettamente dal pianificato, o il ritmo previsto e' cambiato, rigenera il resto.
+function maybeReplan(plan, ctx) {
+  const today = todayISO();
+  const m = plan.meta;
+  const end = m.eventDate || m.endDate;
+  const cw = mondayOf(today);
+  plan.adapt = plan.adapt || { log: [], lastReplanWeek: null };
+  if (plan.adapt.lastReplanWeek === cw) return false;
+  const idx = plan.weeks.findIndex(w => w.monday === cw);
+  if (idx < 0 || today > end) return false;
+  plan.adapt.lastReplanWeek = cw;
+  if (idx === 0 || daysBetween(today, end) < 14) return true;      // niente da confrontare o troppo tardi: si registra solo il controllo
+
+  const last = plan.weeks[idx - 1];
+  const done = runKmDone(ctx.activities, last.monday, isoAdd(last.monday, 6));
+  const ratio = last.runKm > 0 ? done / last.runKm : 1;
+  const newPace = m.sport === 'running' ? eventPace(ctx.fitness, m.distanceKm || 10) : null;
+  const paceChange = newPace && m.evPace ? Math.abs(newPace - m.evPace) / m.evPace : 0;
+  if (ratio >= 0.75 && ratio <= 1.2 && paceChange < 0.02) return true;
+
+  const input = { sport: m.sport, eventName: m.eventName, distanceKm: m.distanceKm, distanceM: m.distanceM, days: m.days, activities: m.activities,
+                  eventDate: m.eventDate || undefined, endDate: m.endDate || undefined, start: today };
+  const np = generatePlan(input, ctx.activities, ctx.fitness, { i0: idx, firstMonday: plan.weeks[0].monday });
+  const keep = plan.weeks[idx].days.filter(d => d.date < today);
+  np.weeks[0].days = keep.concat(np.weeks[0].days);
+  const oldKm = plan.weeks[idx].runKm;
+  plan.weeks = plan.weeks.slice(0, idx).concat(np.weeks);
+  plan.meta.evPace = np.meta.evPace;
+  plan.meta.baseline = np.meta.baseline;
+  const doneTxt = done.toFixed(1).replace('.', ',');
+  const why = ratio < 0.75 ? `la settimana scorsa hai corso ${doneTxt} km su ${last.runKm} previsti`
+    : (ratio > 1.2 ? `la settimana scorsa hai corso ${doneTxt} km su ${last.runKm} previsti (più del piano)`
+      : `il ritmo previsto in gara è cambiato (${paceText(m.evPace / 60)} → ${paceText(newPace / 60)}/km)`);
+  planNote(plan, `Piano riadattato dalla settimana ${idx + 1}: ${why}. Volume di corsa di questa settimana ${oldKm} → ${np.weeks[0].runKm} km.`);
+  return true;
+}
+
+// Applica gli adattamenti e, se qualcosa e' cambiato, salva il piano sul server.
+async function applyPlanAdaptation(plan, ctx, csrf) {
+  let changed = false;
+  try { changed = maybeReplan(plan, ctx) || changed; } catch (e) { console.warn('Riadattamento non riuscito:', e); }
+  try { changed = adaptPlan(plan, ctx) || changed; } catch (e) { console.warn('Adattamento non riuscito:', e); }
+  if (changed) {
+    try {
+      await fetch('/lodestar/piano-api.php?action=save', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-CSRF': csrf }, body: JSON.stringify({ plan }) });
+    } catch (e) { /* il piano resta adattato in pagina; si riprova al prossimo caricamento */ }
+  }
+  return changed;
+}
