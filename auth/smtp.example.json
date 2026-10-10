@@ -1,0 +1,9 @@
+{
+  "host": "smtp.esempio.it",
+  "port": 587,
+  "secure": "tls",
+  "user": "noreply@esempio.it",
+  "pass": "PASSWORD-O-APP-PASSWORD",
+  "from": "noreply@esempio.it",
+  "from_name": "Lodestar"
+}

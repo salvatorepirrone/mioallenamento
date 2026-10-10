@@ -3,6 +3,7 @@
 // Sta fuori da /auth/ cosi' passa dal gate: serve gia' una sessione valida.
 require_once __DIR__ . '/../auth/lib.php';
 require_once __DIR__ . '/../auth/udata-lib.php';
+require_once __DIR__ . '/../auth/invite-lib.php';
 
 $name = auth_current_user();
 if (!auth_is_admin($name)) {
@@ -13,6 +14,7 @@ if (!auth_is_admin($name)) {
 
 // Azioni sugli utenti (solo admin, con CSRF). Le password temporanee si vedono una volta sola.
 $created = null;
+$invited = null;
 $notice = '';
 $formError = '';
 
@@ -25,27 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string)($_POST['action'] ?? 'create');
 
     if ($action === 'create') {
-        $newName = strtolower(trim((string)($_POST['new_user'] ?? '')));
-        if (!auth_valid_username($newName)) {
-            $formError = 'Nome non valido: da 2 a 32 caratteri tra lettere minuscole, numeri, punto, trattino e underscore.';
-        } elseif (auth_get_user($newName)) {
-            $formError = 'Esiste già un utente con questo nome.';
+        $r = invite_user((string)($_POST['new_email'] ?? ''), ['coach' => !empty($_POST['as_coach']), 'nutrizionista' => !empty($_POST['as_nutri'])], $name);
+        if (!$r['ok']) {
+            $formError = $r['error'];
         } else {
-            $temp = auth_create_user($newName);
-            if ($temp !== null && !empty($_POST['as_coach'])) {
-                auth_update_users(function ($users) use ($newName) { $users[$newName]['coach'] = true; return $users; });
-                auth_log('coach_granted', $newName, 'alla creazione, da ' . $name);
-            }
-            if ($temp !== null && !empty($_POST['as_nutri'])) {
-                auth_update_users(function ($users) use ($newName) { $users[$newName]['nutrizionista'] = true; return $users; });
-                auth_log('nutri_granted', $newName, 'alla creazione, da ' . $name);
-            }
-            if ($temp === null) {
-                $formError = 'Impossibile creare l\'utente, riprova.';
-            } else {
-                auth_log('user_created', $newName, 'creato da ' . $name);
-                $created = ['user' => $newName, 'pw' => $temp, 'label' => 'Utente creato.'];
-            }
+            $em = strtolower(trim((string)$_POST['new_email']));
+            auth_log('user_invited', $em, 'invito da ' . $name . ($r['mailed'] ? ' (email inviata)' : ' (email non inviata)'));
+            $invited = ['email' => $em] + $r;
         }
     } else {
         $target = strtolower(trim((string)($_POST['user'] ?? '')));
@@ -55,6 +43,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$tu) {
             $formError = 'Utente non trovato.';
+        } elseif ($action === 'set_email') {
+            $em = strtolower(trim((string)($_POST['email'] ?? '')));
+            if (!auth_valid_email($em)) $formError = 'Indirizzo email non valido.';
+            else {
+                auth_update_users(function ($users) use ($target, $em) { $users[$target]['email'] = $em; return $users; });
+                auth_log('email_set', $target, 'da ' . $name);
+                $notice = "Email di $target impostata: ora può accedere e recuperare la password con $em.";
+            }
+        } elseif ($action === 'resend_invite') {
+            if (empty($tu['pending'])) { $formError = 'Questo utente ha già completato la registrazione.'; }
+            else {
+                $r = invite_send($target);
+                auth_log('user_invited', $target, 'invito reinviato da ' . $name . ($r['mailed'] ? ' (email inviata)' : ' (email non inviata)'));
+                $invited = ['email' => $target] + $r;
+            }
         } elseif ($action === 'reset') {
             $temp = auth_create_user($target, true);
             auth_log('user_reset', $target, 'password azzerata da ' . $name);
@@ -211,6 +214,19 @@ th{background:var(--s2);color:var(--muted);font-size:11px;text-transform:upperca
 </div>
 
 <h2>Utenti</h2>
+<?php if ($invited): ?>
+<div style="border:2px solid var(--accent);border-radius:var(--r);padding:14px 16px;margin:8px 0 16px">
+  <?php if ($invited['mailed']): ?>
+    <b>✅ Invito inviato a <?= e($invited['email']) ?></b>
+    <div class="muted" style="margin-top:6px">L'email contiene il link per scegliere la password e completare la registrazione (vale 7 giorni). Se non arriva, controlla lo spam o inoltra tu il link qui sotto.</div>
+  <?php else: ?>
+    <b>⚠ Invito creato per <?= e($invited['email']) ?>, ma l'email non è partita</b>
+    <div class="muted" style="margin-top:6px"><?= e($invited['mail_error'] ?: 'Errore sconosciuto') ?>. Copia il link e invialo tu alla persona (vale 7 giorni).</div>
+  <?php endif; ?>
+  <textarea id="invite-link" readonly rows="2" style="width:100%;box-sizing:border-box;margin-top:8px;padding:9px;border:1px solid var(--border);border-radius:var(--r);font:inherit;font-size:12px"><?= e($invited['link']) ?></textarea>
+  <button type="button" class="ubtn" onclick="var t=document.getElementById('invite-link');t.select();document.execCommand('copy');this.textContent='Copiato ✓'">Copia link</button>
+</div>
+<?php endif; ?>
 <?php if ($created): ?>
 <div style="border:2px solid var(--accent);border-radius:var(--r);padding:14px 16px;margin:8px 0 16px">
   <b><?= e($created['label']) ?></b> Comunica queste credenziali in modo riservato: la password temporanea <b>non verrà più mostrata</b>
@@ -241,6 +257,10 @@ function user_btn(string $action, string $user, string $label, string $confirm =
 <td><?php
     if ($isOff) echo '<span class="bad">Disattivato</span>';
     elseif ($isLocked) echo '<span class="bad">Bloccato (troppi tentativi)</span>';
+    elseif (!empty($uu['pending'])) {
+        echo 'Invito in attesa';
+        echo '<div class="muted">Invitato il ' . e(date('d/m/Y', (int)($uu['invited_at'] ?? time()))) . ' · non ha ancora scelto la password</div>';
+    }
     elseif (!empty($uu['must_change'])) {
         echo 'Deve ancora scegliere la password';
         echo !empty($uu['temp_pw'])
@@ -254,6 +274,16 @@ function user_btn(string $action, string $user, string $label, string $confirm =
     echo 'Garmin ' . ($cn['garmin'] ? '✅' : '—') . ' · Withings ' . ($cn['withings'] ? '✅' : '—') . '<br>Profilo ' . (udata_has_profile($un) ? '✅' : '—') . ' · Guida ' . (udata_onboarded($un) ? '✅' : '—');
 ?></td>
 <td><?php
+    if (!empty($uu['pending'])) {
+        echo user_btn('resend_invite', $un, 'Reinvia invito');
+        if (!$isSelf) echo user_btn('delete', $un, 'Elimina', "Eliminare l'invito a $un?", true);
+        echo '</td></tr>';
+        continue;
+    }
+    if (strpos($un, '@') === false) {      // utente storico senza email: si associa per permettere accesso e recupero password
+        echo '<form method="post" action="/pianoallenamento/accessi.php" style="display:inline"><input type="hidden" name="csrf" value="' . e(auth_csrf_token()) . '"><input type="hidden" name="action" value="set_email"><input type="hidden" name="user" value="' . e($un) . '">'
+           . '<input name="email" type="email" required placeholder="email" value="' . e($uu['email'] ?? '') . '" style="padding:5px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;width:150px"> <button type="submit" class="ubtn">Imposta email</button></form> ';
+    }
     echo user_btn('reset', $un, 'Azzera password', "Azzerare la password di $un? Le sue sessioni verranno chiuse e avrà una nuova password temporanea.");
     if ($isLocked && !$isOff) echo user_btn('unlock', $un, 'Sblocca');
     if (!$isSelf) {
@@ -268,12 +298,12 @@ function user_btn(string $action, string $user, string $label, string $confirm =
 </table>
 <form method="post" action="/pianoallenamento/accessi.php" style="margin:0 0 28px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
   <input type="hidden" name="csrf" value="<?= e(auth_csrf_token()) ?>">
-  <div><div class="muted" style="margin-bottom:4px">Nuovo utente</div>
-  <input name="new_user" required minlength="2" maxlength="32" pattern="[a-z0-9._\-]{2,32}" placeholder="nome (es. luca)" autocomplete="off"
-         style="padding:9px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:14px"></div>
+  <div><div class="muted" style="margin-bottom:4px">Invita un nuovo utente (email)</div>
+  <input name="new_email" type="email" required maxlength="64" placeholder="nome@esempio.it" autocomplete="off"
+         style="padding:9px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:14px;min-width:240px"></div>
   <label class="muted" style="display:flex;gap:6px;align-items:center;padding-bottom:10px"><input type="checkbox" name="as_coach" value="1"> Coach</label>
   <label class="muted" style="display:flex;gap:6px;align-items:center;padding-bottom:10px"><input type="checkbox" name="as_nutri" value="1"> Nutrizionista</label>
-  <button type="submit" style="padding:10px 16px;border:0;border-radius:var(--r);background:var(--accent);font-weight:700;cursor:pointer">Crea utente</button>
+  <button type="submit" style="padding:10px 16px;border:0;border-radius:var(--r);background:var(--accent);font-weight:700;cursor:pointer">Invia invito</button>
 </form>
 
 <h2>Riepilogo per utente</h2>

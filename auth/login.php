@@ -7,13 +7,15 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     auth_csrf_check();
-    $name = strtolower(trim((string)($_POST['username'] ?? '')));
+    $name = auth_resolve_login((string)($_POST['username'] ?? ''));
     $pass = (string)($_POST['password'] ?? '');
     $user = auth_get_user($name);
 
     if ($user && ($user['locked_until'] ?? 0) > time()) {
         auth_log('login_locked', $name, 'tentativo durante il blocco');
         $error = 'Troppi tentativi: riprova tra qualche minuto.';
+    } elseif ($user && !empty($user['pending'])) {
+        $error = 'La registrazione non è ancora completata: usa il link che hai ricevuto per email.';
     } elseif ($user && !empty($user['disabled']) && password_verify($pass, $user['hash'])) {
         auth_log('login_disabled', $name, 'account disattivato');
         $error = 'Account disattivato: contatta l\'amministratore.';
@@ -50,16 +52,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             auth_log('login_fail', '', 'utente sconosciuto');
         }
         usleep(400000);
-        $error = $error ?: 'Utente o password errati.';
+        $error = $error ?: 'Email o password errate.';
     }
 }
 
 $body = '<form method="post">'
     . '<input type="hidden" name="csrf" value="' . auth_h(auth_csrf_token()) . '">'
     . '<input type="hidden" name="next" value="' . auth_h($next) . '">'
-    . '<label>Utente</label><input name="username" autocomplete="username" autofocus required>'
+    . '<label>Email</label><input name="username" autocomplete="username" autocapitalize="none" autofocus required>'
     . '<label>Password</label><input name="password" type="password" autocomplete="current-password" required>'
     . '<button type="submit">Accedi</button>'
+    . '<p style="margin-top:14px;font-size:13px"><a href="/auth/recupera-password.php">Password dimenticata?</a></p>'
     . ($error ? '<div class="err">' . auth_h($error) . '</div>' : '')
     . '</form>';
 auth_page('Accesso', $body);

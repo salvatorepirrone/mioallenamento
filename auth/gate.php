@@ -11,6 +11,13 @@ $valid = $name && empty($_SESSION['must_change']);
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $path = '/' . ltrim(rawurldecode($uri), '/');
 
+// Pagine raggiungibili senza sessione: completamento della registrazione e recupero password (arrivano da un link via email).
+if (!$valid && in_array($path, ['/auth/registrazione.php', '/auth/recupera-password.php'], true)) {
+    chdir(__DIR__);
+    require __DIR__ . '/' . basename($path);
+    exit;
+}
+
 if (!$valid) {
     header('Cache-Control: no-store');
     if (in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD'], true)) {

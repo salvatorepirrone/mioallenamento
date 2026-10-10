@@ -37,8 +37,11 @@ function auth_update_users(callable $fn): void {
     fclose($lock);
 }
 
+// Un utente e' identificato dal suo indirizzo email; restano validi i nomi storici (senza @). Niente barre, spazi o '..': il nome finisce in nomi di file.
 function auth_valid_username(string $name): bool {
-    return (bool)preg_match('/^[a-z0-9._-]{2,32}$/', $name);
+    if (strpos($name, '..') !== false) return false;
+    if (preg_match('/^[a-z0-9._-]{2,32}$/', $name)) return true;
+    return strlen($name) <= 64 && (bool)preg_match('/^[a-z0-9._%+-]{1,40}@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/', $name);
 }
 
 function auth_all_users(): array {
@@ -68,6 +71,16 @@ function auth_create_user(string $name, bool $overwrite = false): ?string {
         return $users;
     });
     return $created ? $temp : null;
+}
+
+// Dal testo digitato all'identificativo dell'utente: il nome (o email) con cui e' registrato, oppure l'email associata a un utente storico.
+function auth_resolve_login(string $input): string {
+    $input = strtolower(trim($input));
+    if ($input === '' || auth_get_user($input)) return $input;
+    foreach (auth_all_users() as $key => $u) {
+        if (!empty($u['email']) && strtolower($u['email']) === $input) return (string)$key;
+    }
+    return $input;
 }
 
 function auth_get_user(string $name): ?array {
