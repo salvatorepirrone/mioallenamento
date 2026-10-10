@@ -180,13 +180,29 @@ function auth_safe_next(string $next): string {
 function auth_page(string $title, string $body): void {
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-store');
+    $favicon = "data:image/svg+xml," . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12263f"/><path d="M32 8l5.5 18.5L56 32l-18.5 5.5L32 56l-5.5-18.5L8 32l18.5-5.5z" fill="#e8b64b"/></svg>');
+    $css = ':root{--navy:#12263f;--navy2:#1f4a70;--gold:#e8b64b;--text:#1c2b36;--muted:#5b6b78;--line:#d5e0e8;--bad:#c0392b;--good:#2e7d32}'
+        . '*{box-sizing:border-box}html,body{margin:0;min-height:100%}'
+        . 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--text);background:linear-gradient(160deg,var(--navy) 0%,var(--navy2) 100%);background-attachment:fixed;'
+        . 'display:flex;flex-direction:column;align-items:center;padding:7vh 16px 32px}'
+        . '.brand{text-align:center;color:#fff;margin-bottom:22px}.brand .logo{font-size:30px;font-weight:700;letter-spacing:.02em}.brand .logo b{color:var(--gold);font-weight:700}'
+        . '.brand .tag{font-size:13px;color:rgba(255,255,255,.72);margin-top:4px}'
+        . '.auth{width:100%;max-width:400px;background:#fff;border-radius:16px;padding:26px 24px 24px;box-shadow:0 14px 40px rgba(0,0,0,.28)}'
+        . '.auth h1{font-size:21px;margin:0 0 6px;color:var(--navy)}'
+        . '.auth p{font-size:14px;line-height:1.55;margin:10px 0}'
+        . '.auth label{display:block;font-size:12.5px;font-weight:600;margin:16px 0 5px;color:var(--muted)}'
+        . '.auth input[type=text],.auth input[type=email],.auth input[type=password],.auth input:not([type]){width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:16px;font-family:inherit;color:var(--text);background:#fff}'
+        . '.auth input:focus{outline:none;border-color:var(--navy2);box-shadow:0 0 0 3px rgba(31,74,112,.18)}'
+        . '.auth input[type=checkbox]{width:auto;accent-color:var(--navy2)}'
+        . '.auth button{margin-top:22px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--gold);color:var(--navy);font-weight:700;font-size:16px;font-family:inherit;cursor:pointer}'
+        . '.auth button:hover{filter:brightness(1.05)}'
+        . '.auth a{color:var(--navy2);font-weight:600;text-decoration:none}.auth a:hover{text-decoration:underline}'
+        . '.auth .err{margin-top:14px;padding:10px 12px;background:#fdecea;border:1px solid #f3c2bd;border-radius:10px;color:var(--bad);font-size:13.5px;line-height:1.5}'
+        . '.auth .ok{font-size:14px;line-height:1.55}'
+        . '.foot{margin-top:18px;font-size:12px;color:rgba(255,255,255,.6);text-align:center}';
     echo '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">'
-       . '<meta name="viewport" content="width=device-width,initial-scale=1">'
-       . '<title>' . auth_h($title) . '</title><link rel="stylesheet" href="/style.css">'
-       . '<style>.auth{max-width:340px;margin:12vh auto;padding:0 16px}'
-       . '.auth label{display:block;font-size:12px;margin:14px 0 4px;color:var(--muted)}'
-       . '.auth input{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r);box-sizing:border-box;font-size:15px}'
-       . '.auth button{margin-top:18px;width:100%;padding:11px;border:0;border-radius:var(--r);background:var(--accent);font-weight:700;font-size:15px;cursor:pointer}'
-       . '.auth .err{color:#c0392b;font-size:13px;margin-top:12px}.auth .ok{font-size:13px;margin-top:12px}</style>'
-       . '</head><body><div class="auth"><h1>' . auth_h($title) . '</h1>' . $body . '</div></body></html>';
+       . '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#12263f">'
+       . '<link rel="icon" href="' . $favicon . '"><title>' . auth_h($title) . ' · Lodestar</title><style>' . $css . '</style>'
+       . '</head><body><div class="brand"><div class="logo"><b>✦</b> Lodestar</div><div class="tag">Il tuo coach AI per allenamento e nutrizione</div></div>'
+       . '<div class="auth"><h1>' . auth_h($title) . '</h1>' . $body . '</div><div class="foot">Lodestar</div></body></html>';
 }

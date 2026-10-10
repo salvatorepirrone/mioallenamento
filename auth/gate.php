@@ -65,4 +65,16 @@ if (preg_match('/\.(php[345]?|phtml)$/i', $full)) {
     exit;
 }
 
+// Il tipo del file lo decide PHP (nginx tiene l'intestazione Content-Type di questa risposta): senza, tutto usciva come text/html
+// e i browser scartavano i fogli di stile (CSS), le icone e il manifest.
+$mimes = [
+    'css' => 'text/css; charset=utf-8', 'js' => 'text/javascript; charset=utf-8', 'mjs' => 'text/javascript; charset=utf-8',
+    'json' => 'application/json; charset=utf-8', 'webmanifest' => 'application/manifest+json; charset=utf-8',
+    'html' => 'text/html; charset=utf-8', 'htm' => 'text/html; charset=utf-8', 'txt' => 'text/plain; charset=utf-8', 'csv' => 'text/csv; charset=utf-8',
+    'png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'webp' => 'image/webp', 'svg' => 'image/svg+xml', 'ico' => 'image/x-icon',
+    'woff' => 'font/woff', 'woff2' => 'font/woff2', 'ttf' => 'font/ttf', 'pdf' => 'application/pdf', 'zip' => 'application/zip', 'fit' => 'application/octet-stream',
+];
+$ext = strtolower(pathinfo($full, PATHINFO_EXTENSION));
+header('Content-Type: ' . ($mimes[$ext] ?? 'application/octet-stream'));
+header('X-Content-Type-Options: nosniff');
 header('X-Accel-Redirect: /_protected' . implode('/', array_map('rawurlencode', explode('/', $path))));

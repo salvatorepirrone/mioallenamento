@@ -2,7 +2,7 @@
 // per la parte statica (pagine, stile, icone). I dati Garmin/Withings in
 // data/*.json restano invece "network-first" -- l'obiettivo del sito e'
 // mostrare dati live, quindi la cache li serve solo se sei offline.
-const SHELL_CACHE = 'piano-shell-v3';
+const SHELL_CACHE = 'piano-shell-v4';
 const DATA_CACHE = 'piano-data-v1';
 
 const SHELL_ASSETS = [
