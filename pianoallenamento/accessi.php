@@ -35,6 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             auth_log('user_invited', $em, 'invito da ' . $name . ($r['mailed'] ? ' (email inviata)' : ' (email non inviata)'));
             $invited = ['email' => $em] + $r;
         }
+    } elseif ($action === 'set_registration') {
+        settings_set(['open_registration' => ($_POST['mode'] ?? 'open') === 'open', 'max_users' => (int)($_POST['max_users'] ?? 50)]);
+        auth_log('registration_mode', '', ($_POST['mode'] ?? '') . ' (max ' . (int)($_POST['max_users'] ?? 0) . ') da ' . $name);
+        $notice = 'Impostazioni di registrazione salvate.';
     } elseif ($action === 'approve_request' || $action === 'reject_request') {
         $rid = (string)($_POST['rid'] ?? '');
         $req = null;
@@ -138,7 +142,7 @@ $labels = [
     'user_enabled' => 'Utente riattivato', 'user_deleted' => 'Utente eliminato', 'user_unlocked' => 'Utente sbloccato',
     'coach_granted' => 'Coach assegnato', 'coach_revoked' => 'Coach revocato', 'coach_assigned' => 'Allenamento assegnato',
     'coach_library_add' => 'Programma inserito in libreria',
-    'invite_page' => 'Pagina di registrazione aperta', 'access_requested' => 'Richiesta di accesso', 'access_approved' => 'Richiesta approvata', 'access_rejected' => 'Richiesta rifiutata',
+    'invite_page' => 'Pagina di registrazione aperta', 'signup' => 'Iscrizione libera', 'signup_existing' => 'Iscrizione di email già registrata', 'registration_mode' => 'Modalità di registrazione cambiata', 'access_requested' => 'Richiesta di accesso', 'access_approved' => 'Richiesta approvata', 'access_rejected' => 'Richiesta rifiutata',
     'user_invited' => 'Invito inviato', 'registered' => 'Registrazione completata', 'reset_requested' => 'Recupero password richiesto', 'password_reset' => 'Password reimpostata via email',
     'nutri_granted' => 'Nutrizionista assegnato', 'nutri_revoked' => 'Nutrizionista revocato',
     'nutri_recipe_add' => 'Ricetta inserita', 'nutri_recipe_delete' => 'Ricetta eliminata', 'nutri_meal_add' => 'Pasto registrato',
@@ -235,7 +239,20 @@ th{background:var(--s2);color:var(--muted);font-size:11px;text-transform:upperca
   <p>Chi è entrato nel sito, tentativi falliti e cambi password · orari di Roma</p>
 </div>
 
-<?php $pendingReqs = req_pending(); ?>
+<?php $pendingReqs = req_pending(); $reg = settings_get(); ?>
+<h2>Registrazione</h2>
+<form method="post" action="/pianoallenamento/accessi.php" style="margin:0 0 20px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
+  <input type="hidden" name="csrf" value="<?= e(auth_csrf_token()) ?>"><input type="hidden" name="action" value="set_registration">
+  <label class="muted" style="display:flex;flex-direction:column;gap:4px">Come ci si registra
+    <select name="mode" style="padding:8px;border:1px solid var(--border);border-radius:var(--r)">
+      <option value="open"<?= $reg['open_registration'] ? ' selected' : '' ?>>Libera: chiunque con la propria email</option>
+      <option value="approval"<?= $reg['open_registration'] ? '' : ' selected' ?>>Con approvazione di un admin</option>
+    </select></label>
+  <label class="muted" style="display:flex;flex-direction:column;gap:4px">Numero massimo di utenti
+    <input name="max_users" type="number" min="1" max="500" value="<?= (int)$reg['max_users'] ?>" style="padding:8px;border:1px solid var(--border);border-radius:var(--r);width:110px"></label>
+  <button type="submit" class="ubtn">Salva</button>
+  <span class="muted">Utenti attivi: <b><?= users_active_count() ?></b> su <?= (int)$reg['max_users'] ?> · registrazione <?= $reg['open_registration'] ? '<b>libera</b>' : '<b>con approvazione</b>' ?></span>
+</form>
 <h2>Richieste di accesso<?= $pendingReqs ? ' (' . count($pendingReqs) . ')' : '' ?></h2>
 <?php if (!$pendingReqs): ?>
 <p class="muted">Nessuna richiesta in attesa. Chi vuole entrare può farne una da <a href="/auth/richiedi-accesso.php">/auth/richiedi-accesso.php</a>.</p>

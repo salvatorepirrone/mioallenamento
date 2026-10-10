@@ -62,7 +62,7 @@ $body = '<form method="post">'
     . '<label>Email</label><input name="username" autocomplete="username" autocapitalize="none" autofocus required>'
     . '<label>Password</label><input name="password" type="password" autocomplete="current-password" required>'
     . '<button type="submit">Accedi</button>'
-    . '<p style="margin-top:14px;font-size:13px"><a href="/auth/recupera-password.php">Password dimenticata?</a> · <a href="/auth/richiedi-accesso.php">Richiedi accesso</a></p>'
+    . '<p style="margin-top:14px;font-size:13px"><a href="/auth/recupera-password.php">Password dimenticata?</a> · <a href="/auth/richiedi-accesso.php">Registrati</a></p>'
     . ($error ? '<div class="err">' . auth_h($error) . '</div>' : '')
     . '</form>';
 auth_page('Accesso', $body);

@@ -197,3 +197,67 @@ function req_notify_admins(string $email, string $nome, string $nota): void {
 function req_pending(): array {
     return array_values(array_filter(req_all(), function ($r) { return $r['status'] === 'pending'; }));
 }
+
+
+// ---------- registrazione libera ----------
+// Impostazioni del sito (modificabili dall'admin nella pagina Accessi). Di default la registrazione e' libera, con un tetto agli utenti.
+function settings_file(): string { return dirname(auth_users_file()) . '/settings.json'; }
+
+function settings_get(): array {
+    $f = settings_file();
+    $s = is_file($f) ? (json_decode((string)file_get_contents($f), true) ?: []) : [];
+    return ['open_registration' => array_key_exists('open_registration', $s) ? (bool)$s['open_registration'] : true,
+            'max_users' => max(1, (int)($s['max_users'] ?? 50))];
+}
+
+function settings_set(array $new): void {
+    $cur = settings_get();
+    $out = ['open_registration' => array_key_exists('open_registration', $new) ? (bool)$new['open_registration'] : $cur['open_registration'],
+            'max_users' => max(1, min(500, (int)($new['max_users'] ?? $cur['max_users'])))];
+    file_put_contents(settings_file(), json_encode($out));
+}
+
+function users_active_count(): int {
+    $n = 0;
+    foreach (auth_all_users() as $u) if (empty($u['pending']) && empty($u['disabled'])) $n++;
+    return $n;
+}
+
+// Toglie gli inviti mai completati dopo 14 giorni.
+function prune_pending_users(): void {
+    $limit = time() - 14 * 86400;
+    $stale = [];
+    foreach (auth_all_users() as $k => $u) if (!empty($u['pending']) && (int)($u['invited_at'] ?? 0) < $limit) $stale[] = $k;
+    if (!$stale) return;
+    auth_update_users(function ($users) use ($stale) { foreach ($stale as $k) unset($users[$k]); return $users; });
+}
+
+// Iscrizione autonoma: invia il link di registrazione all'indirizzo indicato (e solo a quello: il link non si mostra mai a chi si iscrive,
+// cosi' l'email viene verificata). Esiti: 'sent', 'exists', 'throttled', 'full'.
+function signup_open(string $email): string {
+    $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '?');
+    prune_pending_users();
+    $existing = auth_get_user($email);
+    if ($existing && empty($existing['pending'])) { auth_log('signup_existing', $email, ''); return 'exists'; }
+    if ($existing && (int)($existing['invited_at'] ?? 0) > time() - 600) return 'throttled';      // invito appena inviato: niente reinvii a raffica
+    if (users_active_count() >= settings_get()['max_users']) { req_add($email, '', 'lista d\'attesa: limite di utenti raggiunto'); return 'full'; }
+    $now = time();
+    $blocked = false;
+    req_update(function ($all) use ($ip, $email, $now, &$blocked) {
+        $all = array_values(array_filter($all, function ($r) use ($now) { return $r['status'] === 'pending' || $r['created'] > $now - 30 * 86400; }));
+        $fromIp = 0; $hour = 0;
+        foreach ($all as $r) {
+            if ($r['status'] !== 'auto' || $r['created'] <= $now - 3600) continue;
+            $hour++;
+            if (($r['ip'] ?? '') === $ip) $fromIp++;
+        }
+        if ($fromIp >= 5 || $hour >= 30) { $blocked = true; return $all; }                   // 5 all'ora per indirizzo IP, 30 in tutto il sito
+        $all[] = ['id' => bin2hex(random_bytes(6)), 'email' => $email, 'nome' => '', 'nota' => 'iscrizione libera', 'created' => $now, 'status' => 'auto', 'ip' => $ip];
+        return $all;
+    });
+    if ($blocked) return 'throttled';
+    $r = invite_user($email, [], 'iscrizione libera');
+    if (empty($r['ok'])) return 'sent';                                                       // indirizzo non valido: stessa risposta
+    auth_log('signup', $email, $r['mailed'] ? 'email inviata' : 'email NON inviata: ' . ($r['mail_error'] ?? ''));
+    return 'sent';
+}
