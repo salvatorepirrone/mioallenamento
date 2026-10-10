@@ -19,7 +19,7 @@
   var TOOLS = [
     { href: '/pianoallenamento/peso.html', label: 'Peso ⚖️', dot: '#f5c85a' },
     { href: '/pianoallenamento/callback.html', label: 'Sonno 😴', dot: '#5af5c8' },
-    { href: '/pianoallenamento/editor.html', label: 'Editor FIT', dot: '#f55ac8' },
+    { id: 'editor', href: '/lodestar/editor.html', label: 'Editor FIT', dot: '#f55ac8' },
   ];
 
   var active = document.body.getAttribute('data-page') || 'home';
@@ -31,7 +31,7 @@
     '<button class="nav-toggle" aria-label="Apri/chiudi menu" type="button"><span></span></button>' +
     '<nav><span class="nav-logo">✦ Lodestar</span>' +
     '<div class="nav-links">' + LINKS.map(function (l) { return link(l, l.id === active); }).join('') +
-    '<div style="height:10px"></div>' + TOOLS.map(function (l) { return link(l, false); }).join('') + '</div></nav>' +
+    '<div style="height:10px"></div>' + TOOLS.map(function (l) { return link(l, l.id === active); }).join('') + '</div></nav>' +
     '<div class="nav-backdrop"></div>');
 
   if (window.innerWidth >= 900) document.body.classList.add('nav-open');
