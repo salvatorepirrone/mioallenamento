@@ -13,14 +13,17 @@ const LibUI = (function () {
 
   function runStep(st) {
     const size = st.distance_m ? dist(st.distance_m) : dur(st.time_s);
-    const target = st.pace ? `${mmss(st.pace[0])}–${mmss(st.pace[1])}/km` : (st.hr_zone ? `Z${st.hr_zone}` : '');
-    return `<b>${STEP[st.kind] || st.kind}</b> ${size}${target ? ' · ' + target : ''}${st.note ? ` <span class="cw-note">${e(st.note)}</span>` : ''}`;
+    let target = st.pace ? `${mmss(st.pace[0])}–${mmss(st.pace[1])}/km` : (st.hr_zone ? `Z${st.hr_zone}` : '');
+    if (target.charAt(0) === 'Z' && st.note && st.note.indexOf(target) === 0) target = '';   // la nota ripete gia' la zona
+    const label = st.kind === 'interval' && st.single ? 'Corsa' : (STEP[st.kind] || st.kind);
+    return `<b>${label}</b> ${size}${target ? ' · ' + target : ''}${st.note ? ` <span class="cw-note">${e(st.note)}</span>` : ''}`;
   }
 
   function runHtml(p) {
+    const lone = p.steps.length === 1 && p.steps[0].kind === 'interval';                     // una corsa continua: non e' un "lavoro" tra altri passi
     const items = p.steps.map(st => st.kind === 'repeat'
       ? `<li><b>${st.reps}×</b><ul>${st.steps.map(s => `<li>${runStep(s)}</li>`).join('')}</ul></li>`
-      : `<li>${runStep(st)}</li>`).join('');
+      : `<li>${runStep(lone ? Object.assign({}, st, { single: true }) : st)}</li>`).join('');
     const tot = totals(p);
     return `<ul class="cw-list">${items}</ul><div class="ld-muted">Totale: ~${(tot.m / 1000).toFixed(1).replace('.', ',')} km · ~${Math.round(tot.s / 60)} min (stima)</div>`;
   }

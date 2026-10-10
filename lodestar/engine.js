@@ -310,7 +310,9 @@ function computeReadiness(fitness, sleepNights, hardRunDaysAgo) {
   if (tr && tr.score != null && daysSinceDate(tr.date) <= 1) {
     score = tr.score;
     source = 'Garmin';
-    const fb = { WELL_RECOVERED: 'ben recuperato', PRIME: 'in forma ottima', RECOVERED: 'recuperato', LOW_RECOVERY: 'recupero basso', LET_YOUR_BODY_RECOVER: 'lascia recuperare il corpo' }[tr.feedback] || String(tr.feedback || '').toLowerCase().replace(/_/g, ' ');
+    const fb = { WELL_RECOVERED: 'ben recuperato', PRIME: 'in forma ottima', RECOVERED: 'recuperato', LOW_RECOVERY: 'recupero basso', LET_YOUR_BODY_RECOVER: 'lascia recuperare il corpo',
+      HIGH_RECOVERY_NEEDS: 'serve molto recupero', MODERATE_RECOVERY_NEEDS: 'serve un po\' di recupero', LOW_RECOVERY_NEEDS: 'poco bisogno di recupero', GOOD_RECOVERY: 'buon recupero',
+      READY_TO_PUSH: 'pronto a spingere', FAIR_RECOVERY: 'recupero discreto', POOR_RECOVERY: 'recupero scarso' }[tr.feedback] || String(tr.feedback || '').toLowerCase().replace(/_/g, ' ');
     const recHours = tr.recovery_time_min != null ? Math.round(tr.recovery_time_min / 60) : null;
     const acwrFb = { GOOD: 'carico ottimale', MODERATE: 'carico moderato', HIGH: 'carico alto', POOR: 'carico eccessivo' }[tr.acwr_feedback];
     const bits = [fb, recHours != null && recHours >= 1 ? `recupero ${recHours} h` : null, tr.acute_load != null ? `carico acuto ${tr.acute_load}` : null, acwrFb].filter(Boolean);

@@ -95,7 +95,7 @@ function buildComments(acts, fitness) {
     const names = { velocita: 'ripetute', soglia: 'soglia', fartlek: 'fartlek', progressivo: 'progressivo', vo2: 'ripetute lunghe' };
     const qTxt = q.length ? q.map(a => `${names[classifyRun(a)]} (${actDateLabel(a.date)})`).join(', ') : 'nessuna';
     const share = Math.round(q.length / runs14.length * 100);
-    out.push(`<b>Intensità</b> — su ${runs14.length} corse in 14 giorni, di qualità: ${qTxt} (${share}%). ` +
+    out.push(`<b>Intensità</b> — su ${runs14.length} corse in 14 giorni, di qualità: ${qTxt}, cioè il ${share}%. ` +
       (share > 50 ? 'Troppa qualità: aggiungi corse facili in Z2.' : (share === 0 ? 'Tutto facile: nelle prossime uscite puoi inserire una seduta di qualità.' : 'Buon equilibrio facile/qualità.')));
   }
 

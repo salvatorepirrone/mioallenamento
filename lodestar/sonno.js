@@ -1,6 +1,6 @@
 // Lodestar — pagina Sonno: ultima notte (punteggio, fasi, frequenza cardiaca, respirazione), ultime notti e medie.
 const $ = id => document.getElementById(id);
-const fmtMin = m => (!m ? '—' : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}`);
+const fmtMin = m => (!m ? '—' : (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}`));
 const scoreColor = s => (s >= 75 ? 'var(--ld-good)' : (s >= 55 ? 'var(--ld-mid)' : 'var(--ld-low)'));
 const scoreWord = s => (s >= 75 ? 'Notte riposante' : (s >= 55 ? 'Notte nella media' : 'Notte difficile'));
 const nightLabel = iso => new Date(iso + 'T12:00:00').toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });

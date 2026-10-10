@@ -8,6 +8,7 @@ const DIST = { running: [['5', '5 km'], ['10', '10 km'], ['21.0975', 'Mezza mara
 const $ = id => document.getElementById(id);
 const state = { plan: null, csrf: '', activities: [], fitness: null, canSend: false };
 
+const nf = n => String(n).replace('.', ',');
 function dayLabel(iso) { const d = new Date(iso + 'T12:00:00'); return `${DAY_IT[d.getDay()]} ${d.getDate()} ${MESI_IT[d.getMonth()]}`; }
 
 async function pApi(action, payload) {
@@ -65,7 +66,7 @@ function sessionHtml(s, date) {
   const done = doneOn(date, s.sport);
   const past = date < todayISO();
   const status = done ? '<span class="ld-ok">✅ fatto</span>' : (past ? '<span class="ld-muted">non registrato</span>' : '');
-  const meta = [s.km ? (s.sport === 'swimming' ? Math.round(s.km * 1000) + ' m' : s.km + ' km') : '', s.min ? '~' + s.min + ' min' : ''].filter(Boolean).join(' · ');
+  const meta = [s.km ? (s.sport === 'swimming' ? Math.round(s.km * 1000) + ' m' : nf(s.km) + ' km') : '', s.min ? '~' + s.min + ' min' : ''].filter(Boolean).join(' · ');
   const send = (state.canSend && !past ? `<div class="reco-send"><button type="button" class="cw-btn" data-send="${s.id}" data-date="${date}">${s.sent ? 'Reinvia' : "Invia all'orologio"} (${dayLabel(date)})</button> <span class="reco-send-msg"></span></div>` : '');
   return `<details class="pl-sess${done ? ' pl-done' : ''}" data-sid="${s.id}"><summary>${icon} <b>${LibUI.e(s.title)}</b> <span class="ld-muted">${meta}</span> ${status}${s.sent ? ' <span class="ld-badge alt">inviato</span>' : ''}${s.adapted && s.adapted.orig ? ' <span class="ld-badge">adattata</span>' : ''}</summary>
     ${s.adapted && s.adapted.orig ? `<div class="ld-adapt">🔧 ${LibUI.e(s.adapted.reason)}. Prevista: «${LibUI.e(s.adapted.orig.title)}». <a href="#" data-restore="${s.id}" class="reco-link">Ripristina</a></div>` : ''}
@@ -75,7 +76,7 @@ function sessionHtml(s, date) {
 function weekHtml(w, current) {
   const sessions = w.days.flatMap(d => d.sessions.filter(s => s.role !== 'event'));
   const done = w.days.reduce((n, d) => n + d.sessions.filter(s => s.role !== 'event' && doneOn(d.date, s.sport)).length, 0);
-  const vol = [w.runKm ? w.runKm + ' km corsa' : '', w.swimM ? w.swimM + ' m nuoto' : ''].filter(Boolean).join(' · ');
+  const vol = [w.runKm ? nf(w.runKm) + ' km corsa' : '', w.swimM ? w.swimM + ' m nuoto' : ''].filter(Boolean).join(' · ');
   const rows = w.days.map(d => `<div class="pl-day"><div class="pl-date${d.date === todayISO() ? ' today' : ''}">${dayLabel(d.date)}</div><div>${d.sessions.map(s => sessionHtml(s, d.date)).join('')}</div></div>`).join('');
   return `<details class="pl-week" ${current ? 'open' : ''}><summary><span class="pl-phase" style="background:${PHASE_COLOR[w.phase]}">${PHASE_LABEL[w.phase]}</span>
     <b>Settimana ${w.n}</b>${w.down ? ' <span class="ld-badge alt">scarico</span>' : ''} <span class="ld-muted">${dayLabel(w.monday)} · ${vol || 'palestra'} · ${done}/${sessions.length} fatte</span></summary>${rows}</details>`;
