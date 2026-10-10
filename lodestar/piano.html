@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piano · Lodestar</title>
+<meta name="theme-color" content="#12263f">
+<link rel="manifest" href="/lodestar/manifest.json">
+<link rel="icon" href="/lodestar/icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/lodestar/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/lodestar/lodestar.css">
+</head>
+<body data-page="piano">
+<main>
+
+<div class="hero">
+  <h1>🎯 Il tuo piano</h1>
+  <p id="pl-sub">Un percorso a settimane verso il tuo obiettivo, costruito sul tuo livello reale</p>
+</div>
+
+<div id="pl-view"><span class="ld-muted">Caricamento…</span></div>
+
+<div class="ld-card" id="pl-create" hidden>
+  <div class="reco-title" id="pl-create-title">Crea il tuo piano personalizzato</div>
+  <div class="pl-form">
+    <fieldset class="pl-goal">
+      <label><input type="radio" name="goal" value="event" checked> Ho un evento di riferimento</label>
+      <label><input type="radio" name="goal" value="end"> Voglio un piano fino a una data</label>
+    </fieldset>
+    <div class="pl-grid">
+      <label>Sport dell'evento / principale
+        <select id="f-sport"><option value="running">Corsa</option><option value="swimming">Nuoto</option></select></label>
+      <label id="f-dist-wrap">Distanza
+        <select id="f-dist"></select></label>
+      <label id="f-dist-other-wrap" hidden>Altra distanza (<span id="f-unit">km</span>)
+        <input id="f-dist-other" type="number" min="0.1" step="0.1"></label>
+      <label id="f-name-wrap">Nome dell'evento (facoltativo)
+        <input id="f-name" type="text" maxlength="60" placeholder="Es. Mezza di Torino"></label>
+      <label><span id="f-date-label">Data dell'evento</span>
+        <input id="f-date" type="date"></label>
+      <label>Giorni di allenamento a settimana
+        <select id="f-days"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></label>
+    </div>
+    <div class="pl-acts"><span class="ld-muted">Attività che pratichi:</span>
+      <label><input type="checkbox" value="running" checked> 🏃 Corsa</label>
+      <label><input type="checkbox" value="swimming"> 🏊 Nuoto</label>
+      <label><input type="checkbox" value="strength"> 🏋️ Palestra</label>
+    </div>
+    <div style="margin-top:12px"><button class="ld-btn gold" id="pl-go" type="button">Crea piano</button> <button class="ld-btn ghost" id="pl-cancel" type="button" hidden>Annulla</button> <span id="pl-msg" class="ld-muted"></span></div>
+    <div class="ld-muted" style="margin-top:8px">Il piano parte dal tuo livello reale (ultime 4 settimane su Garmin) e i ritmi dalle previsioni di gara Garmin; il volume sale al massimo del 10% a settimana, con una settimana di scarico ogni quattro. È una proposta indicativa: ascolta il tuo corpo e, se hai dubbi di salute, senti un medico.</div>
+  </div>
+</div>
+
+</main>
+<script src="/lodestar/app.js"></script>
+<script src="/lodestar/engine.js"></script>
+<script src="/lodestar/catalog.js"></script>
+<script src="/lodestar/lib.js"></script>
+<script src="/lodestar/planner.js"></script>
+<script src="/lodestar/piano.js"></script>
+</body>
+</html>

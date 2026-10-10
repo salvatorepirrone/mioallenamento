@@ -91,7 +91,28 @@ async function loadCoachAssigned() {
   } catch (e) { box.innerHTML = ''; }
 }
 
+// Dal piano personalizzato: la seduta di oggi (o la prossima).
+async function loadPlanToday() {
+  const box = document.getElementById('plan-box');
+  try {
+    const res = await fetch('/lodestar/piano-api.php?action=get', { cache: 'no-store', credentials: 'same-origin' });
+    const d = await res.json();
+    if (!d.plan) { box.innerHTML = '<div class="reco-text" style="margin-bottom:12px">🎯 Non hai ancora un piano: <a class="reco-link" href="/lodestar/piano.html">crea il tuo piano personalizzato →</a></div>'; return; }
+    const today = todayISO();
+    const items = d.plan.weeks.flatMap(w => w.days.map(x => ({ date: x.date, s: x.sessions })));
+    const todayItem = items.find(x => x.date === today);
+    const next = items.find(x => x.date > today);
+    const line = x => x.s.map(s => `${s.sport === 'running' ? '🏃' : (s.sport === 'swimming' ? '🏊' : (s.sport === 'strength' ? '🏋️' : '🏁'))} <b>${LibUI.e(s.title)}</b>`).join(' + ');
+    const wk = d.plan.weeks.find(w => daysBetweenIso(w.monday, today) >= 0 && daysBetweenIso(w.monday, today) < 7);
+    box.innerHTML = `<div class="ld-planline"><div class="reco-title">🎯 Dal tuo piano${wk ? ` · settimana ${wk.n} di ${d.plan.weeks.length} (${PHASE_NAMES[wk.phase]})` : ''}</div>
+      <div class="reco-text">${todayItem ? 'Oggi: ' + line(todayItem) : 'Oggi riposo.'}${next ? ` · Prossima: ${line(next)} <span class="ld-muted">(${next.date.slice(8)}/${next.date.slice(5, 7)})</span>` : ''} <a class="reco-link" href="/lodestar/piano.html">Apri il piano →</a></div></div>`;
+  } catch (e) { box.innerHTML = ''; }
+}
+const PHASE_NAMES = { base: 'base', sviluppo: 'sviluppo', picco: 'picco', scarico: 'scarico' };
+function daysBetweenIso(a, b) { return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000); }
+
 async function loadAll() {
+  loadPlanToday();
   loadCoachAssigned();
   const health = await loadHealth();
   loadRecommendation(health);

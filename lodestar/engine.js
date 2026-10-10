@@ -888,6 +888,8 @@ function isoLocal(d) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
+function todayISO() { return isoLocal(new Date()); }
+
 async function attachSendButtons(model) {
   try {
     const res = await fetch('/coach-api.php?action=mine', { cache: 'no-store', credentials: 'same-origin' });

@@ -6,7 +6,6 @@ const SLOT_LABELS = { colazione: 'Colazione', pranzo: 'Pranzo', cena: 'Cena', sp
 
 const nutriState = { csrf: '', recipes: [], meals: [], me: '', canManage: false, weights: [], activities: [] };
 
-function todayISO() { return isoLocal(new Date()); }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
 async function nutriApi(action, body) {

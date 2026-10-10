@@ -14,7 +14,7 @@
     { id: 'palestra', href: '/lodestar/palestra.html', label: 'Libreria palestra', dot: '#c85af5' },
     { id: 'nutrizione', href: '/lodestar/nutrizione.html', label: 'Libreria ricette 🥗', dot: '#f5965a' },
     { id: 'attivita', href: '/lodestar/attivita.html', label: 'Attività 📈', dot: '#2E6DA4' },
-    { id: 'piano', href: '/pianoallenamento/index.html', label: 'Piano', dot: '#2E6DA4' },
+    { id: 'piano', href: '/lodestar/piano.html', label: 'Piano 🎯', dot: '#2E6DA4' },
   ];
   var TOOLS = [
     { href: '/pianoallenamento/peso.html', label: 'Peso ⚖️', dot: '#f5c85a' },
