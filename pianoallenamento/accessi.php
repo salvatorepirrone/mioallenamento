@@ -138,7 +138,7 @@ $labels = [
     'user_enabled' => 'Utente riattivato', 'user_deleted' => 'Utente eliminato', 'user_unlocked' => 'Utente sbloccato',
     'coach_granted' => 'Coach assegnato', 'coach_revoked' => 'Coach revocato', 'coach_assigned' => 'Allenamento assegnato',
     'coach_library_add' => 'Programma inserito in libreria',
-    'access_requested' => 'Richiesta di accesso', 'access_approved' => 'Richiesta approvata', 'access_rejected' => 'Richiesta rifiutata',
+    'invite_page' => 'Pagina di registrazione aperta', 'access_requested' => 'Richiesta di accesso', 'access_approved' => 'Richiesta approvata', 'access_rejected' => 'Richiesta rifiutata',
     'user_invited' => 'Invito inviato', 'registered' => 'Registrazione completata', 'reset_requested' => 'Recupero password richiesto', 'password_reset' => 'Password reimpostata via email',
     'nutri_granted' => 'Nutrizionista assegnato', 'nutri_revoked' => 'Nutrizionista revocato',
     'nutri_recipe_add' => 'Ricetta inserita', 'nutri_recipe_delete' => 'Ricetta eliminata', 'nutri_meal_add' => 'Pasto registrato',

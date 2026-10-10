@@ -37,6 +37,7 @@ auth_page('Richiedi accesso',
     . '<label>Il tuo nome (facoltativo)</label><input name="nome" maxlength="60" autocomplete="name">'
     . '<label>Chi ti conosce / perché vuoi usarlo (facoltativo)</label><input name="nota" maxlength="300">'
     . '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text);margin-top:16px"><input type="checkbox" name="consent" value="1" style="width:auto;margin-top:2px"> '
-    . '<span>Acconsento a essere contattato a questo indirizzo per la mia richiesta di accesso.</span></label>'
-    . '<button type="submit">Invia la richiesta</button>' . ($error ? '<div class="err">' . auth_h($error) . '</div>' : '')
-    . '</form><p style="margin-top:16px;font-size:13px"><a href="/auth/login.php">Ho già un account</a></p>');
+    . '<span>Ho letto l\'<a href="/auth/privacy.php" target="_blank" rel="noopener">informativa sulla privacy</a> e acconsento a essere contattato a questo indirizzo per la mia richiesta di accesso.</span></label>'
+    . '<button type="submit" id="go" disabled>Invia la richiesta</button>' . ($error ? '<div class="err">' . auth_h($error) . '</div>' : '')
+    . '</form><p style="margin-top:16px;font-size:13px"><a href="/auth/login.php">Ho già un account</a></p>'
+    . '<script>(function(){var c=document.querySelector("input[name=consent]"),b=document.getElementById("go");function s(){b.disabled=!c.checked}c.addEventListener("change",s);s()})()</script>');

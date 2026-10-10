@@ -6,6 +6,7 @@ auth_start();
 $token = (string)($_GET['token'] ?? $_POST['token'] ?? '');
 $t = tok_find($token, 'invite');
 $user = $t ? auth_get_user($t['user']) : null;
+if ($_SERVER['REQUEST_METHOD'] === 'GET') auth_log('invite_page', $t['user'] ?? '', $t && $user && !empty($user['pending']) ? 'link valido' : ($token === '' ? 'senza codice' : 'link non valido o scaduto'));
 if (!$t || !$user || empty($user['pending'])) {
     auth_page('Link non valido', '<p>Questo link non è valido o è scaduto.</p><p>Chiedi a chi ti ha invitato di inviartene uno nuovo.</p><p><a href="/auth/login.php">Vai all\'accesso</a></p>');
     exit;
@@ -51,5 +52,6 @@ auth_page('Completa la registrazione',
     . '<label>Ripeti la password</label><input name="again" type="password" autocomplete="new-password" required>'
     . '<div class="ok" style="color:var(--muted);font-size:12px;margin-top:8px">Almeno 10 caratteri, con almeno tre tra minuscole, maiuscole, numeri e simboli.</div>'
     . '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text);margin-top:16px"><input type="checkbox" name="consent" value="1" style="width:auto;margin-top:2px"> '
-    . '<span>Acconsento al trattamento dei miei dati di salute e allenamento (attività, peso, sonno, alimentazione) da parte di Lodestar per erogare il servizio. Posso scollegare i servizi e cancellare i miei dati in qualsiasi momento.</span></label>'
-    . '<button type="submit">Completa la registrazione</button>' . $err . '</form>');
+    . '<span>Ho letto l\'<a href="/auth/privacy.php" target="_blank" rel="noopener">informativa sulla privacy</a> e acconsento al trattamento dei miei dati di salute e allenamento (attività, peso, sonno, alimentazione) da parte di Lodestar per erogare il servizio. Posso scollegare i servizi e cancellare i miei dati in qualsiasi momento.</span></label>'
+    . '<button type="submit" id="go" disabled>Completa la registrazione</button>' . $err . '</form>'
+    . '<script>(function(){var c=document.querySelector("input[name=consent]"),b=document.getElementById("go");function s(){b.disabled=!c.checked}c.addEventListener("change",s);s()})()</script>');
