@@ -402,9 +402,24 @@ function coach_validate_strength($in): array {
 
 // Valida una voce della libreria per sport (nuoto: blocchi; corsa: passi; palestra: esercizi).
 function coach_validate_entry(string $sport, $parsed): array {
-    if ($sport === 'running') return coach_validate_run($parsed['title'] ?? '', $parsed['steps'] ?? null);
-    if ($sport === 'strength') return coach_validate_strength($parsed);
-    $p = coach_validate_parsed($parsed);
-    $p['sport'] = 'swimming';
+    if ($sport === 'running') $p = coach_validate_run($parsed['title'] ?? '', $parsed['steps'] ?? null);
+    elseif ($sport === 'strength') $p = coach_validate_strength($parsed);
+    else {
+        $p = coach_validate_parsed($parsed);
+        $p['sport'] = 'swimming';
+    }
+    $cat = coach_clean_category($sport, is_array($parsed) ? ($parsed['category'] ?? null) : null);
+    if ($cat !== null) $p['category'] = $cat;   // categoria scelta dal coach; senza, la deduce il sito dalla struttura
     return $p;
+}
+
+// Categorie ammesse per sport (le stesse delle librerie e del consiglio del giorno).
+const COACH_CATEGORIES = [
+    'running' => ['recupero', 'base', 'lungo', 'qualita'],
+    'swimming' => ['leggero', 'tecnica', 'velocita', 'resistenza'],
+    'strength' => ['forza'],
+];
+
+function coach_clean_category(string $sport, $cat): ?string {
+    return is_string($cat) && in_array($cat, COACH_CATEGORIES[$sport] ?? [], true) ? $cat : null;
 }

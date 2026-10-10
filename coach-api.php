@@ -56,7 +56,7 @@ try {
     if ($method === 'GET' && $action === 'library') {
         $all = coach_all();
         usort($all, function ($a, $b) { return strcmp($b['created_at'] ?? '', $a['created_at'] ?? ''); });
-        reply(['csrf' => auth_csrf_token(), 'me' => $name, 'is_coach' => $isCoach, 'can_send' => $canSend, 'programs' => array_map('publicView', $all)]);
+        reply(['csrf' => auth_csrf_token(), 'me' => $name, 'is_coach' => $isCoach, 'is_admin' => auth_is_admin($name), 'can_send' => $canSend, 'programs' => array_map('publicView', $all)]);
     }
 
     if ($method === 'GET' && $action === 'mine') {
@@ -96,6 +96,32 @@ try {
         coach_update(function ($all) use ($w) { $all[] = $w; return $all; });
         auth_log('coach_library_add', '', $parsed['title'] . ' (' . $sport . ') da ' . $name . ($date ? ' per il ' . $date : ''));
         reply(['ok' => true, 'program' => publicView($w)]);
+    }
+
+    if ($method === 'POST' && $action === 'set_category') {
+        if (!$isCoach) reply(['error' => 'Solo i coach possono cambiare la categoria.'], 403);
+        $id = (string)($body['id'] ?? '');
+        $raw = $body['category'] ?? null;
+        $found = false; $denied = false; $bad = false;
+        coach_update(function ($all) use ($id, $raw, $name, &$found, &$denied, &$bad) {
+            foreach ($all as &$w) {
+                if ($w['id'] !== $id) continue;
+                $found = true;
+                if ($w['created_by'] !== $name && !auth_is_admin($name)) { $denied = true; continue; }
+                $sport = $w['parsed']['sport'] ?? 'swimming';
+                if ($raw === null || $raw === '') { unset($w['parsed']['category']); continue; }   // torna alla categoria dedotta
+                $cat = coach_clean_category($sport, $raw);
+                if ($cat === null) { $bad = true; continue; }
+                $w['parsed']['category'] = $cat;
+            }
+            unset($w);
+            return $all;
+        });
+        if (!$found) reply(['error' => 'Programma non trovato.'], 404);
+        if ($denied) reply(['error' => 'Puoi cambiare la categoria solo dei programmi inseriti da te.'], 403);
+        if ($bad) reply(['error' => 'Categoria non valida.'], 400);
+        auth_log('coach_category', '', $id . ' da ' . $name);
+        reply(['ok' => true]);
     }
 
     if ($method === 'POST' && $action === 'assign') {

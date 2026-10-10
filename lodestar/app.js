@@ -44,6 +44,29 @@
   });
 
   var nav = document.querySelector('nav');
+
+  // Tasto "Aggiorna dati": forza subito la sincronizzazione con Garmin e Withings.
+  var sync = document.createElement('button');
+  sync.type = 'button';
+  sync.className = 'nav-refresh-btn';
+  sync.textContent = '🔄 Sincronizza dati';
+  nav.appendChild(sync);
+  sync.addEventListener('click', function () {
+    sync.disabled = true;
+    sync.textContent = '⏳ Sincronizzazione…';
+    try { localStorage.setItem('lastAutoRefresh', String(Date.now())); } catch (e) { /* storage non disponibile */ }
+    fetch('/refresh-sync.php', { method: 'POST', credentials: 'same-origin' })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (!data.ok) throw new Error(data.error || 'Errore sconosciuto');
+        sync.textContent = '✅ Dati aggiornati';
+        setTimeout(function () { location.reload(); }, 900);
+      })
+      .catch(function () {
+        sync.textContent = '❌ Errore, riprova';
+        sync.disabled = false;
+      });
+  });
   var pw = document.createElement('a');
   pw.href = '/auth/cambia-password.php';
   pw.className = 'nav-refresh-btn nav-logout';
