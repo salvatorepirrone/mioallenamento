@@ -132,6 +132,7 @@
   <div class="toolbar" style="margin-bottom:16px">
     <span class="hint">Clicca sui blocchi per selezionarli — le azioni disponibili compaiono qui sopra.</span>
     <div class="spacer"></div>
+    <button class="small" id="undoBtn" type="button" title="Annulla l'ultima modifica (Ctrl+Z)" disabled>↩ Annulla</button>
     <button class="primary" id="downloadBtnMain">Scarica FIT corretto</button>
   </div>
   <div id="actionPanel" class="action-panel"></div>
@@ -803,6 +804,20 @@ const STROKE_COLOR = {
 };
 
 let state = null;
+const undoStack = [];           // istantanee del file prima di ogni modifica (FIT ricostruito)
+function pushUndo() {
+  if (!state) return;
+  undoStack.push(buildFit(state.messages, {}));
+  if (undoStack.length > 50) undoStack.shift();
+}
+function undo() {
+  if (!state || !undoStack.length) return;
+  const bytes = undoStack.pop();
+  state = loadSwimActivity(readFit(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)));
+  selected.clear();
+  splitOpen = false;
+  render();
+}
 let selected = new Set();
 let splitOpen = false;
 
@@ -835,7 +850,9 @@ poolApplyBtn.addEventListener('click', () => {
   const value = poolSelect.value === 'custom' ? parsePoolInput(poolCustom.value) : Number(poolSelect.value);
   try {
     if (!Number.isFinite(value)) throw new Error('Scrivi la vasca in metri (per esempio 25, 33,33 oppure 33 1/3)');
+    pushUndo();
     const changed = changePoolLength(state, value);
+    if (!changed) undoStack.pop();
     render();
     poolMsg.textContent = changed ? 'Vasca impostata a ' + fmtMeters(state.poolLength) + ' m: distanze e velocità ricalcolate.' : 'La vasca era già a ' + fmtMeters(state.poolLength) + ' m.';
   } catch (err) {
@@ -945,6 +962,7 @@ function handleFile(file) {
       const repairResult = repairSwimActivity(state);
       selected.clear();
       splitOpen = false;
+      undoStack.length = 0;
       loadMsg.innerHTML = (repairResult.fixed > 0 || repairResult.orphansRepaired > 0)
         ? `<div class="msg ok">File caricato: ${state.lengths.length} length trovati. Trovate e corrette automaticamente ${repairResult.fixed} incoerenze e ${repairResult.orphansRepaired || 0} vasche senza lap nel file di partenza.</div>`
         : `<div class="msg ok">File caricato: ${state.lengths.length} length trovati.</div>`;
@@ -999,6 +1017,8 @@ function render() {
     <div class="vl-stat"><div class="n">${fmtMeters(state.poolLength)}m</div><div class="l">Vasca</div></div>
   `;
 
+  const undoBtn = document.getElementById('undoBtn');
+  if (undoBtn) { undoBtn.disabled = !undoStack.length; undoBtn.textContent = '↩ Annulla' + (undoStack.length ? ' (' + undoStack.length + ')' : ''); }
   syncPoolControl();
   renderTimeline();
   renderActionPanel();
@@ -1097,14 +1117,15 @@ function renderActionPanel() {
   actionPanel.innerHTML = html;
 
   const typeBtn = actionPanel.querySelector('.typeToggleBtn');
-  if (typeBtn) typeBtn.addEventListener('click', () => { toggleLengthType(state, Number(typeBtn.dataset.i)); render(); });
+  if (typeBtn) typeBtn.addEventListener('click', () => { pushUndo(); toggleLengthType(state, Number(typeBtn.dataset.i)); render(); });
 
   const strokeSel = actionPanel.querySelector('[data-role="stroke"]');
-  if (strokeSel) strokeSel.addEventListener('change', () => { setLengthStroke(state, Number(strokeSel.dataset.i), strokeSel.value); render(); });
+  if (strokeSel) strokeSel.addEventListener('change', () => { pushUndo(); setLengthStroke(state, Number(strokeSel.dataset.i), strokeSel.value); render(); });
 
   const strokesInp = actionPanel.querySelector('.strokesInput');
   if (strokesInp) strokesInp.addEventListener('change', () => {
     const i = Number(strokesInp.dataset.i);
+    pushUndo();
     setField(state.lengths[i].msg, L.strokes, Number(strokesInp.value) || 0);
     recompute(state);
     render();
@@ -1130,6 +1151,7 @@ function renderActionPanel() {
       const v = Number(actionPanel.querySelector('#splitRange').value);
       const sASel = actionPanel.querySelector('[data-role="sA"]');
       const sBSel = actionPanel.querySelector('[data-role="sB"]');
+      pushUndo();
       splitLength(state, i, v, sASel ? sASel.value : null, sBSel ? sBSel.value : null);
       splitOpen = false;
       selected.clear();
@@ -1140,6 +1162,7 @@ function renderActionPanel() {
   const confirmMerge = actionPanel.querySelector('#confirmMerge');
   if (confirmMerge) confirmMerge.addEventListener('click', () => {
     try {
+      pushUndo();
       mergeLengths(state, arr);
       selected.clear();
       render();
@@ -1154,6 +1177,10 @@ function renderLegend() {
 }
 
 document.getElementById('downloadBtnMain')?.addEventListener('click', doDownload);
+document.getElementById('undoBtn')?.addEventListener('click', undo);
+document.addEventListener('keydown', ev => {
+  if ((ev.ctrlKey || ev.metaKey) && !ev.shiftKey && ev.key.toLowerCase() === 'z' && !/^(INPUT|TEXTAREA|SELECT)$/.test((ev.target.tagName || ''))) { ev.preventDefault(); undo(); }
+});
 
 function doDownload() {
   if (!state) return;
