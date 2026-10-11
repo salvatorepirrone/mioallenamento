@@ -41,7 +41,7 @@ function readinessTiles(fitness, readiness) {
   // Con dati di piu' dispositivi (Garmin + sonno Withings) la prontezza di Lodestar li unisce.
   if (readiness && readiness.source === 'Garmin' && readiness.withSleep) {
     const why = readiness.factors.map(f => f.value != null ? `${f.label} ${f.value}` : `${f.label} ${f.delta > 0 ? '+' : '−'}${Math.abs(f.delta)}`).join(' · ');
-    tiles.push(`<div class="hstat" title="${why.replace(/"/g, '&quot;')}"><span class="v">${readiness.score}/100</span><span class="l">Prontezza Lodestar (Garmin + sonno Withings)</span></div>`);
+    tiles.push(`<div class="hstat" title="${why.replace(/"/g, '&quot;')}"><span class="v">${readiness.score}/100</span><span class="l">Prontezza Lodestar</span></div>`);
   }
   return tiles;
 }
