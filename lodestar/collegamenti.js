@@ -48,7 +48,18 @@ async function garminStep(action, payload) {
   } catch (e) { renderGarmin({ msg: `<span class="ld-err">${E(e.message)}</span>` }); }
 }
 
+const needsRelink = svc => !!(state.sync && state.sync.results && state.sync.results[svc] && state.sync.results[svc].relink);
+
 function renderWithings() {
+  if (state.connected.withings && needsRelink('withings')) {
+    $('cn-withings').innerHTML = `<div class="reco-title">⚠️ Withings: serve ricollegarlo</div>
+      <div class="ld-muted" style="margin:4px 0 8px">L'autorizzazione a leggere i tuoi dati è scaduta o è stata sostituita. Ti portiamo sul sito di Withings per confermarla di nuovo: i dati già scaricati restano.</div>
+      <button class="ld-btn gold" id="w-go" type="button">Ricollega Withings</button> <span id="w-msg" class="ld-muted"></span>`;
+    $('w-go').onclick = async () => {
+      try { location.href = (await cnApi('withings_url')).url; } catch (e) { $('w-msg').innerHTML = `<span class="ld-err">${E(e.message)}</span>`; }
+    };
+    return;
+  }
   if (state.connected.withings) {
     $('cn-withings').innerHTML = `<div class="reco-title">✅ Withings collegato</div>
       <div class="ld-muted">Peso, composizione corporea e sonno arrivano dalla tua bilancia e dal tuo tracker Withings.</div>

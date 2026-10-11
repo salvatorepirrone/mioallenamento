@@ -62,7 +62,7 @@
         var s = (await api('sync_status')).sync || {};
         if (s.state !== 'running') {
           var res = s.results || {};
-          return { connected: true, ok: Object.keys(res).every(function (k) { return res[k].ok; }) };
+          return { connected: true, ok: Object.keys(res).every(function (k) { return res[k].ok; }), relink: Object.keys(res).some(function (k) { return res[k].relink; }) };
         }
       }
       return { connected: true, ok: false };
@@ -82,6 +82,7 @@
     window.LodestarSync.run()
       .then(function (data) {
         if (!data.connected) { location.href = '/lodestar/collegamenti.html'; return; }
+        if (data.relink) { location.href = '/lodestar/collegamenti.html?relink=1'; return; }
         if (!data.ok) throw new Error('Sincronizzazione non riuscita');
         sync.textContent = '✅ Dati aggiornati';
         setTimeout(function () { location.reload(); }, 900);

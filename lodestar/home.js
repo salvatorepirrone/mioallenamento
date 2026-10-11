@@ -76,6 +76,7 @@ async function maybeAutoRefresh() {
   try {
     const d = await window.LodestarSync.run();
     if (!d.connected) { document.getElementById('ld-refresh').innerHTML = '<a class="reco-link" href="/lodestar/collegamenti.html">Collega Garmin o Withings per vedere i tuoi dati →</a>'; return false; }
+    if (d.relink) { document.getElementById('ld-refresh').innerHTML = '<a class="reco-link" href="/lodestar/collegamenti.html?relink=1">⚠️ Serve ricollegare Withings: tocca qui →</a>'; return false; }
     return !!d.ok;
   } catch (e) {
     return false;

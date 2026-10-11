@@ -34,6 +34,8 @@ def main(argv: list) -> int:
             ok = p.returncode == 0
             tail = (p.stderr or p.stdout or "").strip().splitlines()
             st["results"][svc] = {"ok": ok, "error": None if ok else (tail[-1][:220] if tail else "errore sconosciuto")}
+            if p.returncode == 3:      # autorizzazione scaduta o revocata: l'utente deve ricollegare il servizio
+                st["results"][svc] = {"ok": False, "relink": True, "error": "Autorizzazione scaduta: ricollega il servizio."}
         except subprocess.TimeoutExpired:
             st["results"][svc] = {"ok": False, "error": "Sincronizzazione troppo lenta: riprova."}
         write_status(status_file, st)

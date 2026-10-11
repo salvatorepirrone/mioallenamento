@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import os
+import contextlib
 import sys
 import time
 from datetime import date, datetime, timedelta, timezone
@@ -93,6 +94,31 @@ def exchange_code(code: str) -> dict:
     return data["body"]
 
 
+RELINK_EXIT_CODE = 3   # sync_user.py lo riconosce e chiede all'utente di ricollegare Withings
+
+
+class WithingsRelinkNeeded(RuntimeError):
+    """L'autorizzazione Withings non e' piu' valida (revocata o sostituita): serve ricollegarla dal sito."""
+
+
+@contextlib.contextmanager
+def token_lock():
+    """Un solo rinnovo del token alla volta (sito, sync automatico, pulsante): Withings invalida il vecchio
+    refresh token appena ne rilascia uno nuovo, quindi due rinnovi in parallelo si rompono a vicenda."""
+    SESSION_DIR.mkdir(parents=True, exist_ok=True)
+    try:
+        import fcntl
+    except ImportError:          # Windows: nessun blocco, il sync gira da un solo processo
+        yield
+        return
+    with open(SESSION_DIR / "refresh.lock", "w") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+
+
 def refresh_access_token(refresh_token: str) -> dict:
     _require_client_secret()
     res = requests.post(OAUTH_ENDPOINT, data={
@@ -104,6 +130,8 @@ def refresh_access_token(refresh_token: str) -> dict:
     }, timeout=30)
     data = res.json()
     if data.get("status") != 0:
+        if "refresh_token" in str(data.get("error", "")).lower() or data.get("status") in (293, 294, 295, 601):
+            raise WithingsRelinkNeeded("L'autorizzazione Withings non è più valida: ricollega Withings.")
         raise RuntimeError(f"Errore refresh token Withings: {data}")
     return data["body"]
 
@@ -112,6 +140,14 @@ def get_access_token(force_refresh: bool = False) -> str:
     cached = load_cached_token()
     setup_code = os.environ.get("WITHINGS_SETUP_CODE", "").strip()
     setup_refresh_token = os.environ.get("WITHINGS_SETUP_REFRESH_TOKEN", "").strip()
+
+    if setup_code and not setup_refresh_token:
+        # Ricollegamento esplicito dal sito: il codice nuovo sostituisce qualunque token precedente.
+        print("Autorizzazione Withings: scambio il codice fornito...")
+        body = exchange_code(setup_code)
+        save_token(body)
+        print(f"Autorizzazione riuscita, refresh token salvato in {TOKEN_FILE}.")
+        return body["access_token"]
 
     if not cached:
         if setup_refresh_token:
@@ -137,10 +173,17 @@ def get_access_token(force_refresh: bool = False) -> str:
     if not force_refresh and cached["expires_at"] > time.time() + 60:
         return cached["access_token"]
 
-    print("Rinnovo il token Withings...")
-    body = refresh_access_token(cached["refresh_token"])
-    save_token(body)
-    return body["access_token"]
+    with token_lock():
+        latest = load_cached_token() or cached
+        # Un altro processo puo' aver gia' rinnovato mentre aspettavo il blocco: uso il suo token.
+        if latest["refresh_token"] != cached["refresh_token"] and latest["expires_at"] > time.time() + 60:
+            return latest["access_token"]
+        if not force_refresh and latest["expires_at"] > time.time() + 60:
+            return latest["access_token"]
+        print("Rinnovo il token Withings...")
+        body = refresh_access_token(latest["refresh_token"])
+        save_token(body)
+        return body["access_token"]
 
 
 # ── Dati per precompilare il profilo (sesso, nascita, altezza, peso) ──
@@ -347,4 +390,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except WithingsRelinkNeeded as exc:
+        print(f"RELINK_WITHINGS: {exc}", file=sys.stderr)
+        sys.exit(RELINK_EXIT_CODE)

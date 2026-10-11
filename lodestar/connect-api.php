@@ -112,7 +112,6 @@ try {
     }
 
     if ($method === 'POST' && $action === 'withings_callback') {
-        if ($legacy) reply(['error' => 'Il tuo account Withings è già collegato.'], 400);
         $code = (string)($body['code'] ?? '');
         $state = (string)($body['state'] ?? '');
         if (!preg_match('/^[A-Za-z0-9_\-]{8,200}$/', $code)) reply(['error' => 'Codice di autorizzazione non valido.'], 400);
