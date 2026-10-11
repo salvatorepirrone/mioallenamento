@@ -269,6 +269,7 @@ def sync_sleep(access_token: str) -> list[dict]:
             "hr_average": d.get("hr_average"),
             "rr_average": d.get("rr_average"),
             "snoring_min": round((d.get("snoring") or 0) / 60),
+            "_start": ts, "_end": s.get("enddate"),
         })
 
     # Una nottata con un risveglio prolungato puo' arrivare come due "series"
@@ -283,7 +284,34 @@ def sync_sleep(access_token: str) -> list[dict]:
     entries = list(by_date.values())
 
     entries.sort(key=lambda e: e["date"], reverse=True)
+    add_night_hrv(access_token, entries[:10])
+    for e in entries:
+        e.pop("_start", None)
+        e.pop("_end", None)
     return entries
+
+
+def add_night_hrv(access_token: str, nights: list[dict]) -> None:
+    """HRV (RMSSD) misurata da Withings durante il sonno: media dei campioni della notte.
+    Serie dettagliata, un'interrogazione per notte; se manca (modello, permessi) si prosegue senza."""
+    for n in nights:
+        start, end = n.get("_start"), n.get("_end")
+        if not start or not end:
+            continue
+        try:
+            res = requests.post(SLEEP_ENDPOINT, data={
+                "action": "get", "startdate": start, "enddate": end,
+                "data_fields": "rmssd", "access_token": access_token}, timeout=30).json()
+            if res.get("status") != 0:
+                continue
+            vals = []
+            for seg in res["body"].get("series", []):
+                vals += [v for v in (seg.get("rmssd") or {}).values() if isinstance(v, (int, float)) and v > 0]
+            if vals:
+                n["hrv_rmssd"] = round(sum(vals) / len(vals), 1)
+        except Exception as exc:
+            print(f"  HRV Withings non disponibile: {str(exc)[:80]}")
+            return
 
 
 def write_json(name: str, payload) -> None:

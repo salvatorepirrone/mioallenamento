@@ -349,6 +349,24 @@ function computeReadiness(fitness, sleepNights, hardRunDaysAgo) {
     if (d) { score += d; factors.push({ label: `FC a riposo ${latest.value} (media ${Math.round(baseline)})`, delta: d }); }
   }
 
+  // HRV: ogni dispositivo si confronta con la propria base (scale diverse), poi si sommano.
+  // Withings la misura durante il sonno (RMSSD); Garmin segnala lo stato rispetto alla sua fascia.
+  // Garmin la usa gia' nella Training Readiness, per questo pesa meno.
+  let hrvDelta = 0; const hrvBits = [];
+  const wh = (sleepNights || []).filter(n => n.hrv_rmssd != null && daysSinceDate(n.date) <= 10);
+  if (wh.length >= 4 && daysSinceDate(wh[0].date) <= 2) {
+    const base = median(wh.slice(1, 8).map(n => n.hrv_rmssd)), ratio = wh[0].hrv_rmssd / base;
+    const d = ratio < 0.7 ? -8 : (ratio < 0.85 ? -4 : (ratio > 1.1 ? 2 : 0));
+    hrvDelta += d; hrvBits.push(`Withings ${Math.round(wh[0].hrv_rmssd)} ms (media ${Math.round(base)})`);
+  }
+  const gh = fitness && fitness.hrv && fitness.hrv[0];
+  if (gh && daysSinceDate(gh.date) <= 2) {
+    const d = { LOW: -4, UNBALANCED: -2, POOR: -4 }[gh.status] || 0;
+    hrvDelta += d; hrvBits.push(`Garmin ${gh.last_night_avg} ms${gh.status ? ' ' + String(gh.status).toLowerCase() : ''}`);
+  }
+  hrvDelta = Math.max(-10, hrvDelta);
+  if (hrvBits.length && hrvDelta) { score += hrvDelta; factors.push({ label: `HRV ${hrvBits.join(', ')}`, delta: hrvDelta }); }
+
   if (hardRunDaysAgo === 1) { score -= 6; factors.push({ label: 'corsa di qualità ieri', delta: -6 }); }
   else if (hardRunDaysAgo === 2) { score -= 2; factors.push({ label: 'corsa di qualità 2 giorni fa', delta: -2 }); }
 

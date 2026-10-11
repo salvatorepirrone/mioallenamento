@@ -317,6 +317,20 @@ def sync_trends(client: Garmin, today: date) -> dict:
             out["race_predictions_history"] = [
                 {"date": r.get("calendarDate"), "time_5k_s": r.get("time5K"), "time_10k_s": r.get("time10K")} for r in picked]
 
+        # HRV notturna di Garmin (media della notte, baseline personale, stato), ultimi 8 giorni.
+        hrv = []
+        for back in range(0, 8):
+            day = (today - timedelta(days=back)).isoformat()
+            raw = _safe_connectapi(client, f"/hrv-service/hrv/{day}")
+            sm = (raw or {}).get("hrvSummary") or {}
+            if sm.get("lastNightAvg"):
+                bl = sm.get("baseline") or {}
+                hrv.append({"date": sm.get("calendarDate") or day, "last_night_avg": sm.get("lastNightAvg"),
+                            "weekly_avg": sm.get("weeklyAvg"), "status": sm.get("status"),
+                            "baseline_low": bl.get("balancedLow"), "baseline_upper": bl.get("balancedUpper")})
+        if hrv:
+            out["hrv"] = hrv
+
         # FC a riposo, ultimi 14 giorni.
         rhr = _safe_connectapi(client, f"/userstats-service/wellness/daily/{display}", {
             "fromDate": (today - timedelta(days=14)).isoformat(), "untilDate": today.isoformat(), "metricId": 60})

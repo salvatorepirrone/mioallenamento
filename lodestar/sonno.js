@@ -22,7 +22,7 @@ function render(nights) {
   const row = (l, v) => `<div class="ps-row"><span>${l}</span><b>${v}</b></div>`;
   $('sl-rows').innerHTML = row('Durata del sonno', fmtMin(d.total_sleep_time_min)) + row('Sonno profondo', fmtMin(d.deep_min)) + row('Sonno leggero', fmtMin(d.light_min)) + row('REM', fmtMin(d.rem_min))
     + row('Risvegli', d.wakeupcount != null ? d.wakeupcount + '×' : '—') + row('FC notturna (min · media)', d.hr_min ? `${d.hr_min} · ${d.hr_average || '—'} bpm` : '—')
-    + row('Respirazione media', d.rr_average ? d.rr_average + ' resp/min' : '—') + row('Russamento', (d.snoring_min || 0) + ' min');
+    + (d.hrv_rmssd ? row('HRV notturna (RMSSD)', d.hrv_rmssd + ' ms') : '') + row('Respirazione media', d.rr_average ? d.rr_average + ' resp/min' : '—') + row('Russamento', (d.snoring_min || 0) + ' min');
   $('sl-alerts').innerHTML = (d.breathing_disturbances_intensity || 0) > 40 ? '<div class="ld-adapt" style="margin-top:12px">⚠️ Rilevate possibili interruzioni del respiro durante la notte. Se capita spesso, parlane con un medico.</div>' : '';
 
   const last = nights.slice(0, 14).reverse();
