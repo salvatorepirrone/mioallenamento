@@ -329,7 +329,9 @@ function computeReadiness(fitness, sleepNights, hardRunDaysAgo) {
   }
 
   const night = (sleepNights || [])[0];
+  let withSleep = false;
   if (night && night.sleep_score != null && daysSinceDate(night.date) <= 2) {
+    withSleep = true;
     const s = night.sleep_score;
     let d = s >= 80 ? 3 : (s >= 65 ? 0 : (s >= 55 ? -4 : (s >= 40 ? -9 : -15)));
     if (night.total_sleep_time_min != null && night.total_sleep_time_min < 330 && d > -9) d -= 3;
@@ -358,7 +360,7 @@ function computeReadiness(fitness, sleepNights, hardRunDaysAgo) {
 
   score = Math.max(0, Math.min(100, Math.round(score)));
   const band = score >= 72 ? 'alta' : (score >= 55 ? 'media' : (score >= 40 ? 'bassa' : 'molto bassa'));
-  return { score, band, source, factors };
+  return { score, band, source, factors, withSleep };
 }
 
 // ── Seduta di corsa: parametri che salgono gradualmente ──

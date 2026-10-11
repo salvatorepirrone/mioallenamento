@@ -35,9 +35,15 @@ async function loadHealth() {
 }
 
 // Training readiness: punteggio Garmin, ultima in coda agli indicatori.
-function readinessTiles(fitness) {
+function readinessTiles(fitness, readiness) {
   const tr = fitness && fitness.training_readiness;
-  return tr && tr.score != null && daysSinceDate(tr.date) <= 1 ? [hstat(tr.score + '/100', 'Training readiness')] : [];
+  const tiles = tr && tr.score != null && daysSinceDate(tr.date) <= 1 ? [hstat(tr.score + '/100', 'Training readiness')] : [];
+  // Con dati di piu' dispositivi (Garmin + sonno Withings) la prontezza di Lodestar li unisce.
+  if (readiness && readiness.source === 'Garmin' && readiness.withSleep) {
+    const why = readiness.factors.map(f => f.value != null ? `${f.label} ${f.value}` : `${f.label} ${f.delta > 0 ? '+' : '−'}${Math.abs(f.delta)}`).join(' · ');
+    tiles.push(`<div class="hstat" title="${why.replace(/"/g, '&quot;')}"><span class="v">${readiness.score}/100</span><span class="l">Prontezza Lodestar (Garmin + sonno Withings)</span></div>`);
+  }
+  return tiles;
 }
 
 async function loadRecommendation(health) {
@@ -50,7 +56,7 @@ async function loadRecommendation(health) {
     } catch (e) { /* senza piano non c'e' scadenza */ }
     const model = computeRecommendation(activities, health.fitness, health.sleep, goals);
     try { applyLibrary(model, await loadAllLibraries(), activities); } catch (e) { console.warn('Libreria non disponibile per il consiglio:', e); }
-    renderStats(readinessTiles(health.fitness));
+    renderStats(readinessTiles(health.fitness, model.readiness));
     renderRecommendation(model);
     attachSendButtons(model);
   } catch (err) {
