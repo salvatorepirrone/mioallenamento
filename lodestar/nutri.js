@@ -2,7 +2,7 @@
 // Gli obiettivi sono STIME ragionate (peso, andamento, attivita' recenti): servono a orientare, non a prescrivere.
 
 const CAT_LABELS = { carne: '🥩 Carne', pesce: '🐟 Pesce', pollo: '🍗 Pollo', legumi: '🫘 Legumi', uova: '🥚 Uova e latticini' };
-const SLOT_LABELS = { colazione: 'Colazione', pranzo: 'Pranzo', cena: 'Cena', spuntino: 'Spuntino' };
+const SLOT_LABELS = { colazione: 'Colazione', pranzo: 'Pranzo', cena: 'Cena', spuntino: 'Merenda' };
 
 const nutriState = { csrf: '', recipes: [], meals: [], me: '', canManage: false, weights: [], activities: [], profile: null };
 
@@ -205,16 +205,20 @@ function diaryHTML() {
   return `<div class="ld-diary">
     <div class="ld-diary-title">Cosa hai mangiato oggi?</div>
     ${rows || '<div class="ld-muted">Ancora niente di registrato.</div>'}
-    <div class="ld-log"><textarea id="ld-logtext" rows="2" maxlength="1500" placeholder="Scrivilo come lo diresti a voce: es. «a colazione cappuccino e due fette biscottate con marmellata»"></textarea>
-    <button type="button" class="ld-btn gold" data-act="log">Calcola e registra</button></div>
+    <div class="ld-log"><textarea id="ld-logtext" rows="2" maxlength="1500" placeholder="Scrivilo come lo diresti a voce: es. «cappuccino e due fette biscottate con marmellata»"></textarea>
+    <div class="ld-logrow"><label class="ld-muted">Pasto <select id="ld-logslot">
+      <option value="">Scegli tu per me</option><option value="colazione">Colazione</option><option value="pranzo">Pranzo</option><option value="spuntino">Merenda</option><option value="cena">Cena</option></select></label>
+    <button type="button" class="ld-btn gold" data-act="log">Calcola e registra</button></div></div>
     <div class="ld-muted" id="ld-logmsg">Le calorie sono stimate da Claude, quindi approssimative: i prossimi consigli si adattano a quanto hai già mangiato.</div></div>`;
 }
 
 function renderNutritionPanel(el) {
   const target = dailyTarget();
   const keepText = (document.getElementById('ld-logtext') || {}).value || '';
+  const keepSlot = (document.getElementById('ld-logslot') || {}).value || '';
   el.innerHTML = budgetHTML(target) + `<div class="ld-meals-grid">${mealCardHTML('pranzo', target)}${mealCardHTML('cena', target)}</div>` + diaryHTML();
   const ta = document.getElementById('ld-logtext'); if (ta) ta.value = keepText;
+  const sl = document.getElementById('ld-logslot'); if (sl) sl.value = keepSlot;
 }
 
 async function initNutritionPanel(el) {
@@ -246,7 +250,7 @@ async function initNutritionPanel(el) {
         const text = document.getElementById('ld-logtext').value.trim();
         if (!text) { b.disabled = false; return; }
         document.getElementById('ld-logmsg').textContent = '⏳ Calcolo le calorie…';
-        const out = await nutriApi('log_meal', { text, date: todayISO() });
+        const out = await nutriApi('log_meal', { text, date: todayISO(), slot: document.getElementById('ld-logslot').value || undefined });
         nutriState.meals.unshift(out.meal);
         document.getElementById('ld-logtext').value = '';
       }
