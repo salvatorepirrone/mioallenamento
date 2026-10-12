@@ -2,6 +2,15 @@
 // Portinaio del sito: nginx gli inoltra ogni richiesta (vedi auth/README.md).
 // Senza sessione valida rimanda al login; con sessione valida serve il file
 // richiesto (statici tramite X-Accel-Redirect, .php eseguiti qui).
+
+// Tutor di spagnolo (/spagnolo/): ha accessi propri, indipendenti da quelli del sito. Va prima di qualunque sessione del sito.
+$__sp = '/' . ltrim(rawurldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/'), '/');
+if ($__sp === '/spagnolo' || strpos($__sp, '/spagnolo/') === 0) {
+    require __DIR__ . '/../spagnolo/entry.php';
+    exit;
+}
+unset($__sp);
+
 require_once __DIR__ . '/lib.php';
 require_once __DIR__ . '/udata-lib.php';
 
