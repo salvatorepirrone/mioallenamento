@@ -187,6 +187,57 @@ function mealCardHTML(slot, target) {
   </div>`;
 }
 
+// ---------- "cosa hai in casa?": ricette della libreria in base a frigo e dispensa ----------
+const pantry = { text: '', slot: '', results: null };
+try { pantry.text = localStorage.getItem('ld-pantry') || ''; } catch (e) { /* storage non disponibile */ }
+const PANTRY_BASICS = /^(olio|sale|pepe|acqua|aceto|spezie|aromi|erbe|prezzemolo|basilico|origano|rosmarino|aglio|cipolla|brodo|limone|succo|zucchero|farina)/;
+const PANTRY_STOP = new Set(['di', 'al', 'alla', 'allo', 'ai', 'alle', 'con', 'del', 'della', 'dei', 'delle', 'in', 'e', 'a', 'da', 'extravergine', 'fresco', 'fresca', 'freschi', 'fresche', 'misto', 'mista', 'intero', 'integrale', 'cotto', 'cotta', 'crudo', 'cruda']);
+const normWords = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z]+/).filter(w => w.length > 2 && !PANTRY_STOP.has(w));
+const stem = w => (w.length > 4 ? w.replace(/[aeiou]+$/, '') : w);
+function pantryItems(text) {
+  return text.split(/[,;\n]+|\se\s/i).map(s => normWords(s).map(stem)).filter(a => a.length);
+}
+function ingCovered(ingName, items) {
+  const ws = normWords(ingName).map(stem);
+  return items.some(it => it.some(t => ws.some(w => w === t || (t.length >= 4 && w.length >= 4 && (w.startsWith(t) || t.startsWith(w))))));
+}
+function pantryMatches(text, slot) {
+  const items = pantryItems(text);
+  if (!items.length) return [];
+  const ok = allowedCats();
+  const target = dailyTarget(), budget = slotBudget(slot === 'colazione' || slot === 'spuntino' ? 'pranzo' : slot, target);
+  const list = nutriState.recipes.filter(r => ok.includes(r.category) && (slot === 'colazione' || slot === 'spuntino' || r.meal === 'entrambi' || r.meal === slot));
+  return list.map(r => {
+    const main = r.ingredients.filter(i => !PANTRY_BASICS.test(normWords(i.name).join(' ')));
+    const have = main.filter(i => ingCovered(i.name, items)), miss = main.filter(i => !ingCovered(i.name, items));
+    const portion = Math.max(0.7, Math.min(1.4, Math.round(budget / r.kcal * 20) / 20));
+    return { recipe: r, portion, have: have.length, total: main.length, missing: miss.map(i => i.name), score: main.length ? have.length / main.length : 0 };
+  }).filter(m => m.have > 0)
+    .sort((a, b) => b.score - a.score || a.missing.length - b.missing.length || b.recipe.protein - a.recipe.protein)
+    .slice(0, 12);
+}
+function pantryHTML() {
+  const opts = [['', 'Scegli tu per me'], ['colazione', 'Colazione'], ['pranzo', 'Pranzo'], ['spuntino', 'Merenda'], ['cena', 'Cena']]
+    .map(([v, l]) => `<option value="${v}"${pantry.slot === v ? ' selected' : ''}>${l}</option>`).join('');
+  let res = '';
+  if (pantry.results) {
+    res = pantry.results.length ? pantry.results.map(m => {
+      const r = m.recipe, p = m.portion;
+      return `<div class="ld-meal"><div class="ld-meal-slot">${m.missing.length ? `hai ${m.have} ingredienti su ${m.total}` : '✅ hai tutto'} <span class="ld-badge">${CAT_LABELS[r.category]}</span></div>
+        <div class="ld-meal-name">${esc(r.name)}</div>
+        <div class="ld-macros"><b>${Math.round(r.kcal * p)}</b> kcal · P ${Math.round(r.protein * p)} g · C ${Math.round(r.carbs * p)} g · G ${Math.round(r.fat * p)} g · porzione ×${f1(p)} · ${r.time_min} min</div>
+        ${m.missing.length ? `<div class="ld-why">Ti manca: ${m.missing.map(esc).join(', ')}</div>` : ''}
+        <details class="ld-steps"><summary>Ingredienti e preparazione</summary><div class="ld-ings">${r.ingredients.map(i => `${esc(i.name)} ${Math.round(i.grams * p / 5) * 5} g`).join(' · ')}</div><div style="margin-top:6px">${esc(r.steps)}</div></details>
+        <div class="ld-meal-actions"><button type="button" class="ld-btn" data-act="eat-pantry" data-id="${esc(r.id)}" data-portion="${p}">✅ L'ho mangiato</button></div></div>`;
+    }).join('') : '<div class="ld-muted">Nessuna ricetta della libreria usa questi ingredienti: prova ad aggiungerne altri (per esempio una proteina e un contorno).</div>';
+  }
+  return `<div class="ld-diary" id="ld-pantry"><div class="ld-diary-title">🧊 Cosa hai in casa?</div>
+    <div class="ld-muted">Scrivi gli ingredienti che hai in frigo o in dispensa, separati da virgole: ti propongo le ricette della libreria che puoi preparare.</div>
+    <div class="ld-log"><textarea id="ld-pantrytext" rows="2" maxlength="600" placeholder="es. petto di pollo, zucchine, riso, uova, yogurt">${esc(pantry.text)}</textarea>
+    <div class="ld-logrow"><label class="ld-muted">Per <select id="ld-pantryslot">${opts}</select></label>
+    <button type="button" class="ld-btn gold" data-act="pantry">Trova ricette</button></div></div>${res ? `<div class="ld-meals-grid">${res}</div>` : ''}</div>`;
+}
+
 function budgetHTML(target) {
   const today = mealsOn(todayISO());
   const eaten = sumMeals(today);
@@ -215,8 +266,10 @@ function diaryHTML() {
 function renderNutritionPanel(el) {
   const target = dailyTarget();
   const keepText = (document.getElementById('ld-logtext') || {}).value || '';
+  const pt = document.getElementById('ld-pantrytext'); if (pt) pantry.text = pt.value;
+  const ps = document.getElementById('ld-pantryslot'); if (ps) pantry.slot = ps.value;
   const keepSlot = (document.getElementById('ld-logslot') || {}).value || '';
-  el.innerHTML = budgetHTML(target) + `<div class="ld-meals-grid">${mealCardHTML('pranzo', target)}${mealCardHTML('cena', target)}</div>` + diaryHTML();
+  el.innerHTML = budgetHTML(target) + `<div class="ld-meals-grid">${mealCardHTML('pranzo', target)}${mealCardHTML('cena', target)}</div>` + pantryHTML() + diaryHTML();
   const ta = document.getElementById('ld-logtext'); if (ta) ta.value = keepText;
   const sl = document.getElementById('ld-logslot'); if (sl) sl.value = keepSlot;
 }
@@ -232,6 +285,29 @@ async function initNutritionPanel(el) {
   el.addEventListener('click', async ev => {
     const b = ev.target.closest('[data-act]');
     if (!b) return;
+    if (b.dataset.act === 'pantry') {
+      pantry.text = document.getElementById('ld-pantrytext').value.trim();
+      pantry.slot = document.getElementById('ld-pantryslot').value;
+      try { localStorage.setItem('ld-pantry', pantry.text); } catch (e) { /* storage non disponibile */ }
+      const hour = new Date().getHours();
+      const slot = pantry.slot || (hour < 10 ? 'colazione' : hour < 16 ? 'pranzo' : hour < 18 ? 'spuntino' : 'cena');
+      pantry.results = pantry.text ? pantryMatches(pantry.text, slot) : null;
+      if (pantry.results && pantry.results.some(m => m.score >= 0.5)) pantry.results = pantry.results.filter(m => m.score >= 0.5);
+      if (pantry.results) pantry.results = pantry.results.slice(0, 5);
+      pantry.usedSlot = slot;
+      renderNutritionPanel(el);
+      return;
+    }
+    if (b.dataset.act === 'eat-pantry') {
+      b.disabled = true;
+      try {
+        const out = await nutriApi('log_meal', { recipe_id: b.dataset.id, portion: Number(b.dataset.portion) || 1, slot: pantry.usedSlot || 'pranzo', date: todayISO() });
+        nutriState.meals.unshift(out.meal);
+        pantry.results = null;
+        renderNutritionPanel(el);
+      } catch (e) { b.disabled = false; alert(e.message); }
+      return;
+    }
     const slot = b.dataset.slot, act = b.dataset.act, target = dailyTarget();
     const st = pick[slot] || (pick[slot] = { n: 0, filter: null });
     if (act === 'change') { st.n++; st.open = true; renderNutritionPanel(el); return; }
